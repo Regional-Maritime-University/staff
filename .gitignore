@@ -1,0 +1,8 @@
+/vendor
+/assets
+endpoint/.htaccess
+downloads/*
+cacert.pem
+composer.lock
+.env
+/upload
