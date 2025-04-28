@@ -1,8 +1,10 @@
 <?php
 session_start();
 
+$_SESSION["lastAccessed"] = time();
+
 if ((isset($_SESSION["adminLogSuccess"]) && $_SESSION["adminLogSuccess"] == true) || (isset($_SESSION["user"]) && empty($_SESSION["user"]))) {
-    header("Location: index.php");
+    header("Location: {$_SESSION['role']}");
 }
 
 if (!isset($_SESSION["_adminLogToken"])) {
@@ -245,14 +247,15 @@ if (!isset($_SESSION["_adminLogToken"])) {
         </div>
         <div class="login-body">
             <div class="error-message" id="errorMessage">
-                <i class="fas fa-exclamation-circle"></i> Invalid email or password. Please try again.
+                <i class="fas fa-exclamation-circle"></i>
+                <span class="message">Invalid email or password. Please try again.</span>
             </div>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <div class="input-group">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <input type="email" id="email" name="username" placeholder="Enter your email" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -271,6 +274,7 @@ if (!isset($_SESSION["_adminLogToken"])) {
                     <a href="forgot-password.html" class="forgot-password">Forgot Password?</a>
                 </div>
                 <button type="submit" class="login-btn">Sign In</button>
+                <input type="hidden" name="_vALToken" value="<?php echo $_SESSION["_adminLogToken"]; ?>">
             </form>
         </div>
         <div class="login-footer">
@@ -278,6 +282,7 @@ if (!isset($_SESSION["_adminLogToken"])) {
         </div>
     </div>
 
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
     <script>
         // Toggle password visibility
         const togglePassword = document.getElementById('togglePassword');
@@ -297,73 +302,41 @@ if (!isset($_SESSION["_adminLogToken"])) {
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            $.ajax({
+                type: "POST",
+                url: "endpoint/admin-login",
+                data: new FormData(this),
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function(result) {
+                    console.log(result);
+                    if (result.success) {
+                        window.location.href = result.message;
+                    } else {
+                        errorMessage.querySelector('.message').textContent = result.message || "Invalid email or password. Please try again.";
+                        // Show error message
+                        errorMessage.classList.add('show');
 
-            // For demo purposes, we'll use a simple validation
-            // In a real application, this would be a server request
-            if (email === 'lecturer@rmu.edu' && password === 'password123') {
-                // Successful login
-                window.location.href = 'dashboard.html';
-            } else {
-                // Show error message
-                errorMessage.classList.add('show');
-
-                // Hide error message after 3 seconds
-                setTimeout(() => {
-                    errorMessage.classList.remove('show');
-                }, 3000);
-            }
-        });
-    </script>
-    <script src="js/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-
-            $("#adminLoginForm").on("submit", function(e) {
-                e.preventDefault();
-
-                if (!$("#yourUsername").val()) {
-                    alert("Username required!");
-                    return;
-                }
-
-                if (!$("#yourPassword").val()) {
-                    alert("Password required!");
-                    return;
-                }
-
-
-                $.ajax({
-                    type: "POST",
-                    url: "endpoint/admin-login",
-                    data: new FormData(this),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(result) {
-                        console.log(result);
-                        if (result.success) {
-                            window.location.href = "./";
-                        } else {
-                            alert(result['message']);
-                        }
-                    },
-                    error: function(error) {
-                        console.log(error);
+                        // Hide error message after 3 seconds
+                        setTimeout(() => {
+                            errorMessage.classList.remove('show');
+                        }, 3000);
                     }
-                });
-            });
-
-            $(document).on({
-                ajaxStart: function() {
-                    $("#submitBtn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
                 },
-                ajaxStop: function() {
-                    $("#submitBtn").prop("disabled", false).html('Login');
+                error: function(error) {
+                    console.log(error);
                 }
             });
+        });
 
+        $(document).on({
+            ajaxStart: function() {
+                $(".login-btn").prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+            },
+            ajaxStop: function() {
+                $(".login-btn").prop("disabled", false).html('Sign In');
+            }
         });
     </script>
 

@@ -1,37 +1,37 @@
 <?php
 session_start();
 
-// if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
-//     header("Location: ../index.php");
-// }
+if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+    header("Location: ../index.php");
+}
 
-// $isUser = false;
-// if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers") $isUser = true;
+$isUser = false;
+if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers") $isUser = true;
 
-// if (isset($_GET['logout']) || !$isUser) {
-//     session_destroy();
-//     $_SESSION = array();
-//     if (ini_get("session.use_cookies")) {
-//         $params = session_get_cookie_params();
-//         setcookie(
-//             session_name(),
-//             '',
-//             time() - 42000,
-//             $params["path"],
-//             $params["domain"],
-//             $params["secure"],
-//             $params["httponly"]
-//         );
-//     }
+if (isset($_GET['logout']) || !$isUser) {
+    session_destroy();
+    $_SESSION = array();
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
 
-//     header('Location: ../' . $_SESSION["role"] . '/index.php');
-// }
+    header('Location: ../' . $_SESSION["role"] . '/index.php');
+}
 
-// if (!isset($_SESSION["_shortlistedFormToken"])) {
-//     $rstrong = true;
-//     $_SESSION["_shortlistedFormToken"] = hash('sha256', bin2hex(openssl_random_pseudo_bytes(64, $rstrong)));
-//     $_SESSION["vendor_type"] = "VENDOR";
-// }
+if (!isset($_SESSION["_shortlistedFormToken"])) {
+    $rstrong = true;
+    $_SESSION["_shortlistedFormToken"] = hash('sha256', bin2hex(openssl_random_pseudo_bytes(64, $rstrong)));
+    $_SESSION["vendor_type"] = "VENDOR";
+}
 
 $_SESSION["lastAccessed"] = time();
 
