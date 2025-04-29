@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
     header("Location: ../index.php");
 }
 
 $isUser = false;
-if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers" || strtolower($_SESSION["role"]) == "secretary") $isUser = true;
+if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
 
 if (isset($_GET['logout']) || !$isUser) {
     session_destroy();
@@ -24,7 +24,7 @@ if (isset($_GET['logout']) || !$isUser) {
         );
     }
 
-    header('Location: ../login.php');
+    header('Location: ../index.php');
 }
 
 $_SESSION["lastAccessed"] = time();
@@ -35,7 +35,30 @@ use Src\Controller\SecretaryController;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$secretary = new SecretaryController($db, $user, $pass);
+
+$pageTitle = "Secretary Dashboard";
+$activePage = "dashboard";
+
+$departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$semester = 1; //$_SESSION["semester"] ?? null;
+$archived = false;
+
+$activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
+$totalActiveCourses = count($activeCourses);
+
+$assignedCourses = $secretary->fetchCourseAssignmentsByDepartment($departmentId, $semester);
+var_dump($assignedCourses);
+$totalAssignedCourses = count($assignedCourses);
+var_dump($totalAssignedCourses);
+die();
+
+// $submittedCourses = $secretary->fetchSubmittedCourses($departmentId, $archived);
+// $totalSubmittedCourses = count($submittedCourses);
+// $pendingDeadlines = $secretary->fetchPendingDeadlines($departmentId, $archived);
+// $totalPendingDeadlines = count($pendingDeadlines);
+// $upcomingDeadlines = $secretary->fetchUpcomingDeadlines($departmentId, $archived);
+// $totalUpcomingDeadlines = count($upcomingDeadlines);
 
 ?>
 
@@ -55,32 +78,8 @@ $admin = new SecretaryController($db, $user, $pass);
     <?php require_once '../components/sidebar.php'; ?>
 
     <div class="main-content">
-        
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <button class="toggle-sidebar" id="toggleSidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1>Secretary Dashboard</h1>
-            </div>
-            <div class="header-right">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search...">
-                    <button class="search-btn"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="header-actions">
-                    <button class="action-btn notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">5</span>
-                    </button>
-                    <button class="action-btn messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">3</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+
+        <?php require_once '../components/header.php'; ?>
 
         <div class="dashboard-content">
             <div class="stats-grid">
@@ -89,7 +88,7 @@ $admin = new SecretaryController($db, $user, $pass);
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>42</h3>
+                        <h3><?= $totalActiveCourses ?></h3>
                         <p>Active Courses</p>
                     </div>
                 </div>
@@ -254,30 +253,47 @@ $admin = new SecretaryController($db, $user, $pass);
                             <label for="courseSelect">Select Course</label>
                             <select id="courseSelect" required>
                                 <option value="">-- Select Course --</option>
-                                <option value="ML201">Maritime Law (ML201)</option>
-                                <option value="NS302">Navigation Systems (NS302)</option>
-                                <option value="ME101">Marine Engineering (ME101)</option>
-                                <option value="OC205">Oceanography (OC205)</option>
-                                <option value="SM401">Ship Management (SM401)</option>
+                                <?php
+                                $courses = $secretary->fetchActiveCourses($departmentId, $semester, $archived);
+                                if (! $courses) {
+                                    echo "<option value=''>No active courses available</option>";
+                                } else {
+                                    foreach ($courses as $course) {
+                                        echo "<option value='{$course['code']}'>{$course['name']} ({$course['code']})</option>";
+                                    }
+                                }
+                                ?>
+
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="lecturerSelect">Select Lecturer</label>
                             <select id="lecturerSelect" required>
                                 <option value="">-- Select Lecturer --</option>
-                                <option value="1">Dr. James Wilson</option>
-                                <option value="2">Prof. Sarah Johnson</option>
-                                <option value="3">Dr. Michael Brown</option>
-                                <option value="4">Dr. Emily Davis</option>
-                                <option value="5">Prof. Robert Taylor</option>
+                                <?php
+                                $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
+                                if (! $lecturers) {
+                                    echo "<option value=''>No lecturers available</option>";
+                                } else {
+                                    foreach ($lecturers as $lecturer) {
+                                        echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                    }
+                                }
+                                ?>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="semesterSelect">Semester</label>
                             <select id="semesterSelect" required>
-                                <option value="">-- Select Semester --</option>
-                                <option value="1">First Semester 2023/2024</option>
-                                <option value="2">Second Semester 2023/2024</option>
+                                <?php
+                                $current_semester = $secretary->fetchCurrentSemester();
+                                if ($current_semester) {
+                                    $current_semester = $current_semester[0];
+                                    echo "<option value='{$current_semester['id']}' selected>{$current_semester['academic_year']} Semester {$current_semester['name']} </option>";
+                                } else {
+                                    echo "<option value=''>No active semester</option>";
+                                }
+                                ?>
                             </select>
                         </div>
                         <div class="form-group">
@@ -754,6 +770,7 @@ $admin = new SecretaryController($db, $user, $pass);
         </div>
     </div>
 
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/main.js"></script>
 </body>
 

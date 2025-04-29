@@ -51,16 +51,22 @@ class AdminController
         return array("success" => false, "message" => "Failed to reset user account password!");
     }
 
-    public function verifyAdminLogin($username, $password)
+    public function verifyStaffLogin($email, $password)
     {
-        $sql = "SELECT * FROM `sys_users` WHERE `user_name` = :u";
-        $data = $this->dm->getData($sql, array(':u' => $username));
-        if (!empty($data)) {
-            if (password_verify($password, $data[0]["password"])) {
-                return $data;
-            }
+        $sql = "SELECT s.*, d.`id` AS `department_id`, d.`name` AS `department_name` 
+                FROM `staff` AS s, department AS d 
+                WHERE s.`email` = :u AND s.`fk_department` = d.`id`";
+        $data = $this->dm->getData($sql, array(':u' => $email));
+
+        if (empty($data)) {
+            return array("success" => false, "message" => "No account found for this user!");
         }
-        return 0;
+
+        if (password_verify($password, $data[0]["password"])) {
+            return array("success" => true, "data" => $data[0]);
+        }
+
+        return array("success" => false, "message" => "Invalid email or password!");
     }
 
     public function getAcademicPeriod($admin_period)

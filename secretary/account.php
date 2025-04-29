@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
     header("Location: ../index.php");
 }
 
 $isUser = false;
-if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers" || strtolower($_SESSION["role"]) == "secretary") $isUser = true;
+if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
 
 if (isset($_GET['logout']) || !$isUser) {
     session_destroy();
@@ -24,7 +24,7 @@ if (isset($_GET['logout']) || !$isUser) {
         );
     }
 
-    header('Location: ../login.php');
+    header('Location: ../index.php');
 }
 
 $_SESSION["lastAccessed"] = time();
@@ -37,6 +37,9 @@ require_once('../inc/admin-database-con.php');
 
 $admin = new SecretaryController($db, $user, $pass);
 
+$pageTitle = "Account Settings";
+$activePage = "account";
+
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +50,7 @@ $admin = new SecretaryController($db, $user, $pass);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMU Staff Portal - Account</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/account.css">
+    <link rel="stylesheet" href="./css/account.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -56,30 +59,8 @@ $admin = new SecretaryController($db, $user, $pass);
     <?php require_once '../components/sidebar.php'; ?>
 
     <div class="main-content">
-        <div class="header">
-            <div class="header-left">
-                <button class="toggle-sidebar" id="toggleSidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1>Account Settings</h1>
-            </div>
-            <div class="header-right">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search...">
-                    <button class="search-btn"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="header-actions">
-                    <button class="action-btn notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">5</span>
-                    </button>
-                    <button class="action-btn messages">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">3</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+
+        <?php require_once '../components/header.php'; ?>
 
         <div class="account-container">
             <div class="account-sidebar">

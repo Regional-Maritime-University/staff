@@ -26,6 +26,7 @@ require "../bootstrap.php";
 
 use Src\Controller\AdminController;
 use Src\Controller\ExposeDataController;
+use Src\Controller\SecretaryController;
 use Src\Controller\UploadExcelDataController;
 use Src\Core\Course;
 use Src\Core\Department;
@@ -52,6 +53,7 @@ $fee_structure_category = new FeeStructureCategory($db, $user, $pass);
 $fee_structure_type     = new FeeStructureType($db, $user, $pass);
 $fee_item               = new FeeItem($db, $user, $pass);
 $staff                  = new Staff($db, $user, $pass);
+$secretary              = new SecretaryController($db, $user, $pass);
 
 $data   = [];
 $errors = [];
@@ -69,9 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     // All POST request will be sent here
 } elseif ($_SERVER['REQUEST_METHOD'] == "POST") {
 
-    if ($_GET["url"] == "admin-login") {
-
-        if (! isset($_SESSION["_adminLogToken"]) || empty($_SESSION["_adminLogToken"])) {
+    if ($_GET["url"] == "login") {
+        if (! isset($_SESSION["_staffLogToken"]) || empty($_SESSION["_staffLogToken"])) {
             die(json_encode(["success" => false, "message" => "Invalid request: 1!"]));
         }
 
@@ -79,31 +80,24 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Invalid request: 2!"]));
         }
 
-        if ($_POST["_vALToken"] !== $_SESSION["_adminLogToken"]) {
+        if ($_POST["_vALToken"] !== $_SESSION["_staffLogToken"]) {
             die(json_encode(["success" => false, "message" => "Invalid request: 3!"]));
         }
 
-        $username = $expose->validateText($_POST["username"]);
+        $email = $expose->validateText($_POST["email"]);
         $password = $expose->validatePassword($_POST["password"]);
 
-        $result = $admin->verifyAdminLogin($username, $password);
+        $result = $admin->verifyStaffLogin($email, $password);
 
-        if (! $result) {
-            $_SESSION['adminLogSuccess'] = false;
-            die(json_encode(["success" => false, "message" => "Incorrect application username or password! "]));
+        if (!$result["success"]) {
+            $_SESSION['staffLoginSuccess'] = false;
+            die(json_encode($result));
         }
 
-        $_SESSION['user']         = $result[0]["id"];
-        $_SESSION['role']         = $result[0]["role"];
-        $_SESSION['user_type']    = $result[0]["type"];
-        $_SESSION["admin_period"] = $expose->getCurrentAdmissionPeriodID();
+        $_SESSION['staffLoginSuccess']  = true;
+        $_SESSION['staff']              = $result["data"];
 
-        if (strtoupper($result[0]['role']) == "VENDORS") {
-            $_SESSION["vendor_id"] = $expose->getVendorPhoneByUserID($_SESSION["user"])[0]["id"];
-        }
-
-        $_SESSION['adminLogSuccess'] = true;
-        die(json_encode(["success" => true, "message" => strtolower($result[0]["role"])]));
+        die(json_encode(["success" => true, "message" => $result["data"]["role"]]));
     }
 
     // backup database
@@ -156,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Failed to verify user account!"]));
         }
 
-        $result = $admin->verifyAdminLogin($userDetails[0]["user_name"], $currentPass);
+        $result = $admin->verifyStaffLogin($userDetails[0]["user_name"], $currentPass);
         if (! $result) {
             die(json_encode(["success" => false, "message" => "Incorrect current password!"]));
         }
@@ -277,10 +271,23 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     //courses
 
     elseif ($_GET["url"] == "fetch-course") {
-        if (! isset($_POST["code"]) || empty($_POST["code"])) {
-            die(json_encode(["success" => false, "message" => "Course code is required!"]));
+        if (isset($_POST["course"]) && ! empty($_POST["course"])) {
+            $_POST["key"]   = "code";
+            $_POST["value"] = $_POST["course"];
+        } else if (isset($_POST["name"]) && ! empty($_POST["name"])) {
+            $_POST["key"]   = "name";
+            $_POST["value"] = $_POST["name"];
+        } else if (isset($_POST["category"]) && ! empty($_POST["category"])) {
+            $_POST["key"]   = "category";
+            $_POST["value"] = $_POST["category"];
+        } else if (isset($_POST["department"]) && ! empty($_POST["department"])) {
+            $_POST["key"]   = "department";
+            $_POST["value"] = $_POST["department"];
+        } else {
+            $_POST["key"]   = "";
+            $_POST["value"] = "";
         }
-        die(json_encode(["success" => true, "data" => $course->fetch("code", $_POST["code"])]));
+        die(json_encode(["success" => true, "data" => $course->fetch($_POST["key"], $_POST["value"])]));
     }
     //add
     elseif ($_GET["url"] == "add-course") {
@@ -369,6 +376,18 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $excelData = new UploadExcelDataController($_FILES["uploadCourseFile"], 4, 0);
         $result    = $excelData->run('course');
         die(json_encode($result));
+    } elseif ($_GET["url"] == "assign-course") {
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course code is required!"]));
+        }
+        if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+            die(json_encode(["success" => false, "message" => "Lecturer id is required!"]));
+        }
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester id is required!"]));
+        }
+        $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
+        die(json_encode($secretary->assignCourseToLecturer($_POST["course"], $_POST["lecturer"], $_POST["semester"], $notes)));
     }
 
     // fee structure

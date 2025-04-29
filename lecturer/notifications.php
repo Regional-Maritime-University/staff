@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
+if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
     header("Location: ../index.php");
 }
 
 $isUser = false;
-if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
+if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers" || strtolower($_SESSION["role"]) == "secretary") $isUser = true;
 
 if (isset($_GET['logout']) || !$isUser) {
     session_destroy();
@@ -37,15 +37,6 @@ require_once('../inc/admin-database-con.php');
 
 $admin = new SecretaryController($db, $user, $pass);
 
-$pageTitle = "Notifications";
-$activePage = "notifications";
-
-// $notifications = $admin->getNotifications($_SESSION["staff"]["number"]);
-// $notificationsCount = count($notifications);
-// $unreadMessages = $admin->getUnreadMessages($_SESSION["staff"]["number"]);
-// $unreadCount = count($unreadMessages);
-
-
 ?>
 
 <!DOCTYPE html>
@@ -64,10 +55,7 @@ $activePage = "notifications";
     <!-- Sidebar -->
     <?php require_once '../components/sidebar.php'; ?>
 
-    <div class="main-content">
-        <?php require_once '../components/header.php'; ?>
-        <?php require_once '../components/notifications.php'; ?>
-    </div>
+    <?php require_once '../components/notifications.php'; ?>
 
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/notifications.js"></script>
