@@ -28,7 +28,7 @@ if (!isset($_SESSION["_staffLogToken"]) || empty($_SESSION["_staffLogToken"])) {
     <div class="login-container">
         <div class="login-header">
             <div class="login-logo">
-                <img src="logo.png" alt="RMU Logo">
+                <img src="./assets/img/logo.png" alt="RMU Logo">
             </div>
             <h1 class="login-title">RMU Staff Portal</h1>
             <p class="login-subtitle">Sign in to access your account</p>
