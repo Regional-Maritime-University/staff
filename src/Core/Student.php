@@ -76,29 +76,6 @@ class Student
         return $this->dm->getData($query, $params);
     }
 
-    public function add(array $data)
-    {
-        $query = "INSERT INTO `student` (`index_number`, `email`, `password`, `first_name`, `middle_name`, 
-                `last_name`, `prefix`, `gender`, `role`, `fk_department`, `archived`) 
-                VALUES(:n, :e, :fn, :mn, :ln, :p, :g, :r, :d, :ar)";
-        $params = array(
-            ":n" => $data["index_number"],
-            ":e" => $data["email"],
-            ":fn" => $data["first_name"],
-            ":mn" => $data["middle_name"],
-            ":ln" => $data["last_name"],
-            ":p" => $data["prefix"],
-            ":g" => $data["gender"],
-            ":r" => $data["role"],
-            ":d" => $data["fk_department"],
-            ":ar" => 0
-        );
-        $query_result = $this->dm->inputData($query, $params);
-        if ($query_result)
-            $this->log->activity($_SESSION["user"], "INSERT", "Added new student {$data["name"]} of student type {$data["type"]}");
-        return $query_result;
-    }
-
     public function update(array $data)
     {
         $query = "UPDATE `student` SET 
@@ -119,23 +96,7 @@ class Student
             ":ar" => 0
         );
         $query_result = $this->dm->inputData($query, $params);
-        if ($query_result) $this->log->activity($_SESSION["user"], "UPDATE", "Updated information for student {$data["id"]}");
-        return $query_result;
-    }
-
-    public function archive($index_number)
-    {
-        $query = "UPDATE `student` SET archived = 1 WHERE `index_number` = :i";
-        $query_result = $this->dm->inputData($query, array(":i" => $index_number));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Archived student {$index_number}");
-        return $query_result;
-    }
-
-    public function delete($index_number)
-    {
-        $query = "DELETE FROM `student` WHERE `index_number` = :i";
-        $query_result = $this->dm->inputData($query, array(":i" => $index_number));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Deleted student {$index_number}");
+        if ($query_result) $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Staff Details Modification", "Updated information for student {$data["id"]}");
         return $query_result;
     }
 

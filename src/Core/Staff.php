@@ -71,7 +71,7 @@ class Staff
         );
         $query_result = $this->dm->inputData($query, $params);
         if ($query_result)
-            $this->log->activity($_SESSION["user"], "INSERT", "Added new staff {$data["name"]} of staff type {$data["type"]}");
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Staff Account Creation", "Added new staff {$data["name"]} of staff type {$data["type"]}");
         return $query_result;
     }
 
@@ -95,24 +95,55 @@ class Staff
             ":ar" => 0
         );
         $query_result = $this->dm->inputData($query, $params);
-        if ($query_result) $this->log->activity($_SESSION["user"], "UPDATE", "Updated information for staff {$data["id"]}");
+        if ($query_result) $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Staff Account Modification", "Updated information for staff {$data["id"]}");
         return $query_result;
     }
 
     public function archive($number)
     {
-        $query = "UPDATE `staff` SET archived = 1 WHERE `number` = :i";
+        $query = "UPDATE `staff` SET `archived` = 1 WHERE `number` = :i";
         $query_result = $this->dm->inputData($query, array(":i" => $number));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Archived staff {$number}");
-        return $query_result;
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Staff Account Modification", "Archived staff {$number}");
+            return array("success" => true, "message" => "Staff with number {$number} successfully archived!");
+        }
+        return array("success" => false, "message" => "Failed to archive new staff!");
     }
 
-    public function delete($number)
+    public function unarchive(array $staffs)
     {
-        $query = "DELETE FROM `staff` WHERE `number` = :i";
-        $query_result = $this->dm->inputData($query, array(":i" => $number));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Deleted staff {$number}");
-        return $query_result;
+        $unarchived = 0;
+        foreach ($staffs as $staff) {
+            $query = "UPDATE `staff` SET `archived` = 0 WHERE `number` = :n";
+            $query_result = $this->dm->inputData($query, array(":n" => $staff));
+            if ($query_result) {
+                $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Staff Account Modification", "Unarchived staff category {$staff}");
+                $unarchived += 1;
+            }
+        }
+        return array(
+            "success" => true,
+            "message" => "{$unarchived} successfully unarchived!",
+            "errors" => "Failed to unarchive " . (count($staffs) - $unarchived) . " staffs"
+        );
+    }
+
+    public function delete(array $staffs)
+    {
+        $deleted = 0;
+        foreach ($staffs as $staff) {
+            $query = "DELETE FROM `staff` WHERE `number` = :i";
+            $query_result = $this->dm->inputData($query, array(":i" => $staff));
+            if ($query_result) {
+                $this->log->activity($_SESSION["staff"]["number"], "DELETE", "secretary", "Staff Account Modification", "Deleted staff {$staff}");
+                $deleted += 1;
+            }
+        }
+        return array(
+            "success" => true,
+            "message" => "{$deleted} successfully deleted!",
+            "errors" => "Failed to delete " . (count($staffs) - $deleted) . " staffs"
+        );
     }
 
     public function total(string $key = "", string $value = "", bool $archived = false)

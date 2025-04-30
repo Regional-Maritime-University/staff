@@ -32,33 +32,32 @@ $_SESSION["lastAccessed"] = time();
 require_once('../bootstrap.php');
 
 use Src\Controller\SecretaryController;
+use Src\Core\Course;
+use Src\Core\CourseCategory;
 
 require_once('../inc/admin-database-con.php');
 
 $secretary = new SecretaryController($db, $user, $pass);
+$course_category = new CourseCategory($db, $user, $pass);
+$course = new Course($db, $user, $pass);
 
 $pageTitle = "Secretary Dashboard";
 $activePage = "dashboard";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
-$semester = 1; //$_SESSION["semester"] ?? null;
+$semester = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
 $activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
 $totalActiveCourses = count($activeCourses);
 
-$assignedCourses = $secretary->fetchCourseAssignmentsByDepartment($departmentId, $semester);
-var_dump($assignedCourses);
-$totalAssignedCourses = count($assignedCourses);
-var_dump($totalAssignedCourses);
-die();
+$assignedCourses = $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semester);
+$totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
 
-// $submittedCourses = $secretary->fetchSubmittedCourses($departmentId, $archived);
-// $totalSubmittedCourses = count($submittedCourses);
-// $pendingDeadlines = $secretary->fetchPendingDeadlines($departmentId, $archived);
-// $totalPendingDeadlines = count($pendingDeadlines);
-// $upcomingDeadlines = $secretary->fetchUpcomingDeadlines($departmentId, $archived);
-// $totalUpcomingDeadlines = count($upcomingDeadlines);
+$assignedLecturers = $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semester);
+$totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
+// var_dump($assignedLecturers);
+// die();
 
 ?>
 
@@ -88,7 +87,7 @@ die();
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="stat-info">
-                        <h3><?= $totalActiveCourses ?></h3>
+                        <h3><?= $totalAssignedCourses ?></h3>
                         <p>Active Courses</p>
                     </div>
                 </div>
@@ -97,7 +96,7 @@ die();
                         <i class="fas fa-user-tie"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>18</h3>
+                        <h3><?= $totalAssignedLecturers ?></h3>
                         <p>Assigned Lecturers</p>
                     </div>
                 </div>
@@ -300,6 +299,7 @@ die();
                             <label for="assignmentNotes">Notes (Optional)</label>
                             <textarea id="assignmentNotes" rows="3" placeholder="Add any additional notes about this assignment"></textarea>
                         </div>
+                        <input type="hidden" id="departmentSelect" name="department" value="<?= $departmentId ?>">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -312,7 +312,7 @@ die();
 
     <!-- Upload Courses Modal -->
     <div class="modal" id="uploadCoursesModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Upload Courses</h2>
@@ -349,22 +349,16 @@ die();
                                 <input type="text" id="courseCode" placeholder="e.g. ML201" required>
                             </div>
                             <div class="form-group">
-                                <label for="courseTitle">Course Title</label>
-                                <input type="text" id="courseTitle" placeholder="e.g. Maritime Law" required>
+                                <label for="courseName">Course Title</label>
+                                <input type="text" id="courseName" placeholder="e.g. Maritime Law" required>
                             </div>
                             <div class="form-group">
                                 <label for="creditHours">Credit Hours</label>
                                 <input type="number" id="creditHours" min="1" max="6" required>
                             </div>
                             <div class="form-group">
-                                <label for="department">Department</label>
-                                <select id="department" required>
-                                    <option value="">-- Select Department --</option>
-                                    <option value="1">Maritime Studies</option>
-                                    <option value="2">Marine Engineering</option>
-                                    <option value="3">Nautical Science</option>
-                                    <option value="4">Logistics and Transport</option>
-                                </select>
+                                <label for="contactHours">Contact Hours</label>
+                                <input type="number" id="contactHours" min="1" max="6" required>
                             </div>
                             <div class="form-group">
                                 <label for="courseLevel">Level</label>
@@ -377,6 +371,20 @@ die();
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="courseCategory">Category</label>
+                                <select id="courseCategory" name="courseCategory" required>
+                                    <option value="">-- Select Category --</option>
+                                    <?php
+                                    $course_categories = $course_category->fetch();
+                                    foreach ($course_categories as $cc) {
+                                    ?>
+                                        <option value="<?= $cc["id"] ?>"><?= $cc["name"] ?></option>
+                                    <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="courseSemester">Semester</label>
                                 <select id="courseSemester" required>
                                     <option value="">-- Select Semester --</option>
@@ -384,6 +392,7 @@ die();
                                     <option value="2">Second Semester</option>
                                 </select>
                             </div>
+                            <input type="hidden" name="department" id="courseDepartment" value="<?= $departmentId ?>">
                         </form>
                     </div>
                 </div>
@@ -770,8 +779,9 @@ die();
         </div>
     </div>
 
-    <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/Dashboard.js"></script>
 </body>
 
 </html>

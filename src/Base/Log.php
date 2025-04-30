@@ -13,10 +13,10 @@ class Log
         $this->dm = new DatabaseMethods($db, $user, $pass);
     }
 
-    public function activity(int $user_id, $operation, $description)
+    public function activity($user_id, $operation, $type, $action, $description)
     {
-        $query = "INSERT INTO `activity_logs`(`user_id`, `operation`, `description`) VALUES (:u,:o,:d)";
-        $params = array(":u" => $user_id, ":o" => $operation, ":d" => $description);
+        $query = "INSERT INTO `activity_logs`(`user_id`, `operation`, `type`, `action`, `description`) VALUES (:u,:o,:t,:a,:d)";
+        $params = array(":u" => $user_id, ":o" => $operation, ":t" => $type, ":a" => $action, ":d" => $description);
         $this->dm->inputData($query, $params);
     }
 }

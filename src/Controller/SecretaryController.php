@@ -6,15 +6,26 @@ use Exception;
 use Src\System\DatabaseMethods;
 use Src\Controller\ExposeDataController;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Src\Base\Log;
+use Src\Core\Course;
+use Src\Core\Staff;
 
 class SecretaryController
 {
     private $dm = null;
+    private $db = null;
+    private $user = null;
+    private $pass = null;
     private $expose = null;
+    private $log = null;
 
     public function __construct($db, $user, $pass)
     {
+        $this->db = $db;
+        $this->user = $user;
+        $this->pass = $pass;
         $this->dm = new DatabaseMethods($db, $user, $pass);
+        $this->log = new Log($db, $user, $pass);
         $this->expose = new ExposeDataController($db, $user, $pass);
     }
 
@@ -124,14 +135,14 @@ class SecretaryController
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
     }
 
-    public function assignCourseToLecturer($courseCode, $lecturerId, $semesterId, $notes)
+    public function assignCourseToLecturer($courseCode, $lecturerId, $semesterId, $departmentId, $notes)
     {
         // Check if the course is already assigned to any lecturer or the same lecturer for the same semester
-        $query = "SELECT * FROM `lecture_course_assignments` WHERE `course_code` = :cc AND `semester_id` = :si";
-        $result = $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
-        if ($result) {
+        $query1 = "SELECT * FROM `lecture_course_assignments` WHERE `course_code` = :cc AND `semester_id` = :si";
+        $result1 = $this->dm->getData($query1, array(":cc" => $courseCode, ":si" => $semesterId));
+        if ($result1) {
             // Check if the course is already assigned to the same lecturer for the same semester
-            if ($result[0]['staff_number'] == $lecturerId) {
+            if ($result1[0]['lecturer_id'] == $lecturerId) {
                 return array(
                     "success" => false,
                     "message" => "Course is already assigned to this lecturer for the same semester."
@@ -144,39 +155,64 @@ class SecretaryController
         }
         // Check if the lecturer is already assigned to the course for the same semester
 
-        $query = "INSERT INTO `lecture_course_assignments` (`course_code`, `staff_number`, `semester_id`, `notes`) VALUES (:cc, :sn, :si, :nt)";
-        $result = $this->dm->inputData($query, array(":cc" => $courseCode, ":sn" => $lecturerId, ":si" => $semesterId, ":nt" => $notes));
-        if (!$result) {
+        $query2 = "INSERT INTO `lecture_course_assignments` (`course_code`, `lecturer_id`, `semester_id`, `department_id`, `notes`) VALUES (:cc, :sn, :si, :di, :nt)";
+        $result2 = $this->dm->inputData($query2, array(":cc" => $courseCode, ":sn" => $lecturerId, ":si" => $semesterId, ":di" => $departmentId, ":nt" => $notes));
+        if (!$result2) {
             return array(
                 "success" => false,
                 "message" => "Failed to assign course to lecturer."
             );
         }
+
+        // Fetch lecturer details
+        $lecturer = (new Staff($this->db, $this->user, $this->pass))->fetch(key: "number", value: $lecturerId, archived: false)[0];
+        // Fetch course details
+        $course = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $courseCode, archived: false)[0];
+
+        $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$lecturer["name"]} to {$course["name"]} ({$courseCode})");
         return array(
             "success" => true,
             "message" => "Course assigned to lecturer successfully."
         );
     }
 
-    public function fetchCourseAssignmentsByLecturer($lecturerId, $semesterId)
+    public function fetchSemesterCourseAssignmentsByLecturer($lecturerId, $semesterId)
     {
-        $query = "SELECT * FROM `lecture_course_assignments` WHERE `staff_number` = :sn AND `semester_id` = :si";
+        $query = "SELECT * FROM `lecture_course_assignments` WHERE `lecturer_id` = :sn AND `semester_id` = :si";
         return $this->dm->getData($query, array(":sn" => $lecturerId, ":si" => $semesterId));
     }
 
-    public function fetchCourseAssignmentsByCourse($courseCode, $semesterId)
+    public function fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId)
+    {
+        $query = "SELECT * FROM `lecture_course_assignments` WHERE `department_id` = :di AND `semester_id` = :si GROUP BY `lecturer_id`";
+        return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
+    }
+
+    public function fetchSemesterCourseAssignmentsByCourse($courseCode, $semesterId)
     {
         $query = "SELECT * FROM `lecture_course_assignments` WHERE `course_code` = :cc AND `semester_id` = :si";
         return $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
     }
 
-    public function fetchCourseAssignmentsByDepartment($departmentId, $semesterId)
+    public function fetchSemesterCourseAssignmentsGroupByCourse($courseCode, $semesterId)
+    {
+        $query = "SELECT * FROM `lecture_course_assignments` WHERE `course_code` = :cc AND `semester_id` = :si GROUP BY `course_code`";
+        return $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
+    }
+
+    public function fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId)
     {
         $query = "SELECT * FROM `lecture_course_assignments` WHERE `department_id` = :di AND `semester_id` = :si";
         return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
     }
 
-    public function fetchCourseAssignmentsBySemester($semesterId)
+    public function fetchSemesterCourseAssignmentsGroupByDepartment($departmentId, $semesterId)
+    {
+        $query = "SELECT * FROM `lecture_course_assignments` WHERE `department_id` = :di AND `semester_id` = :si GROUP BY `department_id`";
+        return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
+    }
+
+    public function fetchSemesterCourseAssignmentsBySemester($semesterId)
     {
         $query = "SELECT * FROM `lecture_course_assignments` WHERE `semester_id` = :si";
         return $this->dm->getData($query, array(":si" => $semesterId));
