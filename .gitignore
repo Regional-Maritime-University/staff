@@ -1,5 +1,4 @@
 /vendor
-/assets
 endpoint/.htaccess
 downloads/*
 cacert.pem
