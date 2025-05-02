@@ -135,15 +135,23 @@ document.addEventListener("DOMContentLoaded", function () {
   
         if (activeTab === "bulkUpload") {
             if (!courseFileUpload.files.length) {
-                alert("Please select a file to upload")
-                return
+                alert("Please select a file to upload");
+                return;
             }
   
             // Simulate file upload
-            const file = courseFileUpload.files[0]
-            const formData = new FormData()
-            formData.append("file", file)
+            const courseFile = courseFileUpload.files[0];
+            const department = document.getElementById("courseDepartment");
 
+            if (!department.value) {
+                alert("Please fill in all required fields");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("courseFile", courseFile);
+            formData.append("departmentId", department.value);
+            
             $.ajax({
                 type: "POST",
                 url: "../endpoint/upload-courses",
@@ -157,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         closeModal('uploadCoursesModal');
                         document.getElementById("bulkUploadForm").reset();
                     } else {
-                        alert(result['message']);
+                        alert(result.message);
                     }
                 },
                 error: function(error) {
@@ -168,18 +176,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } else {
             // Single course form validation
-            const courseCode = document.getElementById("courseCode")
-            const courseName = document.getElementById("courseName")
-            const creditHours = document.getElementById("creditHours")
-            const contactHours = document.getElementById("contactHours")
-            const courseLevel = document.getElementById("courseLevel")
-            const courseCategory = document.getElementById("courseCategory")
-            const courseSemester = document.getElementById("courseSemester")
-            const department = document.getElementById("courseDepartment")
+            const courseCode = document.getElementById("courseCode");
+            const courseName = document.getElementById("courseName");
+            const creditHours = document.getElementById("creditHours");
+            const contactHours = document.getElementById("contactHours");
+            const courseLevel = document.getElementById("courseLevel");
+            const courseCategory = document.getElementById("courseCategory");
+            const courseSemester = document.getElementById("courseSemester");
+            const department = document.getElementById("courseDepartment");
     
             if ( !courseCode.value || !courseName.value || !creditHours.value || !contactHours.value || !department.value || !courseLevel.value || !courseSemester.value ) {
-                alert("Please fill in all required fields")
-                return
+                alert("Please fill in all required fields");
+                return;
             }
     
             // Simulate API call
@@ -192,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 level: courseLevel.value,
                 category: courseCategory.value,
                 departmentId: department.value,
-            }
+            };
 
             $.ajax({
                 type: "POST",

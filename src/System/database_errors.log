@@ -1,292 +1,168 @@
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(27): Src\System\DatabaseMethods->getData('SELECT `code`, ...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(71): Src\Controller\SecretaryController->fetchActiveCourses()
-#4 {main}
-Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND c.`archived` = ''' at line 4
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
 Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT c.`code`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(27): Src\System\DatabaseMethods->getData('SELECT c.`code`...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(46): Src\Controller\SecretaryController->fetchActiveCourses(NULL, false)
-#4 {main}
-Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND c.`archived` = ''' at line 4
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT c.`code`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(27): Src\System\DatabaseMethods->getData('SELECT c.`code`...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(46): Src\Controller\SecretaryController->fetchActiveCourses(NULL, false)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(36): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(48): Src\Controller\SecretaryController->fetchAssignedCourses(1, false)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(36): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(48): Src\Controller\SecretaryController->fetchAssignedCourses(1, false)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(98): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(272): Src\Controller\SecretaryController->fetchCurrentSemester()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.number' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.`numbe...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(107): Src\System\DatabaseMethods->getData('SELECT s.`numbe...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(267): Src\Controller\SecretaryController->fetchAllLecturers()
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.number' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.`numbe...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(107): Src\System\DatabaseMethods->getData('SELECT s.`numbe...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(267): Src\Controller\SecretaryController->fetchAllLecturers(1, false)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.number' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.`numbe...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(107): Src\System\DatabaseMethods->getData('SELECT s.`numbe...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(262): Src\Controller\SecretaryController->fetchAllLecturers(1, false)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.number' in 'field list'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.`numbe...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(107): Src\System\DatabaseMethods->getData('SELECT s.`numbe...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(262): Src\Controller\SecretaryController->fetchAllLecturers(1, false)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(179): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'department_id' in 'where clause'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(176): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(50): Src\Controller\SecretaryController->fetchCourseAssignmentsByDepartment(1, 1)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(53): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsGroupByLecturer(1, 2)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(53): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsGroupByLecturer(1, 2)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(53): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsGroupByLecturer(1, 2)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(53): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsGroupByLecturer(1, 2)
-#4 {main}
-Warning: SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT * FROM `...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\System\DatabaseMethods->getData('SELECT * FROM `...', Array)
-#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(53): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsGroupByLecturer(1, 2)
-#4 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(171): Src\Core\Course->fetch('code', 'BCME 312', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('BCME 312', 'ICT6', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(171): Src\Core\Course->fetch('code', 'BCME 410', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('BCME 410', 'ICT6', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(171): Src\Core\Course->fetch('code', 'BCME 414', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('BCME 414', 'ICT6', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(171): Src\Core\Course->fetch('code', 'BCME 104', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('BCME 104', 'ICT6', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\Core\Course->fetch('code', 'DITE 212', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('DITE 212', 'ICT0002', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'code' in field list is ambiguous
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT `code`, ...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(49): Src\System\DatabaseMethods->getData('SELECT `code`, ...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(170): Src\Core\Course->fetch('code', 'BPSA 104', false)
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(393): Src\Controller\SecretaryController->assignCourseToLecturer('BPSA 104', 'ICT0002', '2', '1', '')
-#5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(172): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Course Assignme...', 'Assigned Mr. Ha...')
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(395): Src\Controller\SecretaryController->assignCourseToLecturer('DITE 202', 'ICT5', '2', '1', '')
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
 #5 {main}
 Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
 Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO cou...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(78): Src\System\DatabaseMethods->inputData('INSERT INTO cou...', Array)
-#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(313): Src\Core\Course->add(Array)
-#4 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
-Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(80): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Course Creation', 'Added new cours...')
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(313): Src\Core\Course->add(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
 #5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
 Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(79): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Course Creation', 'Added new cours...')
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(313): Src\Core\Course->add(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
 #5 {main}
-Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
 Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
-#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
-#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
-#3 C:\xampp\htdocs\rmu\staff\src\Core\Course.php(79): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Course Creation', 'Added new cours...')
-#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(313): Src\Core\Course->add(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
+#5 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'code' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `co...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(152): Src\System\DatabaseMethods->inputData('INSERT INTO `co...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\UploadCoursesController.php(181): Src\Controller\UploadCoursesController->saveCourseData(Array, '1')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(386): Src\Controller\UploadCoursesController->run('1')
 #5 {main}

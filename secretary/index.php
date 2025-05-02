@@ -349,7 +349,7 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                                 <input type="text" id="courseCode" placeholder="e.g. ML201" required>
                             </div>
                             <div class="form-group">
-                                <label for="courseName">Course Title</label>
+                                <label for="courseName">Course Name</label>
                                 <input type="text" id="courseName" placeholder="e.g. Maritime Law" required>
                             </div>
                             <div class="form-group">
