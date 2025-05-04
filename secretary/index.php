@@ -262,7 +262,6 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                                     }
                                 }
                                 ?>
-
                             </select>
                         </div>
                         <div class="form-group">
@@ -426,13 +425,18 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                         <form id="singleDeadlineForm">
                             <div class="form-group">
                                 <label for="deadlineCourse">Select Course</label>
-                                <select id="deadlineCourse" required>
+                                <select id="deadlineCourse" required multiple>
                                     <option value="">-- Select Course --</option>
-                                    <option value="ML201">Maritime Law (ML201)</option>
-                                    <option value="NS302">Navigation Systems (NS302)</option>
-                                    <option value="ME101">Marine Engineering (ME101)</option>
-                                    <option value="OC205">Oceanography (OC205)</option>
-                                    <option value="SM401">Ship Management (SM401)</option>
+                                    <?php
+                                    $courses = $secretary->fetchActiveCourses($departmentId, $semester, $archived);
+                                    if (! $courses) {
+                                        echo "<option value=''>No active courses available</option>";
+                                    } else {
+                                        foreach ($courses as $course) {
+                                            echo "<option value='{$course['code']}'>{$course['code']} - {$course['name']} </option>";
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
                             <div class="form-group">
