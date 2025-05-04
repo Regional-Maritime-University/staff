@@ -327,19 +327,21 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                     </div>
 
                     <div class="tab-content active" id="bulkUpload">
-                        <div class="upload-area">
-                            <div class="upload-icon">
-                                <i class="fas fa-file-excel fa-3x"></i>
+                        <form id="bulkUploadForm">
+                            <div class="upload-area">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-excel fa-3x"></i>
+                                </div>
+                                <h3>Upload Course List</h3>
+                                <p>Upload an Excel file with course details</p>
+                                <input type="file" id="courseFileUpload" class="file-input" accept=".xlsx, .xls">
+                                <label for="courseFileUpload" class="file-label">Choose File</label>
+                                <p class="selected-file-name" id="selectedFileName">No file selected</p>
                             </div>
-                            <h3>Upload Course List</h3>
-                            <p>Upload an Excel or CSV file with course details</p>
-                            <input type="file" id="courseFileUpload" class="file-input" accept=".xlsx, .xls, .csv">
-                            <label for="courseFileUpload" class="file-label">Choose File</label>
-                            <p class="selected-file-name" id="selectedFileName">No file selected</p>
-                        </div>
-                        <div class="template-download">
-                            <p>Don't have the template? <a href="#" class="download-link">Download Template</a></p>
-                        </div>
+                            <div class="template-download">
+                                <p>Don't have the template? <a href="#" class="download-link">Download Template</a></p>
+                            </div>
+                        </form>
                     </div>
 
                     <div class="tab-content" id="singleCourse">

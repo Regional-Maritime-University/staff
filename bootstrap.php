@@ -32,7 +32,7 @@ define('JS_PATH', ROOT_PATH . '/js');
 // Add this after your other defines
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $host = $_SERVER['HTTP_HOST'];
-$baseDir = '/rmu/admin'; // Change this according to your setup
+$baseDir = '/rmu/staff'; // Change this according to your setup
 define('BASE_URL', $baseDir);
 
 // Add this to bootstrap.php
