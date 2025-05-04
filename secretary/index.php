@@ -69,6 +69,7 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMU Staff Portal - Secretary Dashboard</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -439,6 +440,24 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                                     ?>
                                 </select>
                             </div>
+
+                            <!-- Inside the singleDeadlineForm, replace the deadlineCourse select with this: -->
+                            <div class="course-selection-container">
+                                <div class="course-selection-header">
+                                    <h3>Selected Courses</h3>
+                                    <button type="button" id="selectCoursesBtn">
+                                        <i class="fas fa-search"></i> Find Courses
+                                    </button>
+                                </div>
+                                <div class="selected-courses-container">
+                                    <div id="selectedCoursesList">
+                                        <!-- Selected courses will be added here dynamically -->
+                                    </div>
+                                    <div class="selected-courses-empty" id="noCoursesMessage">
+                                        No courses selected. Click "Find Courses" to add courses.
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label for="deadlineDate">Deadline Date</label>
                                 <input type="date" id="deadlineDate" required>
@@ -780,6 +799,33 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                 <div class="modal-footer">
                     <button class="cancel-btn" id="backToResultsBtn">Back to Results</button>
                     <button class="submit-btn" id="downloadDetailedResultsBtn">Download Detailed Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Selection Modal -->
+    <div class="modal" id="courseSelectionModal">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Courses</h2>
+                    <button class="close-btn" id="closeCourseSelectionModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="course-search">
+                        <input type="text" id="courseSearchInput" placeholder="Search by course code or name">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="course-list" id="courseList">
+                        <!-- Course items will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" id="closeCourseSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmCourseSelectionBtn">Confirm Selection</button>
                 </div>
             </div>
         </div>

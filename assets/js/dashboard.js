@@ -1,6 +1,19 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-  
+
+    
+    // Add this array at the top of your dashboard.js file
+    const availableCourses = [
+        { code: "ML201", name: "Maritime Law" },
+        { code: "NS302", name: "Navigation Systems" },
+        { code: "ME101", name: "Marine Engineering" },
+        { code: "OC205", name: "Oceanography" },
+        { code: "SM401", name: "Ship Management" },
+        { code: "MT103", name: "Marine Technology" },
+        { code: "PS202", name: "Port Security" },
+        { code: "SC301", name: "Shipping Commerce" },
+    ]
+
     // Modal Functions
     function openModal(modalId) {
         document.getElementById(modalId).classList.add("active")
@@ -258,25 +271,27 @@ document.addEventListener("DOMContentLoaded", function () {
           courseId: deadlineCourse.value,
           deadlineDate: deadlineDate.value,
           notes: document.getElementById("deadlineNotes").value,
-        }
+        };
   
-        console.log("Setting deadline:", formData)
+        console.log("Setting deadline:", formData);
   
         // Simulate successful setting
         setTimeout(function () {
-          alert("Deadline set successfully!")
-          closeModal("setDeadlineModal")
-          document.getElementById("singleDeadlineForm").reset()
+          alert("Deadline set successfully!");
+          closeModal("setDeadlineModal");
+          document.getElementById("singleDeadlineForm").reset();
+          document.getElementById("selectedCoursesList").innerHTML = "";
+          document.getElementById("noCoursesMessage").style.display = "block";
         }, 1000)
       } else {
         // Bulk deadline validation
         const checkboxes = document.querySelectorAll('#bulkDeadlineForm input[type="checkbox"]:checked')
-        const bulkDeadlineDate = document.getElementById("bulkDeadlineDate")
+        const bulkDeadlineDate = document.getElementById("bulkDeadlineDate");
   
         if (checkboxes.length === 0 || !bulkDeadlineDate.value) {
-          alert("Please select at least one course and a deadline date")
-          return
-        }
+          alert("Please select at least one course and a deadline date");
+          return;
+        };
   
         // Collect selected courses
         const selectedCourses = []
@@ -289,15 +304,15 @@ document.addEventListener("DOMContentLoaded", function () {
           courseIds: selectedCourses,
           deadlineDate: bulkDeadlineDate.value,
           notes: document.getElementById("bulkDeadlineNotes").value,
-        }
+        };
   
-        console.log("Setting bulk deadlines:", formData)
+        console.log("Setting bulk deadlines:", formData);
   
         // Simulate successful setting
         setTimeout(function () {
-          alert("Deadlines set successfully!")
-          closeModal("setDeadlineModal")
-          document.getElementById("bulkDeadlineForm").reset()
+          alert("Deadlines set successfully!");
+          closeModal("setDeadlineModal");
+          document.getElementById("bulkDeadlineForm").reset();
         }, 1000)
       }
     })
@@ -422,5 +437,137 @@ document.addEventListener("DOMContentLoaded", function () {
   
       // In a real application, you would generate and download a detailed report
       alert("Downloading detailed results report")
+    });
+  
+  // Add these functions to your dashboard.js file
+  function openCourseSelectionModal() {
+    document.getElementById("courseSelectionModal").classList.add("active")
+  }
+  
+  function closeCourseSelectionModal() {
+    document.getElementById("courseSelectionModal").classList.remove("active")
+  }
+  
+  function searchCourses() {
+    const searchTerm = document.getElementById("courseSearchInput").value.toLowerCase()
+    const courseList = document.getElementById("courseList")
+    courseList.innerHTML = ""
+  
+    availableCourses.forEach((course) => {
+      if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
+        const courseItem = document.createElement("div")
+        courseItem.className = "course-item"
+        courseItem.innerHTML = `
+          <div class="course-info">
+            <strong>${course.code}</strong> - ${course.name}
+          </div>
+          <button class="add-course-btn" data-code="${course.code}" data-name="${course.name}">
+            <i class="fas fa-plus"></i>
+          </button>
+        `
+        courseList.appendChild(courseItem)
+      }
     })
+  
+    // Add event listeners to the add buttons
+    document.querySelectorAll(".add-course-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const code = this.getAttribute("data-code")
+        const name = this.getAttribute("data-name")
+        addCourseToSelection(code, name)
+      })
+    })
+  }
+  
+  function addCourseToSelection(code, name) {
+    const selectedCoursesList = document.getElementById("selectedCoursesList")
+  
+    // Check if course is already added
+    if (document.querySelector(`.selected-course[data-code="${code}"]`)) {
+      return
+    }
+  
+    const courseItem = document.createElement("div")
+    courseItem.className = "selected-course"
+    courseItem.setAttribute("data-code", code)
+    courseItem.innerHTML = `
+      <div class="course-info">
+        <strong>${code}</strong> - ${name}
+      </div>
+      <button class="remove-course-btn" data-code="${code}">
+        <i class="fas fa-times"></i>
+      </button>
+      <input type="hidden" name="selectedCourses[]" value="${code}">
+    `
+    selectedCoursesList.appendChild(courseItem)
+  
+    // Add event listener to the remove button
+    courseItem.querySelector(".remove-course-btn").addEventListener("click", function () {
+      const code = this.getAttribute("data-code")
+      removeFromSelection(code)
+    })
+  }
+  
+  function removeFromSelection(code) {
+    const courseItem = document.querySelector(`.selected-course[data-code="${code}"]`)
+    if (courseItem) {
+      courseItem.remove()
+    }
+  }
+  
+  function confirmCourseSelection() {
+    closeCourseSelectionModal()
+  }
+  
+  // Add this to your document.addEventListener("DOMContentLoaded", function() { ... }) block
+  document.addEventListener("DOMContentLoaded", () => {
+    // Your existing code...
+  
+    // Course Selection Modal
+    const selectCoursesBtn = document.getElementById("selectCoursesBtn")
+    const closeCourseSelectionModal = document.getElementById("closeCourseSelectionModal")
+    const confirmCourseSelectionBtn = document.getElementById("confirmCourseSelectionBtn")
+    const courseSearchInput = document.getElementById("courseSearchInput")
+  
+    if (selectCoursesBtn) {
+      selectCoursesBtn.addEventListener("click", () => {
+        openCourseSelectionModal()
+      })
+    }
+  
+    if (closeCourseSelectionModal) {
+      closeCourseSelectionModal.addEventListener("click", () => {
+        closeCourseSelectionModal()
+      })
+    }
+  
+    if (confirmCourseSelectionBtn) {
+      confirmCourseSelectionBtn.addEventListener("click", () => {
+        confirmCourseSelection()
+      })
+    }
+  
+    if (courseSearchInput) {
+      courseSearchInput.addEventListener("input", () => {
+        searchCourses()
+      })
+  
+      // Initialize course list on modal open
+      courseSearchInput.addEventListener("focus", () => {
+        if (courseSearchInput.value === "") {
+          searchCourses()
+        }
+      })
+    }
+  
+    // Initialize course list when modal opens
+    if (selectCoursesBtn) {
+      selectCoursesBtn.addEventListener("click", () => {
+        setTimeout(() => {
+          searchCourses()
+        }, 100)
+      })
+    }
+  })
+  
   })
