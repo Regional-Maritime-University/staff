@@ -34,6 +34,31 @@ ALTER TABLE `activity_logs` ADD INDEX `activity_logs_action_idx1` (`action`);
 
 ALTER TABLE `activity_logs` CHANGE `id` `id` VARCHAR(10) NOT NULL; 
 
+ALTER TABLE `semester` 
+ADD COLUMN `type` VARCHAR(30) DEFAULT 'continuing students' AFTER `name`,
+ADD COLUMN `start_date` DATE DEFAULT NULL AFTER `type`,
+ADD COLUMN `end_date` DATE DEFAULT NULL AFTER `start_date`,
+ADD COLUMN `exam_start_date` DATE DEFAULT NULL AFTER `end_date`,
+ADD COLUMN `exam_end_date` DATE DEFAULT NULL AFTER `exam_start_date`,
+ADD COLUMN `exam_registration_start_date` DATE DEFAULT NULL AFTER `exam_end_date`,
+ADD COLUMN `exam_registration_end_date` DATE DEFAULT NULL AFTER `exam_registration_start_date`,
+ADD COLUMN `resit_exam_start_date` DATE DEFAULT NULL AFTER `exam_end_date`,
+ADD COLUMN `resit_exam_end_date` DATE DEFAULT NULL AFTER `resit_exam_start_date`,
+ADD COLUMN `resit_exam_registration_start_date` DATE DEFAULT NULL AFTER `resit_exam_end_date`,
+ADD COLUMN `resit_exam_registration_end_date` DATE DEFAULT NULL AFTER `resit_exam_registration_start_date`,
+ADD COLUMN `resit_exam_results_uploaded` DATE DEFAULT NULL AFTER `resit_exam_registration_end_date`,
+ADD INDEX `semester_type_idx1` (`type`),
+ADD INDEX `semester_start_date_idx1` (`start_date`),
+ADD INDEX `semester_end_date_idx1` (`end_date`),
+ADD INDEX `semester_exam_registration_start_date_idx1` (`exam_registration_start_date`),
+ADD INDEX `semester_exam_registration_end_date_idx1` (`exam_registration_end_date`),
+ADD INDEX `semester_exam_start_date_idx1` (`exam_start_date`),
+ADD INDEX `semester_exam_end_date_idx1` (`exam_end_date`),
+ADD INDEX `semester_resit_exam_start_date_idx1` (`resit_exam_start_date`),
+ADD INDEX `semester_resit_exam_end_date_idx1` (`resit_exam_end_date`),
+ADD INDEX `semester_resit_exam_registration_start_date_idx1` (`resit_exam_registration_start_date`),
+ADD INDEX `semester_resit_exam_registration_end_date_idx1` (`resit_exam_registration_end_date`),
+ADD INDEX `semester_exam_results_uploaded_idx1` (`exam_results_uploaded`);
 
 
 

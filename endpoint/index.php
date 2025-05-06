@@ -28,13 +28,8 @@ use Src\Controller\AdminController;
 use Src\Controller\ExposeDataController;
 use Src\Controller\SecretaryController;
 use Src\Controller\UploadExcelDataController;
+use Src\Core\Base;
 use Src\Core\Course;
-use Src\Core\Department;
-use Src\Core\FeeItem;
-use Src\Core\FeeStructure;
-use Src\Core\FeeStructureCategory;
-use Src\Core\FeeStructureItem;
-use Src\Core\FeeStructureType;
 use Src\Core\Program;
 use Src\Core\Staff;
 use Src\Core\Student;
@@ -48,6 +43,7 @@ $course                 = new Course($db, $user, $pass);
 $student                = new Student($db, $user, $pass);
 $staff                  = new Staff($db, $user, $pass);
 $secretary              = new SecretaryController($db, $user, $pass);
+$base                   = new Base($db, $user, $pass);
 
 $data   = [];
 $errors = [];
@@ -60,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode(["success" => true, "data" => $fee_structure_type->fetch()]));
     } elseif ($_GET["url"] == "fetch-fee-item") {
         die(json_encode(["success" => true, "data" => $fee_item->fetch()]));
+    } elseif ($_GET["url"] == "current-semester") {
+        die(json_encode(["success" => true, "data" => $base->getActiveSemesters()]));
     }
 
     // All POST request will be sent here
@@ -209,10 +207,26 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     //programs
 
     elseif ($_GET["url"] == "fetch-staff") {
-        if (! isset($_POST["staff"]) || empty($_POST["staff"])) {
-            die(json_encode(["success" => false, "message" => "Staff id is required!"]));
+        if (isset($_POST["staff"]) && ! empty($_POST["staff"])) {
+            $_POST["key"]   = "number";
+            $_POST["value"] = $_POST["staff"];
+        } else if (isset($_POST["email"]) && ! empty($_POST["email"])) {
+            $_POST["key"]   = "email";
+            $_POST["value"] = $_POST["email"];
+        } else if (isset($_POST["gender"]) && ! empty($_POST["gender"])) {
+            $_POST["key"]   = "gender";
+            $_POST["value"] = $_POST["gender"];
+        } else if (isset($_POST["role"]) && ! empty($_POST["role"])) {
+            $_POST["key"]   = "role";
+            $_POST["value"] = $_POST["role"];
+        } else if (isset($_POST["department"]) && ! empty($_POST["department"])) {
+            $_POST["key"]   = "department";
+            $_POST["value"] = $_POST["department"];
+        } else {
+            $_POST["key"]   = "";
+            $_POST["value"] = "";
         }
-        die(json_encode($staff->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
+        die(json_encode(["success" => true, "data" => $staff->fetch($_POST["key"], $_POST["value"])]));
     } elseif ($_GET["url"] == "add-staff") {
         if (! isset($_POST["name"]) || empty($_POST["name"])) {
             die(json_encode(["success" => false, "message" => "Staff name is required!"]));
@@ -401,6 +415,38 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode($program->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
     } elseif ($_GET["url"] == "update-student") {
         die(json_encode($student->update($_POST)));
+    }
+
+    // Deadline
+    elseif ($_GET["url"] == "add-deadline") {
+        if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
+            die(json_encode(["success" => false, "message" => "Course(s) required!"]));
+        }
+        if (! isset($_POST["date"]) || empty($_POST["date"])) {
+            die(json_encode(["success" => false, "message" => "Date of deadline required!"]));
+        }
+        if (! isset($_POST["note"]) || empty($_POST["note"])) {
+            $note = null;
+        } else {
+            $note = $_POST["note"];
+        }
+        die(json_encode($deadline->add($_POST["courses"], $_POST["semester"], $_POST["department"], $note)));
+    } elseif ($_GET["url"] == "edit-deadline") {
+        if (! isset($_POST["deadline"]) || empty($_POST["deadline"])) {
+            die(json_encode(["success" => false, "message" => "Deadline id required!"]));
+        }
+        if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
+            die(json_encode(["success" => false, "message" => "Course(s) required!"]));
+        }
+        if (! isset($_POST["date"]) || empty($_POST["date"])) {
+            die(json_encode(["success" => false, "message" => "Date of deadline required!"]));
+        }
+        if (! isset($_POST["note"]) || empty($_POST["note"])) {
+            $note = null;
+        } else {
+            $note = $_POST["note"];
+        }
+        die(json_encode($deadline->add($_POST["deadline"], $_POST["semester"], $_POST["department"])));
     }
 
     // All PUT request will be sent here

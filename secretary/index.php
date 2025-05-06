@@ -27,6 +27,7 @@ if (isset($_GET['logout']) || !$isUser) {
     header('Location: ../index.php');
 }
 
+$staffData = $_SESSION["staff"] ?? null;
 $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
@@ -417,44 +418,24 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="singleDeadline">Single Course</button>
-                        <button class="tab-btn" data-tab="bulkDeadline">Multiple Courses</button>
-                    </div>
-
                     <div class="tab-content active" id="singleDeadline">
-                        <form id="singleDeadlineForm">
-                            <div class="form-group">
-                                <label for="deadlineCourse">Select Course</label>
-                                <select id="deadlineCourse" required multiple>
-                                    <option value="">-- Select Course --</option>
-                                    <?php
-                                    $courses = $secretary->fetchActiveCourses($departmentId, $semester, $archived);
-                                    if (! $courses) {
-                                        echo "<option value=''>No active courses available</option>";
-                                    } else {
-                                        foreach ($courses as $course) {
-                                            echo "<option value='{$course['code']}'>{$course['code']} - {$course['name']} </option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-
-                            <!-- Inside the singleDeadlineForm, replace the deadlineCourse select with this: -->
+                        <form id="deadlineForm">
+                            <!-- Inside the deadlineForm, replace the deadlineCourse select with this: -->
                             <div class="course-selection-container">
-                                <div class="course-selection-header">
-                                    <h3>Selected Courses</h3>
-                                    <button type="button" id="selectCoursesBtn">
-                                        <i class="fas fa-search"></i> Find Courses
-                                    </button>
-                                </div>
-                                <div class="selected-courses-container">
-                                    <div id="selectedCoursesList">
-                                        <!-- Selected courses will be added here dynamically -->
+                                <div class="form-group">
+                                    <div class="course-selection-header">
+                                        <label>Selected Courses</label>
+                                        <button type="button" id="selectCoursesBtn">
+                                            <i class="fas fa-search"></i> Find Courses
+                                        </button>
                                     </div>
-                                    <div class="selected-courses-empty" id="noCoursesMessage">
-                                        No courses selected. Click "Find Courses" to add courses.
+                                    <div class="selected-courses-container">
+                                        <div id="selectedCoursesList">
+                                            <!-- Selected courses will be added here dynamically -->
+                                        </div>
+                                        <div class="selected-courses-empty" id="noCoursesMessage">
+                                            No courses selected. Click "Find Courses" to add courses.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -465,44 +446,6 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                             <div class="form-group">
                                 <label for="deadlineNotes">Notes (Optional)</label>
                                 <textarea id="deadlineNotes" rows="3" placeholder="Add any additional notes about this deadline"></textarea>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="tab-content" id="bulkDeadline">
-                        <form id="bulkDeadlineForm">
-                            <div class="form-group">
-                                <label>Select Courses</label>
-                                <div class="checkbox-list">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course1" value="ML201">
-                                        <label for="course1">Maritime Law (ML201)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course2" value="NS302">
-                                        <label for="course2">Navigation Systems (NS302)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course3" value="ME101">
-                                        <label for="course3">Marine Engineering (ME101)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course4" value="OC205">
-                                        <label for="course4">Oceanography (OC205)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course5" value="SM401">
-                                        <label for="course5">Ship Management (SM401)</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="bulkDeadlineDate">Deadline Date</label>
-                                <input type="date" id="bulkDeadlineDate" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="bulkDeadlineNotes">Notes (Optional)</label>
-                                <textarea id="bulkDeadlineNotes" rows="3" placeholder="Add any additional notes about these deadlines"></textarea>
                             </div>
                         </form>
                     </div>
@@ -831,6 +774,11 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
         </div>
     </div>
 
+    <script>
+        // Make PHP session data available to JS
+        window.AuthenticatedStaff = <?php echo json_encode($staffData); ?>;
+    </script>
+    <script src="../assets/js/Data.js"></script>
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/Dashboard.js"></script>
