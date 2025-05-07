@@ -1,6 +1,8 @@
 // Create a global object to hold shared data
 window.AppData = {
+    ACTIVE_SEMESTERS: [], 
     COURSES: [],
+    ASSIGNED_COURSES: [],
     LECTURERS_AND_HODS: [],
     DEADLINES: [],
     RESULTS: [],
@@ -30,8 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchData() {
         try {
             const [
-                semesterRes,
+                activeSemestersRes,
                 coursesRes,
+                assignedCoursesRes,
                 staffRes,
                 // deadlinesRes,
                 // resultsRes,
@@ -39,17 +42,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 // messagesRes,
                 // notificationsRes
             ] = await Promise.all([
-                fetch(`../endpoint/current-semesters`, { method: 'GET', headers: {'Content-Type': 'application/json'}}),
-                fetch(`../endpoint/fetch-course`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ departmentId }) }),
-                fetch(`../endpoint/fetch-staff`, { method: 'POST', headers: {'Content-Type': 'application/json'}}),
-                // fetch(`../endpoint/fetch-deadline`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ departmentId }) }),
-                // fetch(`../endpoint/fetch-result`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ departmentId }) }),
-                // fetch(`../endpoint/fetch-student`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ departmentId }) }),
-                // fetch(`../endpoint/fetch-message`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId }) }),
-                // fetch(`../endpoint/fetch-notification`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId }) })
+                fetch(`../endpoint/active-semesters`, { method: 'GET', headers: {'Content-Type': 'application/x-www-form-urlencoded'}}),
+                fetch(`../endpoint/fetch-course`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ departmentId }) }),
+                fetch(`../endpoint/fetch-assigned-courses`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({ department: departmentId }).toString() }),
+                fetch(`../endpoint/fetch-staff`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}}),
+                // fetch(`../endpoint/fetch-deadline`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ departmentId }) }),
+                // fetch(`../endpoint/fetch-result`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ departmentId }) }),
+                // fetch(`../endpoint/fetch-student`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ departmentId }) }),
+                // fetch(`../endpoint/fetch-message`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ userId }) }),
+                // fetch(`../endpoint/fetch-notification`, { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: JSON.stringify({ userId }) })
             ]);
 
+            const activeSemestersData = await activeSemestersRes.json();
             const coursesData = await coursesRes.json();
+            const assignedCoursesData = await assignedCoursesRes.json();
             const staffData = await staffRes.json();
             // const deadlinesData = await deadlinesRes.json();
             // const resultsData = await resultsRes.json();
@@ -58,8 +64,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // const notificationsData = await notificationsRes.json();
 
             // Populate global object
-            window.AppData.COURSES = coursesData.data;
-            window.AppData.LECTURERS_AND_HODS = staffData.data.filter(s => s.role === 'lecturer' || s.role === 'hod');
+            if (activeSemestersData.success) window.AppData.ACTIVE_SEMESTERS = assignedCoursesData.data;
+            if (activeSemestersData.success) window.AppData.COURSES = coursesData.data;
+            if (activeSemestersData.success) window.AppData.ASSIGNED_COURSES = assignedCoursesData.data;
+            if (activeSemestersData.success) window.AppData.LECTURERS_AND_HODS = window.AppData.LECTURERS_AND_HODS = staffData.data.filter(s => s.role === 'lecturer' || s.role === 'hod');
             // window.AppData.DEADLINES = deadlinesData.data;
             // window.AppData.RESULTS = resultsData.data;
             // window.AppData.STUDENTS = studentsData.data;

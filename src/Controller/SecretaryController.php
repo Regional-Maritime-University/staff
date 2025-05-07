@@ -118,11 +118,13 @@ class SecretaryController
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId, ":s" => $semesterId));
     }
 
-    public function fetchCurrentSemester()
+    public function fetchActiveSemesters()
     {
-        $query = "SELECT s.*, a.`name` AS `academic_year`, a.`start_month`, a.`end_month`, a.`start_year`, a.`end_year`, a.`active` AS `academic_year_status`
+        $query = "SELECT s.*, a.`id` AS academic_year, a.`name` AS academic_year_name, a.`active` AS `academic_year_status`, 
+                    a.`start_month` AS academic_year_start_month, a.`end_month` AS academic_year_end_month, 
+                    a.`start_year` AS academic_year_start_year, a.`end_year` AS academic_year_end_year 
                 FROM `semester` AS s, `academic_year` AS a 
-                WHERE s.`fk_academic_year` = a.`id` AND s.`active` = 1 AND a.`active` = 1";
+                WHERE a.`active` = 1 AND s.`active` = 1 AND a.`id` = s.`fk_academic_year`";
         return $this->dm->getData($query);
     }
 
@@ -202,8 +204,46 @@ class SecretaryController
 
     public function fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId)
     {
-        $query = "SELECT * FROM `lecture_course_assignments` WHERE `department_id` = :di AND `semester_id` = :si";
+        $query = "SELECT 
+                    lca.`id`, lca.`lecture_day`, lca.`lecture_period`, lca.`room_number`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
+                    lca.`department_id`, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
+                    lca.`lecturer_id`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
+                    sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
+                    sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_department_id, 
+                    lca.`course_code`, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
+                    c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
+                    cg.`archived` AS course_category_archived, c.`fk_department` AS course_department_id 
+                FROM 
+                    `lecture_course_assignments` AS lca 
+                    JOIN `department` AS d ON lca.`department_id` = d.`id` 
+                    JOIN `staff` AS sf ON lca.`lecturer_id` = sf.`number` 
+                    JOIN `course` AS c ON lca.`course_code` = c.`code` 
+                    JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+                    JOIN `semester` AS s ON lca.`semester_id` = s.`id` 
+                WHERE lca.`department_id` = :di AND lca.`semester_id` = :si";
         return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
+    }
+
+    public function fetchAssignedSemesterCoursesByDepartment($departmentId)
+    {
+        $query = "SELECT 
+                    lca.`id`, lca.`lecture_day`, lca.`lecture_period`, lca.`room_number`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
+                    lca.`department_id`, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
+                    lca.`lecturer_id`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
+                    sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
+                    sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_department_id, 
+                    lca.`course_code`, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
+                    c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
+                    cg.`archived` AS course_category_archived, c.`fk_department` AS course_department_id 
+                FROM 
+                    `lecture_course_assignments` AS lca 
+                    JOIN `department` AS d ON lca.`department_id` = d.`id` 
+                    JOIN `staff` AS sf ON lca.`lecturer_id` = sf.`number` 
+                    JOIN `course` AS c ON lca.`course_code` = c.`code` 
+                    JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+                    JOIN `semester` AS s ON lca.`semester_id` = s.`id` 
+                WHERE lca.`department_id` = :di AND s.`active` = 1";
+        return $this->dm->getData($query, array(":di" => $departmentId));
     }
 
     public function fetchSemesterCourseAssignmentsGroupByDepartment($departmentId, $semesterId)

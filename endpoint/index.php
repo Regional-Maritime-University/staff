@@ -30,6 +30,7 @@ use Src\Controller\SecretaryController;
 use Src\Controller\UploadExcelDataController;
 use Src\Core\Base;
 use Src\Core\Course;
+use Src\Core\Deadline;
 use Src\Core\Program;
 use Src\Core\Staff;
 use Src\Core\Student;
@@ -44,6 +45,7 @@ $student                = new Student($db, $user, $pass);
 $staff                  = new Staff($db, $user, $pass);
 $secretary              = new SecretaryController($db, $user, $pass);
 $base                   = new Base($db, $user, $pass);
+$deadline                = new Deadline($db, $user, $pass);
 
 $data   = [];
 $errors = [];
@@ -56,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode(["success" => true, "data" => $fee_structure_type->fetch()]));
     } elseif ($_GET["url"] == "fetch-fee-item") {
         die(json_encode(["success" => true, "data" => $fee_item->fetch()]));
-    } elseif ($_GET["url"] == "current-semester") {
+    } elseif ($_GET["url"] == "active-semesters") {
         die(json_encode(["success" => true, "data" => $base->getActiveSemesters()]));
     }
 
@@ -296,6 +298,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $_POST["value"] = "";
         }
         die(json_encode(["success" => true, "data" => $course->fetch($_POST["key"], $_POST["value"])]));
+    } elseif ($_GET["url"] == "fetch-assigned-courses") {
+        if (! isset($_POST["department"]) || empty($_POST["department"])) {
+            die(json_encode(["success" => false, "message" => "Department is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesByDepartment($_POST["department"])]));
     }
     //add
     elseif ($_GET["url"] == "add-course") {
@@ -419,6 +426,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
     // Deadline
     elseif ($_GET["url"] == "add-deadline") {
+        if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+            die(json_encode(["success" => false, "message" => "Semester required!"]));
+        }
         if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
             die(json_encode(["success" => false, "message" => "Course(s) required!"]));
         }
@@ -430,7 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else {
             $note = $_POST["note"];
         }
-        die(json_encode($deadline->add($_POST["courses"], $_POST["semester"], $_POST["department"], $note)));
+        die(json_encode($deadline->add($_POST)));
     } elseif ($_GET["url"] == "edit-deadline") {
         if (! isset($_POST["deadline"]) || empty($_POST["deadline"])) {
             die(json_encode(["success" => false, "message" => "Deadline id required!"]));

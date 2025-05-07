@@ -124,6 +124,11 @@
 	background-color: var(--light-bg);
 }
 
+/* Add these styles for selected courses */
+.course-item.course-selected {
+	background-color: rgba(46, 204, 113, 0.1);
+}
+
 .add-course-btn {
 	background-color: var(--success-color);
 	color: white;
@@ -136,6 +141,16 @@
 	justify-content: center;
 	cursor: pointer;
 	transition: background-color var(--transition-speed);
+}
+
+.add-course-btn.selected {
+	background-color: var(--success-color);
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+.add-course-btn.selected:hover {
+	background-color: var(--success-color);
 }
 
 .add-course-btn:hover {

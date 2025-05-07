@@ -1,19 +1,23 @@
 // Dashboard.js
 
 document.addEventListener("DOMContentLoaded", function () {
-
-    let courses = window.AppData.COURSES;
-    let lecturersAndHods = window.AppData.LECTURERS_AND_HODS;
-    let deadlines = window.AppData.DEADLINES;
-    let results = window.AppData.RESULTS;
-    let students = window.AppData.STUDENTS;
-    let messages = window.AppData.MESSAGES;
-    let notifications = window.AppData.NOTIFICATIONS;
+    
+    let activeSemesters = null;
+    let courses = null;
+    let assignedCourses = null;
+    let lecturersAndHods = null;
+    let deadlines = null;
+    let results = null;
+    let students = null;
+    let messages = null;
+    let notifications = null;
 
     let user = window.AppData.user;
 
     document.addEventListener("AppDataReady", function () {
+        activeSemesters = window.AppData.ACTIVE_SEMESTERS;
         courses = window.AppData.COURSES;
+        assignedCourses = window.AppData.ASSIGNED_COURSES;
         lecturersAndHods = window.AppData.LECTURERS_AND_HODS;
         deadlines = window.AppData.DEADLINES;
         results = window.AppData.RESULTS;
@@ -22,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         notifications = window.AppData.NOTIFICATIONS;
 
         console.log("Courses ready:", courses);
+        console.log("Assigned Courses ready:", assignedCourses);
         console.log("Lecturers and HODs ready:", lecturersAndHods);
         console.log("Deadlines ready:", deadlines);
         console.log("Results ready:", results);
@@ -276,34 +281,49 @@ document.addEventListener("DOMContentLoaded", function () {
         const courseList = document.getElementById("courseList");
         courseList.innerHTML = "";
     
-        courses.forEach((course) => {
-            if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
+        assignedCourses.forEach((course) => {
+            if (course.course_code.toLowerCase().includes(searchTerm) || course.course_name.toLowerCase().includes(searchTerm)) {
+                // Check if course is already selected
+                const isSelected = document.querySelector(`.selected-course[data-code="${course.course_code}"]`) !== null;
                 const courseItem = document.createElement("div");
                 courseItem.className = "course-item";
+        
+                // Add a class if the course is selected
+                if (isSelected) {
+                    courseItem.classList.add("course-selected");
+                }
+        
                 courseItem.innerHTML = `
-                <div class="course-info">
-                    <strong>${course.code}</strong> - ${course.name}
-                </div>
-                <button class="add-course-btn" data-code="${course.code}" data-name="${course.name}">
-                    <i class="fas fa-plus"></i>
-                </button>
+                    <div class="course-info">
+                        <strong>${course.course_code}</strong> - ${course.course_name}
+                    </div>
+                    <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
+                        <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                    </button>
                 `;
                 courseList.appendChild(courseItem);
             }
         });
 
         // Add event listeners to the add buttons
-        document.querySelectorAll(".add-course-btn").forEach((btn) => {
+        document.querySelectorAll(".add-course-btn:not(.selected)").forEach((btn) => {
             btn.addEventListener("click", function () {
                 const code = this.getAttribute("data-code");
                 const name = this.getAttribute("data-name");
                 addCourseToSelection(code, name);
+
+                // Update the button to show it's selected
+                this.classList.add("selected");
+                this.disabled = true;
+                this.querySelector("i").classList.remove("fa-plus");
+                this.querySelector("i").classList.add("fa-check");
+                this.closest(".course-item").classList.add("course-selected");
             });
         });
     }
 
     function addCourseToSelection(code, name) {
-        const selectedCoursesList = document.getElementById("selectedCoursesList")
+        const selectedCoursesList = document.getElementById("selectedCoursesList");
 
         // Check if course is already added
         if (document.querySelector(`.selected-course[data-code="${code}"]`)) {
@@ -323,6 +343,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <input type="hidden" name="selectedCourses[]" value="${code}">
         `;
         selectedCoursesList.appendChild(courseItem);
+
         // Add event listener to the remove button
         courseItem.querySelector(".remove-course-btn").addEventListener("click", function () {
             const code = this.getAttribute("data-code");
@@ -333,7 +354,30 @@ document.addEventListener("DOMContentLoaded", function () {
     function removeFromSelection(code) {
         const courseItem = document.querySelector(`.selected-course[data-code="${code}"]`)
         if (courseItem) {
-            courseItem.remove();
+            courseItem.remove()
+
+            // Update the course in the search list if it's visible
+            const courseInList = document.querySelector(`.course-item .add-course-btn[data-code="${code}"]`)
+            if (courseInList) {
+                courseInList.classList.remove("selected")
+                courseInList.disabled = false
+                courseInList.querySelector("i").classList.remove("fa-check")
+                courseInList.querySelector("i").classList.add("fa-plus")
+                courseInList.closest(".course-item").classList.remove("course-selected")
+
+                // Re-add the click event listener
+                courseInList.addEventListener("click", function () {
+                    const name = this.getAttribute("data-name")
+                    addCourseToSelection(code, name)
+
+                    // Update the button to show it's selected
+                    this.classList.add("selected")
+                    this.disabled = true
+                    this.querySelector("i").classList.remove("fa-plus")
+                    this.querySelector("i").classList.add("fa-check")
+                    this.closest(".course-item").classList.add("course-selected")
+                });
+            }
         }
     }
 
@@ -385,9 +429,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (submitSetDeadline) {
         submitSetDeadline.addEventListener("click", function () {
-            // Collect selected courses from the selectedCoursesList
-            const selectedCourseElements = document.querySelectorAll('#selectedCoursesList .selected-course');
+
+            const selectedLecturer = document.getElementById("deadlineLecturerSelect").value;
+            if (!selectedLecturer) {
+                alert("Please select a semester");
+                return;
+            }
             
+            const selectedCourseElements = document.querySelectorAll('#selectedCoursesList .selected-course');
             if (selectedCourseElements.length === 0) {
                 alert("Please select at least one course");
                 return;
@@ -399,7 +448,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
     
-            // Collect selected courses
             const selectedCourses = [];
             selectedCourseElements.forEach((element) => {
                 selectedCourses.push(element.getAttribute("data-code"));
@@ -408,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Create the form data
             const formData = {
                 courses: selectedCourses,
-                semester: selectedCourses,
+                lecturer: selectedLecturer,
                 date: deadlineDate.value,
                 note: document.getElementById("deadlineNotes").value || "",
             };
@@ -425,7 +473,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log(result);
 
                     if (result.success) {
-                        alert(data.message || 'Deadlines set successfully!');
+                        alert(result.message || 'Deadlines set successfully!');
                         closeModal("setDeadlineModal");
                         document.getElementById("deadlineForm").reset();
                     

@@ -47,22 +47,24 @@ class Deadline
 
     public function add(array $data)
     {
-        $selectQuery = "SELECT * FROM `course_category` WHERE `name` = :c";
-        $courseCategoryData = $this->dm->getData($selectQuery, array(":c" => $data["name"]));
+        foreach ($data["courses"] as $course) {
+            $selectQuery = "SELECT * FROM `course` WHERE `code` = :c";
+            $courseData = $this->dm->getData($selectQuery, array(":c" => $course));
 
-        if (!empty($courseCategoryData)) {
-            return array(
-                "success" => false,
-                "message" => "{$courseCategoryData[0]["name"]} with name {$courseCategoryData[0]["name"]} already exist in database!"
+            $query = "INSERT INTO deadlines (`course_code`, `lecturer_id`, `date`, `note`) VALUES(:c, :l, :d, :n)";
+            $params = array(
+                ":c" => $course,
+                ":l" => $data["lecturer"],
+                ":d" => $data["date"],
+                ":n" => $data["note"]
             );
+            $result = $this->dm->inputData($query, $params);
+            if ($result) {
+                $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Results Submission Deadline", "Set a deadline for {$courseData[0]["name"]} ({$course})");
+                return array("success" => true, "message" => "Deadline successfully set for {$courseData[0]["name"]} ({$course})!");
+            }
+            return array("success" => false, "message" => "Failed to set deadline for {$courseData[0]["name"]} ({$course})!");
         }
-
-        $query_result = $this->dm->inputData("INSERT INTO course_category (`name`) VALUES(:n)", array(":n" => $data["name"]));
-        if ($query_result) {
-            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Category Creation", "Added new course category {$data["name"]}");
-            return array("success" => true, "message" => "New course category successfully added!");
-        }
-        return array("success" => false, "message" => "Failed to add new course category!");
     }
 
     public function update(array $data)

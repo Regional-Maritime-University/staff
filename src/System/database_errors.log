@@ -1,0 +1,303 @@
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM `semester` AS s, `academic_year` AS a 
+                WHERE a.`active`...' at line 4
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(128): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(261): Src\Controller\SecretaryController->fetchCurrentSemester()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM `semester` AS s, `academic_year` AS a 
+                WHERE a.`active`...' at line 4
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(128): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(261): Src\Controller\SecretaryController->fetchCurrentSemester()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM `semester` AS s, `academic_year` AS a 
+                WHERE a.`active`...' at line 4
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(128): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(261): Src\Controller\SecretaryController->fetchActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM `semester` AS s, `academic_year` AS a 
+                WHERE a.`active`...' at line 4
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(128): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(261): Src\Controller\SecretaryController->fetchActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.start_date' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT s.*, a.`...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(24): Src\System\DatabaseMethods->getData('SELECT s.*, a.`...')
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(54): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(174): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Course Assignme...', 'Assigned Mr. Ha...')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(412): Src\Controller\SecretaryController->assignCourseToLecturer('BCME 104', 'ICT5', '2', '1', '')
+#5 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(224): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(224): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(223): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(222): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(222): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(222): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(222): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(222): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(223): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(223): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM 
+                    lecture_course_assignments AS lca
+               ...' at line 3
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(227): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM 
+                    lecture_course_assignments AS lca
+               ...' at line 3
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(227): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM 
+                    lecture_course_assignments AS lca
+               ...' at line 3
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(226): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM 
+                    lecture_course_assignments AS lca
+               ...' at line 3
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(225): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(234): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(232): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.course_credit_hours' in 'field list'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(232): Src\System\DatabaseMethods->getData('SELECT \r\n      ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\index.php(61): Src\Controller\SecretaryController->fetchSemesterCourseAssignmentsByDepartment(1, 2)
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Core\Deadline.php(64): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Results Submiss...', 'Set a deadline ...')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(443): Src\Core\Deadline->add(Array)
+#5 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS acade...' at line 6
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(69): PDOStatement->execute()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(104): Src\System\DatabaseMethods->query('SELECT \r\n      ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Base.php(32): Src\System\DatabaseMethods->getData('SELECT \r\n      ...')
+#3 C:\xampp\htdocs\rmu\staff\endpoint\index.php(62): Src\Core\Base->getActiveSemesters()
+#4 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '' for key 'PRIMARY'
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(119): Src\System\DatabaseMethods->query('INSERT INTO `ac...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Base\Log.php(20): Src\System\DatabaseMethods->inputData('INSERT INTO `ac...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Core\Deadline.php(63): Src\Base\Log->activity('ICT4', 'INSERT', 'secretary', 'Results Submiss...', 'Set a deadline ...')
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(443): Src\Core\Deadline->add(Array)
+#5 {main}

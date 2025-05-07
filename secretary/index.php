@@ -33,6 +33,7 @@ $_SESSION["lastAccessed"] = time();
 require_once('../bootstrap.php');
 
 use Src\Controller\SecretaryController;
+use Src\Core\Base;
 use Src\Core\Course;
 use Src\Core\CourseCategory;
 
@@ -41,6 +42,7 @@ require_once('../inc/admin-database-con.php');
 $secretary = new SecretaryController($db, $user, $pass);
 $course_category = new CourseCategory($db, $user, $pass);
 $course = new Course($db, $user, $pass);
+$base               = new Base($db, $user, $pass);
 
 $pageTitle = "Secretary Dashboard";
 $activePage = "dashboard";
@@ -48,6 +50,11 @@ $activePage = "dashboard";
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
 $semester = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
+
+// $current_semester = $base->getActiveSemesters();
+$activeSemesters = $secretary->fetchActiveSemesters();
+$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
+// $courses = $secretary->fetchActiveCourses($departmentId, $semester, $archived);
 
 $activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
 $totalActiveCourses = count($activeCourses);
@@ -251,47 +258,46 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                 <div class="modal-body">
                     <form id="assignCourseForm">
                         <div class="form-group">
-                            <label for="courseSelect">Select Course</label>
-                            <select id="courseSelect" required>
-                                <option value="">-- Select Course --</option>
+                            <label for="semesterSelect">Semester</label>
+                            <select id="semesterSelect" required>
+                                <option value="">-- Select Semester --</option>
                                 <?php
-                                $courses = $secretary->fetchActiveCourses($departmentId, $semester, $archived);
-                                if (! $courses) {
-                                    echo "<option value=''>No active courses available</option>";
-                                } else {
-                                    foreach ($courses as $course) {
-                                        echo "<option value='{$course['code']}'>{$course['name']} ({$course['code']})</option>";
+                                if ($activeSemesters) {
+                                    foreach ($activeSemesters as $semester) {
+                                        echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
                                     }
+                                } else {
+                                    echo "<option value=''>No active semester</option>";
                                 }
                                 ?>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="lecturerSelect">Select Lecturer</label>
+                            <label for="courseSelect">Course</label>
+                            <select id="courseSelect" required>
+                                <option value="">-- Select Course --</option>
+                                <?php
+                                if ($activeCourses) {
+                                    foreach ($activeCourses as $course) {
+                                        echo "<option value='{$course['code']}'>{$course['name']} ({$course['code']})</option>";
+                                    }
+                                } else {
+                                    echo "<option value=''>No active courses available</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="lecturerSelect">Lecturer</label>
                             <select id="lecturerSelect" required>
                                 <option value="">-- Select Lecturer --</option>
                                 <?php
-                                $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
                                 if (! $lecturers) {
                                     echo "<option value=''>No lecturers available</option>";
                                 } else {
                                     foreach ($lecturers as $lecturer) {
                                         echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
                                     }
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="semesterSelect">Semester</label>
-                            <select id="semesterSelect" required>
-                                <?php
-                                $current_semester = $secretary->fetchCurrentSemester();
-                                if ($current_semester) {
-                                    $current_semester = $current_semester[0];
-                                    echo "<option value='{$current_semester['id']}' selected>{$current_semester['academic_year']} Semester {$current_semester['name']} </option>";
-                                } else {
-                                    echo "<option value=''>No active semester</option>";
                                 }
                                 ?>
                             </select>
@@ -422,6 +428,21 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                         <form id="deadlineForm">
                             <!-- Inside the deadlineForm, replace the deadlineCourse select with this: -->
                             <div class="course-selection-container">
+                                <div class="form-group">
+                                    <label for="deadlineLecturerSelect">Lecturer</label>
+                                    <select id="deadlineLecturerSelect" required>
+                                        <option value="">-- Select Lecturer --</option>
+                                        <?php
+                                        if (! $lecturers) {
+                                            echo "<option value=''>No lecturers available</option>";
+                                        } else {
+                                            foreach ($lecturers as $lecturer) {
+                                                echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <div class="course-selection-header">
                                         <label>Selected Courses</label>
