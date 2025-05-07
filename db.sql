@@ -63,15 +63,14 @@ ADD INDEX `semester_exam_results_uploaded_idx1` (`exam_results_uploaded`);
 DROP TABLE IF EXISTS `deadlines`;
 CREATE TABLE IF NOT EXISTS `deadlines` (
     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+    `lecture_course_assignment_id` INT,
     `lecturer_id` VARCHAR(10),
-    `course_code` VARCHAR(10),
     `date` DATE,
     `note` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT `fk_deadlines_lecturer_id` FOREIGN KEY (`lecturer_id`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_deadlines_course_code` FOREIGN KEY (`course_code`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `fk_deadlines_lecture_course_assignment_id` FOREIGN KEY (`lecture_course_assignment_id`) REFERENCES `lecture_course_assignments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_deadlines_lecturer_id` FOREIGN KEY (`lecturer_id`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE INDEX `deadlines_date_idx1` ON `deadlines` (`date`);

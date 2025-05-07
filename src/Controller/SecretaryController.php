@@ -246,6 +246,33 @@ class SecretaryController
         return $this->dm->getData($query, array(":di" => $departmentId));
     }
 
+    public function fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($departmentId)
+    {
+        $query = "SELECT 
+                        lca.`id`, lca.`lecture_day`, lca.`lecture_period`, lca.`room_number`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
+                        lca.`department_id`, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
+                        lca.`lecturer_id`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
+                        sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
+                        sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_department_id, 
+                        lca.`course_code`, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
+                        c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
+                        cg.`archived` AS course_category_archived, c.`fk_department` AS course_department_id 
+                    FROM 
+                        `lecture_course_assignments` AS lca 
+                        JOIN `department` AS d ON lca.`department_id` = d.`id` 
+                        JOIN `staff` AS sf ON lca.`lecturer_id` = sf.`number` 
+                        JOIN `course` AS c ON lca.`course_code` = c.`code` 
+                        JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+                        JOIN `semester` AS s ON lca.`semester_id` = s.`id` 
+                        LEFT JOIN `deadlines` AS dl 
+                            ON dl.`lecture_course_assignment_id` = lca.`id` 
+                    WHERE 
+                        lca.`department_id` = :di 
+                        AND s.`active` = 1
+                        AND dl.`id` IS NULL";
+        return $this->dm->getData($query, array(":di" => $departmentId));
+    }
+
     public function fetchSemesterCourseAssignmentsGroupByDepartment($departmentId, $semesterId)
     {
         $query = "SELECT * FROM `lecture_course_assignments` WHERE `department_id` = :di AND `semester_id` = :si GROUP BY `department_id`";

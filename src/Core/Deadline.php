@@ -47,24 +47,34 @@ class Deadline
 
     public function add(array $data)
     {
+        $successCount = $failedCount = 0;
+        $successCourses = $failedCourses = [];
         foreach ($data["courses"] as $course) {
             $selectQuery = "SELECT * FROM `course` WHERE `code` = :c";
-            $courseData = $this->dm->getData($selectQuery, array(":c" => $course));
+            $courseData = $this->dm->getData($selectQuery, array(":c" => $course["code"]));
 
-            $query = "INSERT INTO deadlines (`course_code`, `lecturer_id`, `date`, `note`) VALUES(:c, :l, :d, :n)";
+            $query = "INSERT INTO deadlines (`lecture_course_assignment_id`, `lecturer_id`, `date`, `note`) VALUES(:c, :l, :d, :n)";
             $params = array(
-                ":c" => $course,
+                ":c" => $course["lca_id"],
                 ":l" => $data["lecturer"],
                 ":d" => $data["date"],
                 ":n" => $data["note"]
             );
             $result = $this->dm->inputData($query, $params);
             if ($result) {
-                $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Results Submission Deadline", "Set a deadline for {$courseData[0]["name"]} ({$course})");
-                return array("success" => true, "message" => "Deadline successfully set for {$courseData[0]["name"]} ({$course})!");
+                $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Results Submission Deadline", "Set a deadline for {$courseData[0]["name"]} ({$course["code"]})");
+                array_push($successCourses, $course["code"]);
+                $successCount++;
+            } else {
+                array_push($failedCourses, $course["code"]);
+                $failedCount++;
             }
-            return array("success" => false, "message" => "Failed to set deadline for {$courseData[0]["name"]} ({$course})!");
         }
+
+        return array(
+            "success" => $successCount > 0 ? true : false,
+            "message" => $successCount > 0 ? "Successfully set deadline(s) for results submission for {$successCount} courses (" . implode(", ", $successCourses) . ") !" : "Failed to set deadline(s) for results submission for {$failedCount} courses (" . implode($failedCourses) . ") !"
+        );
     }
 
     public function update(array $data)

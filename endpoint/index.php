@@ -302,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["department"]) || empty($_POST["department"])) {
             die(json_encode(["success" => false, "message" => "Department is required!"]));
         }
-        die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesByDepartment($_POST["department"])]));
+        die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($_POST["department"])]));
     }
     //add
     elseif ($_GET["url"] == "add-course") {

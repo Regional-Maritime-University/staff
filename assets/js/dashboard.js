@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="course-info">
                         <strong>${course.course_code}</strong> - ${course.course_name}
                     </div>
-                    <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
+                    <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-lca_id="${course.id}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
                         <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
                     </button>
                 `;
@@ -310,7 +310,8 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.addEventListener("click", function () {
                 const code = this.getAttribute("data-code");
                 const name = this.getAttribute("data-name");
-                addCourseToSelection(code, name);
+                const lca_id = this.getAttribute("data-lca_id");
+                addCourseToSelection(lca_id, code, name);
 
                 // Update the button to show it's selected
                 this.classList.add("selected");
@@ -322,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function addCourseToSelection(code, name) {
+    function addCourseToSelection(lca_id, code, name) {
         const selectedCoursesList = document.getElementById("selectedCoursesList");
 
         // Check if course is already added
@@ -333,11 +334,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const courseItem = document.createElement("div");
         courseItem.className = "selected-course";
         courseItem.setAttribute("data-code", code);
+        courseItem.setAttribute("data-lca_id", lca_id);
         courseItem.innerHTML = `
             <div class="course-info">
             <strong>${code}</strong> - ${name}
             </div>
-            <button class="remove-course-btn" data-code="${code}">
+            <button class="remove-course-btn" data-code="${code}" data-lca_id="${lca_id}">
             <i class="fas fa-times"></i>
             </button>
             <input type="hidden" name="selectedCourses[]" value="${code}">
@@ -450,7 +452,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
             const selectedCourses = [];
             selectedCourseElements.forEach((element) => {
-                selectedCourses.push(element.getAttribute("data-code"));
+                selectedCourses.push(
+                    {
+                        lca_id: element.getAttribute("data-lca_id"),
+                        code: element.getAttribute("data-code"),
+                    }
+                );
             });
     
             // Create the form data
@@ -460,6 +467,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 date: deadlineDate.value,
                 note: document.getElementById("deadlineNotes").value || "",
             };
+
+            console.log(formData);
     
             // Show loading state
             submitSetDeadline.disabled = true;
