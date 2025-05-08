@@ -280,7 +280,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const searchTerm = document.getElementById("courseSearchInput").value.toLowerCase();
         const courseList = document.getElementById("courseList");
         courseList.innerHTML = "";
-    
+        
+        // Check if assignedCourses has data
+        if (!assignedCourses || assignedCourses.length === 0) {
+            courseList.innerHTML = `
+                <div class="no-courses-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No courses are available.</p>
+                </div>
+            `;
+            return;
+        }
+        
         assignedCourses.forEach((course) => {
             if (course.course_code.toLowerCase().includes(searchTerm) || course.course_name.toLowerCase().includes(searchTerm)) {
                 // Check if course is already selected

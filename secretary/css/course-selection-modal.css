@@ -156,3 +156,54 @@
 .add-course-btn:hover {
 	background-color: #219653;
 }
+
+/* Improved styling for the no courses message */
+.no-courses-message {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 20px;
+	text-align: center;
+	color: #666;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	margin: 10px 0;
+	border: 1px dashed var(--border-color);
+}
+
+.no-courses-message i {
+	font-size: 2.5rem;
+	margin-bottom: 15px;
+	color: var(--accent-color);
+	opacity: 0.8;
+}
+
+.no-courses-message p {
+	margin: 0;
+	font-size: 1.1rem;
+	line-height: 1.5;
+	max-width: 80%;
+}
+
+/* Add a subtle animation for loading spinner if used */
+.no-courses-message .fa-spinner {
+	animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* Make sure the message is visible in dark mode if applicable */
+@media (prefers-color-scheme: dark) {
+	.no-courses-message {
+		background-color: rgba(255, 255, 255, 0.05);
+		color: rgba(255, 255, 255, 0.8);
+	}
+}
