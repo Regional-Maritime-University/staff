@@ -97,7 +97,7 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                     </div>
                     <div class="stat-info">
                         <h3><?= $totalAssignedCourses ?></h3>
-                        <p>Active Courses</p>
+                        <p>Assigned Courses</p>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -257,6 +257,11 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                 </div>
                 <div class="modal-body">
                     <form id="assignCourseForm">
+                        <div class="assign-course-tabs">
+                            <button class="tab-btn active" data-tab="toLecturer">To Lecturer</button>
+                            <button class="tab-btn" data-tab="toStudent">To Student</button>
+                            <button class="tab-btn" data-tab="toClass">To Class</button>
+                        </div>
                         <div class="form-group">
                             <label for="semesterSelect">Semester</label>
                             <select id="semesterSelect" required>
@@ -273,34 +278,73 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="courseSelect">Course</label>
-                            <select id="courseSelect" required>
-                                <option value="">-- Select Course --</option>
-                                <?php
-                                if ($activeCourses) {
-                                    foreach ($activeCourses as $course) {
-                                        echo "<option value='{$course['code']}'>{$course['name']} ({$course['code']})</option>";
-                                    }
-                                } else {
-                                    echo "<option value=''>No active courses available</option>";
-                                }
-                                ?>
-                            </select>
+                            <div class="course-selection-header">
+                                <label>Selected Courses</label>
+                                <button type="button" id="departmentSelectCoursesBtn">
+                                    <i class="fas fa-search"></i> Find Courses
+                                </button>
+                            </div>
+                            <div class="department-selected-courses-container">
+                                <div id="departmentSelectedCoursesList">
+                                    <!-- Selected courses will be added here dynamically -->
+                                </div>
+                                <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
+                                    No courses selected. Click "Find Courses" to add courses.
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="lecturerSelect">Lecturer</label>
-                            <select id="lecturerSelect" required>
-                                <option value="">-- Select Lecturer --</option>
-                                <?php
-                                if (! $lecturers) {
-                                    echo "<option value=''>No lecturers available</option>";
-                                } else {
-                                    foreach ($lecturers as $lecturer) {
-                                        echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                        <div class="tab-content active" id="toLecturer">
+                            <div class="form-group">
+                                <label for="lecturerSelect">Lecturer</label>
+                                <select id="lecturerSelect" required>
+                                    <option value="">-- Select Lecturer --</option>
+                                    <?php
+                                    if (! $lecturers) {
+                                        echo "<option value=''>No lecturers available</option>";
+                                    } else {
+                                        foreach ($lecturers as $lecturer) {
+                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                        }
                                     }
-                                }
-                                ?>
-                            </select>
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="toStudent">
+                            <div class="form-group">
+                                <label for="classStudentSelect">Student</label>
+                                <select id="classStudentSelect" required>
+                                    <option value="">-- Select Student --</option>
+                                    <option value="all">All</option>
+                                    <?php
+                                    if (! $lecturers) {
+                                        echo "<option value=''>No lecturers available</option>";
+                                    } else {
+                                        foreach ($lecturers as $lecturer) {
+                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="toClass">
+                            <div class="form-group">
+                                <label for="classClassSelect">Class</label>
+                                <select id="classClassSelect" required>
+                                    <option value="">-- Select Class --</option>
+                                    <option value="all">All</option>
+                                    <?php
+                                    if (! $lecturers) {
+                                        echo "<option value=''>No lecturers available</option>";
+                                    } else {
+                                        foreach ($lecturers as $lecturer) {
+                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="assignmentNotes">Notes (Optional)</label>
@@ -424,52 +468,50 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="tab-content active" id="singleDeadline">
-                        <form id="deadlineForm">
-                            <!-- Inside the deadlineForm, replace the deadlineCourse select with this: -->
-                            <div class="course-selection-container">
-                                <div class="form-group">
-                                    <label for="deadlineLecturerSelect">Lecturer</label>
-                                    <select id="deadlineLecturerSelect" required>
-                                        <option value="">-- Select Lecturer --</option>
-                                        <?php
-                                        if (! $lecturers) {
-                                            echo "<option value=''>No lecturers available</option>";
-                                        } else {
-                                            foreach ($lecturers as $lecturer) {
-                                                echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
-                                            }
+                    <form id="deadlineForm">
+                        <!-- Inside the deadlineForm, replace the deadlineCourse select with this: -->
+                        <div class="course-selection-container">
+                            <div class="form-group">
+                                <label for="deadlineLecturerSelect">Lecturer</label>
+                                <select id="deadlineLecturerSelect" required>
+                                    <option value="">-- Select Lecturer --</option>
+                                    <?php
+                                    if (! $lecturers) {
+                                        echo "<option value=''>No lecturers available</option>";
+                                    } else {
+                                        foreach ($lecturers as $lecturer) {
+                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
                                         }
-                                        ?>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <div class="course-selection-header">
-                                        <label>Selected Courses</label>
-                                        <button type="button" id="selectCoursesBtn">
-                                            <i class="fas fa-search"></i> Find Courses
-                                        </button>
-                                    </div>
-                                    <div class="selected-courses-container">
-                                        <div id="selectedCoursesList">
-                                            <!-- Selected courses will be added here dynamically -->
-                                        </div>
-                                        <div class="selected-courses-empty" id="noCoursesMessage">
-                                            No courses selected. Click "Find Courses" to add courses.
-                                        </div>
-                                    </div>
-                                </div>
+                                    }
+                                    ?>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="deadlineDate">Deadline Date</label>
-                                <input type="date" id="deadlineDate" required>
+                                <div class="course-selection-header">
+                                    <label>Selected Courses</label>
+                                    <button type="button" id="selectCoursesBtn" class="selectCoursesBtn">
+                                        <i class="fas fa-search"></i> Find Courses
+                                    </button>
+                                </div>
+                                <div class="selected-courses-container">
+                                    <div id="selectedCoursesList">
+                                        <!-- Selected courses will be added here dynamically -->
+                                    </div>
+                                    <div class="selected-courses-empty" id="noCoursesMessage">
+                                        No courses selected. Click "Find Courses" to add courses.
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="deadlineNotes">Notes (Optional)</label>
-                                <textarea id="deadlineNotes" rows="3" placeholder="Add any additional notes about this deadline"></textarea>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="deadlineDate">Deadline Date</label>
+                            <input type="date" id="deadlineDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deadlineNotes">Notes (Optional)</label>
+                            <textarea id="deadlineNotes" rows="3" placeholder="Add any additional notes about this deadline"></textarea>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" id="cancelSetDeadline">Cancel</button>
@@ -769,6 +811,33 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
     </div>
 
     <!-- Course Selection Modal -->
+    <div class="modal" id="departmentCourseSelectionModal">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Courses</h2>
+                    <button class="close-btn" id="closeDepartmentCourseSelectionModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="department-course-search">
+                        <input type="text" id="departmentCourseSearchInput" placeholder="Search by course code or name">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="department-course-list" id="departmentCourseList">
+                        <!-- Course items will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" id="closeDepartmentCourseSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmDepartmentCourseSelectionBtn">Confirm Selection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Selection Modal -->
     <div class="modal" id="courseSelectionModal">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
@@ -797,7 +866,195 @@ $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? c
 
     <script>
         // Make PHP session data available to JS
-        window.AuthenticatedStaff = <?php echo json_encode($staffData); ?>;
+        window.AuthenticatedStaff = <?= json_encode($staffData); ?>;
+        departmentCourses = <?= json_encode($activeCourses); ?>;
+        console.log("departmentCourses", departmentCourses)
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // Modal Functions
+            function openModal(modalId) {
+                document.getElementById(modalId).classList.add("active");
+                document.body.style.overflow = "hidden";
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.remove("active");
+                document.body.style.overflow = "auto";
+            }
+
+            // Close modal when clicking outside
+            document.querySelectorAll(".modal").forEach((modal) => {
+                modal.addEventListener("click", function(e) {
+                    if (e.target === this) {
+                        this.classList.remove("active");
+                        document.body.style.overflow = "auto";
+                    }
+                });
+            });
+
+            // Course Selection Modal
+            const departmentSelectCoursesBtn = document.getElementById("departmentSelectCoursesBtn");
+            const closeDepartmentCourseSelectionModal = document.getElementById("closeDepartmentCourseSelectionModal");
+            const confirmDepartmentCourseSelectionBtn = document.getElementById("confirmDepartmentCourseSelectionBtn");
+            const departmentCourseSearchInput = document.getElementById("departmentCourseSearchInput");
+
+            if (departmentSelectCoursesBtn) {
+                departmentSelectCoursesBtn.addEventListener("click", () => {
+                    openModal("departmentCourseSelectionModal");
+                });
+            }
+
+            if (closeDepartmentCourseSelectionModal) {
+                closeDepartmentCourseSelectionModal.addEventListener("click", () => {
+                    closeModal("departmentCourseSelectionModal");
+                });
+            }
+
+            if (confirmDepartmentCourseSelectionBtn) {
+                confirmDepartmentCourseSelectionBtn.addEventListener("click", () => {
+                    closeModal("departmentCourseSelectionModal");
+                });
+            }
+
+            if (departmentCourseSearchInput) {
+                departmentCourseSearchInput.addEventListener("input", () => {
+                    departmentSearchCourses();
+                });
+
+                // Initialize course list on modal open
+                departmentCourseSearchInput.addEventListener("focus", () => {
+                    if (departmentCourseSearchInput.value === "") {
+                        departmentSearchCourses();
+                    }
+                });
+            }
+
+            // Initialize course list when modal opens
+            if (departmentSelectCoursesBtn) {
+                departmentSelectCoursesBtn.addEventListener("click", () => {
+                    setTimeout(() => {
+                        departmentSearchCourses();
+                    }, 100);
+                });
+            }
+
+            function departmentSearchCourses() {
+                const searchTerm = document.getElementById("departmentCourseSearchInput").value.toLowerCase();
+                const courseList = document.getElementById("departmentCourseList");
+                courseList.innerHTML = "";
+
+                // Check if assignedCourses has data
+                if (!departmentCourses || departmentCourses.length === 0) {
+                    courseList.innerHTML = `
+                        <div class="department-no-courses-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No courses are available.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                departmentCourses.forEach((course) => {
+                    if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
+                        // Check if course is already selected
+                        const isSelected = document.querySelector(`.department-selected-course[data-code="${course.code}"]`) !== null;
+                        const courseItem = document.createElement("div");
+                        courseItem.className = "department-course-item";
+
+                        // Add a class if the course is selected
+                        if (isSelected) {
+                            courseItem.classList.add("department-course-selected");
+                        }
+
+                        courseItem.innerHTML = `
+                                <div class="department-course-info">
+                                    <strong>${course.code}</strong> - ${course.name}
+                                </div>
+                                <button class="department-add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.code}" data-name="${course.name}" ${isSelected ? "disabled" : ""}>
+                                    <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                                </button>
+                            `;
+                        courseList.appendChild(courseItem);
+                    }
+                });
+
+                // Add event listeners to the add buttons
+                document.querySelectorAll(".department-add-course-btn:not(.selected)").forEach((btn) => {
+                    btn.addEventListener("click", function() {
+                        const code = this.getAttribute("data-code");
+                        const name = this.getAttribute("data-name");
+                        departmentAddCourseToSelection(code, name);
+
+                        // Update the button to show it's selected
+                        this.classList.add("selected");
+                        this.disabled = true;
+                        this.querySelector("i").classList.remove("fa-plus");
+                        this.querySelector("i").classList.add("fa-check");
+                        this.closest(".department-course-item").classList.add("course-selected");
+                    });
+                });
+            }
+
+            function departmentAddCourseToSelection(code, name) {
+                const selectedCoursesList = document.getElementById("departmentSelectedCoursesList");
+
+                // Check if course is already added
+                if (document.querySelector(`.department-selected-course[data-code="${code}"]`)) {
+                    return;
+                }
+
+                const courseItem = document.createElement("div");
+                courseItem.className = "department-selected-course";
+                courseItem.setAttribute("data-code", code);
+                courseItem.innerHTML = `
+                    <div class="department-course-info">
+                        <strong>${code}</strong> - ${name}
+                    </div>
+                    <button class="department-remove-course-btn" data-code="${code}"">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="departmentSelectedCourses[]" value="${code}">
+                `;
+                selectedCoursesList.appendChild(courseItem);
+
+                // Add event listener to the remove button
+                courseItem.querySelector(".department-remove-course-btn").addEventListener("click", function() {
+                    const code = this.getAttribute("data-code");
+                    departmentRemoveFromSelection(code);
+                });
+            }
+
+            function departmentRemoveFromSelection(code) {
+                const courseItem = document.querySelector(`.department-selected-course[data-code="${code}"]`)
+                if (courseItem) {
+                    courseItem.remove()
+
+                    // Update the course in the search list if it's visible
+                    const courseInList = document.querySelector(`.department-course-item .department-add-course-btn[data-code="${code}"]`)
+                    if (courseInList) {
+                        courseInList.classList.remove("selected")
+                        courseInList.disabled = false
+                        courseInList.querySelector("i").classList.remove("fa-check")
+                        courseInList.querySelector("i").classList.add("fa-plus")
+                        courseInList.closest(".department-course-item").classList.remove("department-course-selected")
+
+                        // Re-add the click event listener
+                        courseInList.addEventListener("click", function() {
+                            const name = this.getAttribute("data-name")
+                            departmentAddCourseToSelection(code, name)
+
+                            // Update the button to show it's selected
+                            this.classList.add("selected")
+                            this.disabled = true
+                            this.querySelector("i").classList.remove("fa-plus")
+                            this.querySelector("i").classList.add("fa-check")
+                            this.closest(".department-course-item").classList.add("department-course-selected")
+                        });
+                    }
+                }
+            }
+        });
     </script>
     <script src="../assets/js/Data.js"></script>
     <script src="../assets/js/main.js"></script>

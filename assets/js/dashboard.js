@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.body.style.overflow = "auto";
             }
         });
-    })
+    });
     
     // Assign Course Modal
     const assignCourseBtn = document.getElementById("assignCourseBtn");
@@ -65,15 +65,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     assignCourseBtn.addEventListener("click", function () {
         openModal("assignCourseModal");
-    })
+    });
 
     closeAssignCourseModal.addEventListener("click", function () {
         closeModal("assignCourseModal");
-    })
+    });
 
     cancelAssignCourse.addEventListener("click", function () {
         closeModal("assignCourseModal");
-    })
+    });
+    
+    // Tab functionality for Upload Courses Modal
+    const assignCourseTabs = document.querySelectorAll(".assign-course-tabs .tab-btn")
+
+    assignCourseTabs.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            const tabId = this.getAttribute("data-tab");
+
+            // Remove active class from all tabs and contents
+            assignCourseTabs.forEach((btn) => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+
+            // Add active class to clicked tab and corresponding content
+            this.classList.add("active");
+            document.getElementById(tabId).classList.add("active");
+        });
+    });
 
     submitAssignCourse.addEventListener("click", function () {
         // Validate form
@@ -134,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cancelUploadCourses.addEventListener("click", function () {
         closeModal("uploadCoursesModal");
-    })
+    });
 
     // Tab functionality for Upload Courses Modal
     const tabBtns = document.querySelectorAll(".tab-btn")
@@ -598,8 +615,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
             this.classList.add("active");
             document.getElementById(tabId).classList.add("active");
-        })
-    })
+        });
+    });
 
     // Download results
     const downloadResultsBtns = document.querySelectorAll(".download-results");
