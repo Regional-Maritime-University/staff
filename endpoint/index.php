@@ -401,11 +401,35 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $result    = $excelData->run($_SESSION["staff"]["department_id"]);
         die(json_encode($result));
     } elseif ($_GET["url"] == "assign-course") {
-        if (! isset($_POST["course"]) || empty($_POST["course"])) {
-            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        if (! isset($_POST["action"]) || empty($_POST["action"])) {
+            die(json_encode(["success" => false, "message" => "Action is required!"]));
         }
-        if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
-            die(json_encode(["success" => false, "message" => "Lecturer is required!"]));
+        switch ($_POST["action"]) {
+            case 'lecturer':
+                if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+                    die(json_encode(["success" => false, "message" => "Lecturer is required!"]));
+                }
+                break;
+
+            case 'student':
+                if (! isset($_POST["student"]) || empty($_POST["student"])) {
+                    die(json_encode(["success" => false, "message" => "Student is required!"]));
+                }
+                break;
+
+            case 'class':
+                if (! isset($_POST["class"]) || empty($_POST["class"])) {
+                    die(json_encode(["success" => false, "message" => "Class is required!"]));
+                }
+                break;
+
+            default:
+                die(json_encode(["success" => false, "message" => "Invalid action requested!"]));
+                break;
+        }
+
+        if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
+            die(json_encode(["success" => false, "message" => "Select at least one course!"]));
         }
         if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester is required!"]));
@@ -413,8 +437,10 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["department"]) || empty($_POST["department"])) {
             die(json_encode(["success" => false, "message" => "Department is required!"]));
         }
+
         $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
-        die(json_encode($secretary->assignCourseToLecturer($_POST["course"], $_POST["lecturer"], $_POST["semester"], $_POST["department"], $notes)));
+
+        die(json_encode($secretary->assignCourses($_POST)));
     }
 
     //students
@@ -426,14 +452,20 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
     // Deadline
     elseif ($_GET["url"] == "add-deadline") {
-        if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+        if (! isset($_POST["department"]) || empty($_POST["department"])) {
+            die(json_encode(["success" => false, "message" => "Department required!"]));
+        }
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester required!"]));
         }
         if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
             die(json_encode(["success" => false, "message" => "Course(s) required!"]));
         }
+        if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+            die(json_encode(["success" => false, "message" => "Lecturer required!"]));
+        }
         if (! isset($_POST["date"]) || empty($_POST["date"])) {
-            die(json_encode(["success" => false, "message" => "Date of deadline required!"]));
+            die(json_encode(["success" => false, "message" => "Date required!"]));
         }
         if (! isset($_POST["note"]) || empty($_POST["note"])) {
             $note = null;

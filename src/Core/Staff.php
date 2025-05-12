@@ -45,7 +45,7 @@ class Staff
                 break;
         }
 
-        $query = "SELECT s.`number`, s.`email`, s.`password`, CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS `name`, 
+        $query = "SELECT s.`number`, s.`email`, s.`password`, CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS `full_name`, 
                 s.`gender`, s.`role`, s.`archived`, s.`fk_department` AS department_id, d.`name` AS department_name, s.`archived` 
                 FROM `staff` AS s, `department` AS d WHERE s.`fk_department` = d.`id` AND s.`archived` = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);

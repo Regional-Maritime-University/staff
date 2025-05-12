@@ -49,24 +49,27 @@ class Deadline
     {
         $successCount = $failedCount = 0;
         $successCourses = $failedCourses = [];
+
         foreach ($data["courses"] as $course) {
             $selectQuery = "SELECT * FROM `course` WHERE `code` = :c";
-            $courseData = $this->dm->getData($selectQuery, array(":c" => $course["code"]));
+            $courseData = $this->dm->getData($selectQuery, array(":c" => $course));
 
-            $query = "INSERT INTO deadlines (`lecture_course_assignment_id`, `lecturer_id`, `date`, `note`) VALUES(:c, :l, :d, :n)";
+            $query = "INSERT INTO deadlines (`fk_department`, `fk_semester`, `fk_course`, `fk_staff`, `date`, `note`) VALUES(:dp, :sm, :cs, :st, :dt, :n)";
             $params = array(
-                ":c" => $course["lca_id"],
-                ":l" => $data["lecturer"],
-                ":d" => $data["date"],
+                ":dp" => $data["department"],
+                ":sm" => $data["semester"],
+                ":cs" => $course,
+                ":st" => $data["lecturer"],
+                ":dt" => $data["date"],
                 ":n" => $data["note"]
             );
             $result = $this->dm->inputData($query, $params);
             if ($result) {
-                $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Results Submission Deadline", "Set a deadline for {$courseData[0]["name"]} ({$course["code"]})");
-                array_push($successCourses, $course["code"]);
+                $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Results Submission Deadline", "Set a deadline for {$courseData[0]["name"]} ({$course})");
+                array_push($successCourses, $course);
                 $successCount++;
             } else {
-                array_push($failedCourses, $course["code"]);
+                array_push($failedCourses, $course);
                 $failedCount++;
             }
         }

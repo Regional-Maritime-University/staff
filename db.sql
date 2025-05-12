@@ -1,37 +1,27 @@
 ALTER TABLE staff ADD COLUMN `designation` VARCHAR(100) AFTER `gender`;
 
-CREATE TABLE IF NOT EXISTS `lecture_course_assignments` (
+CREATE TABLE IF NOT EXISTS `lecturer_course_assignments` (
     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
-
-    `department_id` INT(11),
-    `lecturer_id` VARCHAR(10),
-    `course_code` VARCHAR(10),
-    `semester_id` INT(11),
-
-    `lecture_day` VARCHAR(15),
-    `lecture_period` VARCHAR(15),
-    `room_number` VARCHAR(10),
+    `fk_department` INT(11),
+    `fk_staff` VARCHAR(10),
+    `fk_course` VARCHAR(10),
+    `fk_semester` INT(11),
     `notes` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT `fk_lecturer_course_assignments_department_id` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_lecturer_id` FOREIGN KEY (`lecturer_id`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_course_code` FOREIGN KEY (`course_code`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_semester_id` FOREIGN KEY (`semester_id`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `fk_lecturer_course_assignments_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_course_assignments_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_course_assignments_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_course_assignments_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-CREATE INDEX `lecture_day_idx1` ON `lecture_course_assignments` (`lecture_day`);
-CREATE INDEX `lecture_period_idx1` ON `lecture_course_assignments` (`lecture_period`);
-CREATE INDEX `room_number_idx1` ON `lecture_course_assignments` (`room_number`);
-CREATE INDEX `created_at_idx1` ON `lecture_course_assignments` (`created_at`);
-CREATE INDEX `updated_at_idx1` ON `lecture_course_assignments` (`updated_at`);
+CREATE INDEX `created_at_idx1` ON `lecturer_course_assignments` (`created_at`);
+CREATE INDEX `updated_at_idx1` ON `lecturer_course_assignments` (`updated_at`);
 
 ALTER TABLE `activity_logs` ADD COLUMN `type` VARCHAR(50) DEFAULT 'admin' AFTER `operation`;
 ALTER TABLE `activity_logs` ADD COLUMN `action` VARCHAR(100) AFTER `type`;
 ALTER TABLE `activity_logs` ADD INDEX `activity_logs_type_idx1` (`type`);
 ALTER TABLE `activity_logs` ADD INDEX `activity_logs_action_idx1` (`action`);
-
 ALTER TABLE `activity_logs` CHANGE `id` `id` VARCHAR(10) NOT NULL; 
 
 ALTER TABLE `semester` 
@@ -63,19 +53,32 @@ ADD INDEX `semester_exam_results_uploaded_idx1` (`exam_results_uploaded`);
 DROP TABLE IF EXISTS `deadlines`;
 CREATE TABLE IF NOT EXISTS `deadlines` (
     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
-    `lecture_course_assignment_id` INT,
-    `lecturer_id` VARCHAR(10),
+    `fk_department` INT(11),
+    `fk_semester` INT,
+    `fk_course` VARCHAR(10),
+    `fk_staff` VARCHAR(10),
     `date` DATE,
     `note` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_deadlines_lecture_course_assignment_id` FOREIGN KEY (`lecture_course_assignment_id`) REFERENCES `lecture_course_assignments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_deadlines_lecturer_id` FOREIGN KEY (`lecturer_id`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `fk_deadlines_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_deadlines_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_deadlines_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_deadlines_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE INDEX `deadlines_date_idx1` ON `deadlines` (`date`);
 CREATE INDEX `deadlines_created_at_idx1` ON `deadlines` (`created_at`);
 CREATE INDEX `deadlines_updated_at_idx1` ON `deadlines` (`updated_at`);
+
+ALTER TABLE `deadlines` ADD COLUMN `status` VARCHAR(15) DEFAULT 'pending' AFTER `note`;
+ALTER TABLE `deadlines` ADD INDEX `deadlines_status_idx1` (`status`);
+
+ALTER TABLE `activity_logs` 
+ADD COLUMN `fk_department` INT DEFAULT 1 AFTER `id`, 
+ADD CONSTRAINT `fk_activities_logs_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+// remember to also alter the code to properly account for the department insertion into the activity logs table
 
 
 

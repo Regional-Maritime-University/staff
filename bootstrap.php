@@ -40,3 +40,11 @@ function url($path)
 {
     return BASE_URL . '/' . ltrim($path, '/');
 }
+
+function dd($data)
+{
+    echo "<pre>";
+    var_dump($data);
+    echo "</pre>";
+    die();
+}
