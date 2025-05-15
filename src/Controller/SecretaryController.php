@@ -355,8 +355,10 @@ class SecretaryController
         foreach ($data["courses"] as $course) {
             // Fetch class details
             $classData = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "code", value: $data["class"], archived: false)[0];
+            //return $classData;
             // Fetch course details
             $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+            //return $courseData;
 
             // Check if the course is already assigned to any class or the same class
             $query1 = "SELECT * FROM `section` WHERE `fk_class` = :cs AND `fk_course` = :cc";
@@ -394,9 +396,9 @@ class SecretaryController
                     ":co" => $course,
                     ":st" => $data["semester"],
                     ":nt" => $data["notes"],
-                    ":ch" => $courseData[0]["credit_hours"],
-                    ":lv" => $courseData[0]["level"],
-                    ":sm" => $courseData[0]["semester"]
+                    ":ch" => $courseData["credit_hours"],
+                    ":lv" => $courseData["level"],
+                    ":sm" => $courseData["semester"]
                 )
             );
 

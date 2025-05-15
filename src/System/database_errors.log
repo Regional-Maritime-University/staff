@@ -161,3 +161,10 @@ Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOState
 #4 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(208): Src\Controller\SecretaryController->assignCoursesToClass(Array)
 #5 C:\xampp\htdocs\rmu\staff\endpoint\index.php(450): Src\Controller\SecretaryController->assignCourses(Array)
 #6 {main}
+Warning: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'credit_hours' cannot be null
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(70): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(126): Src\System\DatabaseMethods->query('INSERT INTO `se...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(390): Src\System\DatabaseMethods->inputData('INSERT INTO `se...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(208): Src\Controller\SecretaryController->assignCoursesToClass(Array)
+#4 C:\xampp\htdocs\rmu\staff\endpoint\index.php(450): Src\Controller\SecretaryController->assignCourses(Array)
+#5 {main}
