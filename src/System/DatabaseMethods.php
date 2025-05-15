@@ -71,8 +71,15 @@ class DatabaseMethods
 
             if (explode(' ', $str)[0] == 'SELECT' || explode(' ', $str)[0] == 'CALL') {
                 return $stmt->fetchAll();
-            } elseif (explode(' ', $str)[0] == 'INSERT' || explode(' ', $str)[0] == 'UPDATE' || explode(' ', $str)[0] == 'DELETE') {
+            } elseif (explode(' ', $str)[0] == 'INSERT') {
+                return $this->conn->lastInsertId();
+            } elseif (explode(' ', $str)[0] == 'UPDATE' || explode(' ', $str)[0] == 'DELETE') {
+                $result = $stmt->rowCount();
+                return $result > 0 ? $result : 1;
+            } elseif (explode(' ', $str)[0] == 'CREATE' || explode(' ', $str)[0] == 'DROP') {
                 return 1;
+            } else {
+                return 0;
             }
         } catch (PDOException $e) {
             $this->logError($e);

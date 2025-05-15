@@ -80,6 +80,16 @@ ADD CONSTRAINT `fk_activities_logs_department` FOREIGN KEY (`fk_department`) REF
 
 // remember to also alter the code to properly account for the department insertion into the activity logs table
 
+RENAME TABLE `assigned_courses` TO `student_course_assignments`;
+ALTER TABLE `student_course_assignments` ADD COLUMN `fk_semester` INT AFTER `fk_course`;
+ALTER TABLE `student_course_assignments` ADD CONSTRAINT `fk_student_course_assignments_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `student_course_assignments` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
+
+ALTER TABLE `section` ADD COLUMN `fk_semester` INT AFTER `fk_course`;
+ALTER TABLE `section` ADD CONSTRAINT `fk_section_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `section` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
+
+
 
 
 

@@ -77,6 +77,12 @@ $courseWithNoDeadlines = $secretary->fetchAssignedSemesterCoursesWithNoDeadlines
 
 $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
 
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
+$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
+
+$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
+$totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -291,7 +297,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
 
     <!-- Assign Course Modal -->
     <div class="modal" id="assignCourseModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Assign Course to Lecturer</h2>
@@ -361,11 +367,11 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
                                     <option value="">-- Select Student --</option>
                                     <option value="all">All</option>
                                     <?php
-                                    if (! $lecturers) {
-                                        echo "<option value=''>No lecturers available</option>";
+                                    if (! $totalActiveStudents) {
+                                        echo "<option value=''>No students available</option>";
                                     } else {
-                                        foreach ($lecturers as $lecturer) {
-                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                        foreach ($activeStudents as $student) {
+                                            echo "<option value='{$student['index_number']}'>{$student["prefix"]} {$student["first_name"]} {$student["last_name"]} {$student["suffix"]}</option>";
                                         }
                                     }
                                     ?>
@@ -379,11 +385,11 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
                                     <option value="">-- Select Class --</option>
                                     <option value="all">All</option>
                                     <?php
-                                    if (! $lecturers) {
-                                        echo "<option value=''>No lecturers available</option>";
+                                    if (! $totalActiveClasses) {
+                                        echo "<option value=''>No students available</option>";
                                     } else {
-                                        foreach ($lecturers as $lecturer) {
-                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                        foreach ($activeClasses as $class) {
+                                            echo "<option value='{$class['code']}'>{$class["code"]} ({$class["program_name"]})</option>";
                                         }
                                     }
                                     ?>
@@ -408,7 +414,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
 
     <!-- Upload Courses Modal -->
     <div class="modal" id="uploadCoursesModal">
-        <div class="modal-dialog modal-lg modal-scrollable">
+        <div class="modal-dialog modal-md modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Upload Courses</h2>
@@ -504,7 +510,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
 
     <!-- Set Deadline Modal -->
     <div class="modal" id="setDeadlineModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-md modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Set Results Submission Deadline</h2>
@@ -921,6 +927,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
             let activeSemesters = null;
             let courses = null;
             let assignedCourses = null;
+            let semesterCourses = null;
             let lecturersAndHods = null;
             let deadlines = null;
             let results = null;
@@ -929,7 +936,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
             let notifications = null;
 
             const user = <?= json_encode($staffData); ?>;
-            const departmentCourses = <?= json_encode($activeCourses); ?>;
+            let departmentCourses = null
 
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
@@ -943,6 +950,33 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
                 console.error("User ID is not available. Cannot fetch data.");
                 return;
             }
+
+            document.getElementById("semesterSelect").addEventListener("change", function() {
+                if (departmentCourses !== null) {
+                    return;
+                }
+                const selectedSemester = this.value;
+                if (selectedSemester) {
+                    fetch(`../endpoint/fetch-semester-courses`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                semester: selectedSemester,
+                            }).toString()
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                semesterCourses = departmentCourses = data.data;
+                            } else {
+                                alert("Failed to fetch courses for selected semester: ", data.message);
+                            }
+                        })
+                        .catch(error => console.error("Error fetching courses for selected semester:", error));
+                }
+            });
 
             async function fetchData() {
                 try {
@@ -978,7 +1012,7 @@ $recentActivities = $secretary->fetchRecentActivities($departmentId, false);
                                 'Content-Type': 'application/x-www-form-urlencoded'
                             },
                             body: new URLSearchParams({
-                                department: departmentId
+                                department: departmentId,
                             }).toString()
                         }),
                         fetch(`../endpoint/fetch-staff`, {

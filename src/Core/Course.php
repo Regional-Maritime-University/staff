@@ -36,6 +36,10 @@ class Course
                 $concat_stmt = "AND c.`fk_department` = :v";
                 break;
 
+            case 'semester':
+                $concat_stmt = "AND c.`semester` = :v";
+                break;
+
             default:
                 $concat_stmt = "";
                 break;
@@ -44,7 +48,7 @@ class Course
         $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
                 c.`fk_category` AS category_id, cg.`name` AS category, c.`fk_department` AS `department_id`, d.`name` AS `department_name` 
                 FROM `course` AS c, `course_category` AS cg, `department` AS d 
-                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND c.`archived` = :ar $concat_stmt";
+                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND c.`archived` = :ar $concat_stmt ORDER BY c.`code` ASC";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }

@@ -5,7 +5,7 @@ namespace Src\Core;
 use Src\Base\Log;
 use Src\System\DatabaseMethods;
 
-class Student
+class Classes
 {
 
     private $dm = null;
@@ -20,36 +20,16 @@ class Student
     public function fetch(string $key = "", string $value = "", bool $archived = false)
     {
         switch ($key) {
-            case 'index_number':
-                $concat_stmt = "AND s.`index_number` = :v";
-                break;
-
-            case 'name':
-                $concat_stmt = "AND s.`name` = :v";
-                break;
-
-            case 'role':
-                $concat_stmt = "AND s.`role` = :v";
-                break;
-
-            case 'gender':
-                $concat_stmt = "AND s.`gender` = :v";
-                break;
-
-            case 'academic_year':
-                $concat_stmt = "AND s.`fk_academic_year` = :v";
+            case 'code':
+                $concat_stmt = "AND c.`code` = :v";
                 break;
 
             case 'department':
-                $concat_stmt = "AND s.`fk_department` = :v";
+                $concat_stmt = "AND p.`department` = :v";
                 break;
 
             case 'program':
-                $concat_stmt = "AND s.`fk_program` = :v";
-                break;
-
-            case 'class':
-                $concat_stmt = "AND s.`fk_class` = :v";
+                $concat_stmt = "AND c.`fk_program` = :v";
                 break;
 
             default:
@@ -58,21 +38,11 @@ class Student
         }
 
         $query = "SELECT 
-                s.`index_number`, s.`app_number`, s.`email`, s.`password`, s.`phone_number`, 
-                CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`, ' ', s.`suffix`) AS full_name, 
-                s.`prefix`, s.`first_name`, s.`middle_name`, s.`last_name`, s.`suffix`, s.`gender`, 
-                s.`dob`, s.`nationality`, s.`photo`, s.`marital_status`, s.`disability`, 
-                s.`date_admitted`, s.`term_admitted`, s.`stream_admitted`, s.`level_admitted`, 
-                s.`programme_duration`, s.`default_password`, s.`semester_setup`, s.`archived`, 
-                s.`fk_academic_year` AS acad_year_id, s.`fk_applicant` AS applicant_id, 
-                s.`fk_department` AS department_id, s.`fk_program` AS program_id, s.`fk_class` AS class_code, 
-                ay.`name` AS acad_year_name, d.`name` AS department_name, p.`name` AS program_name 
-                FROM 
-                `student` AS s, `academic_year` AS ay, `department` AS d, `programs` AS p, `class` AS c 
-                WHERE 
-                s.`fk_academic_year` = ay.`id` AND s.`fk_department` = d.`id` AND 
-                s.`fk_program` = p.`id` AND s.`fk_class` = c.`code` AND s.`archived` = :ar $concat_stmt";
-        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
+                    c.`code`, c.`fk_program` AS program_id, p.`name` AS program_name, 
+                    p.`index_code` AS program_code, d.`id` AS department_id, d.`name` AS department_name 
+                FROM `class` AS c, `programs` AS p, `department` AS d 
+                WHERE c.`fk_program` = p.`id` AND p.`department` = d.`id` $concat_stmt";
+        $params = $value ? array(":v" => $value) : array();
         return $this->dm->getData($query, $params);
     }
 

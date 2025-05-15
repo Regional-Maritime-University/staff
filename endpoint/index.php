@@ -304,6 +304,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
         die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($_POST["department"])]));
     }
+    // fetch semester courses
+    elseif ($_GET["url"] == "fetch-semester-courses") {
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchSemesterCourses($_POST["semester"])]));
+    }
     //add
     elseif ($_GET["url"] == "add-course") {
         if (! isset($_POST["courseCode"]) || empty($_POST["courseCode"])) {

@@ -20,11 +20,12 @@ class Base
     public function getActiveSemesters()
     {
         $query = "SELECT 
-                    s.`id`, s.`atcive`, s.`name`, s.`type`, s.`start_date`, s.`end_date`, s.`exam_registration_start_date`, 
+                    s.`id`, s.`active`, s.`name`, s.`type`, s.`start_date`, s.`end_date`, s.`exam_registration_start_date`, 
                     s.`exam_registration_end_date`, s.`exam_start_date`, s.`exam_end_date`, s.`resit_exam_start_date`, 
                     s.`resit_exam_end_date`, s.`resit_exam_registration_start_date`, s.`resit_exam_registration_end_date`, 
-                    s.`resit_exam_results_uploaded`, s.`course_registration_opened`, s.`registration_end`, s.`exam_results_uploaded`, s.`archived`
-                    a.`id` AS academic_year, a.`name` AS academic_year_name, a.start_date AS academic_year_start_date, a.end_date AS academic_year_end_date 
+                    s.`resit_exam_results_uploaded`, s.`course_registration_opened`, s.`registration_end`, s.`exam_results_uploaded`, s.`archived`, 
+                    a.`id` AS academic_year, a.`name` AS academic_year_name, a.`start_month` AS academic_year_start_month, a.`end_month` AS academic_year_end_month,
+                    a.`start_year` AS academic_year_start_year, a.`end_year` AS academic_year_end_year  
                 FROM 
                 `semester` AS s 
                 JOIN `academic_year` AS a ON s.`fk_academic_year` = a.`id` 

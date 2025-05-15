@@ -7,8 +7,10 @@ use Src\System\DatabaseMethods;
 use Src\Controller\ExposeDataController;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Src\Base\Log;
+use Src\Core\Classes;
 use Src\Core\Course;
 use Src\Core\Staff;
+use Src\Core\Student;
 
 class SecretaryController
 {
@@ -60,6 +62,12 @@ class SecretaryController
             $timeAgo = $years == 1 ? '1 year ago' : "$years years ago";
         }
         return $timeAgo;
+    }
+
+    public function fetchStudents($departmentId)
+    {
+        $query = "SELECT * FROM student WHERE fk_department = :dp";
+        return $this->dm->getData($query, array(":dp" => $departmentId));
     }
 
     public function fetchActiveCourses($departmentId = null, $semester = null, $archived = false)
@@ -118,8 +126,7 @@ class SecretaryController
               JOIN `course` AS c ON dl.`fk_course` = c.`code` 
               JOIN `semester` AS s ON dl.`fk_semester` = s.`id` 
               JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
-              WHERE dl.`fk_department` = :d AND dl.`fk_semester` = :s AND c.`archived` = :ar ORDER BY (dl.`status` = 'pending') DESC, dl.`date` ASC
-";
+              WHERE dl.`fk_department` = :d AND dl.`fk_semester` = :s AND c.`archived` = :ar ORDER BY (dl.`status` = 'pending') DESC, dl.`date` ASC";
         return $this->dm->getData($query, array(":d" => $departmentId, ":s" => $semesterId, ":ar" => $archived));
     }
 
@@ -260,9 +267,186 @@ class SecretaryController
         );
     }
 
-    public function assignCoursesToStudent() {}
+    public function assignCoursesToStudent($data)
+    {
+        $errorEncountered = 0;
+        $successEncountered = 0;
+        $errors = [];
+        $coursesAssigned = [];
 
-    public function assignCoursesToClass() {}
+        foreach ($data["courses"] as $course) {
+            // Fetch student details
+            $studentData = (new Student($this->db, $this->user, $this->pass))->fetch(key: "index_number", value: $data["student"], archived: false)[0];
+            // Fetch course details
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+
+            // Check if the course is already assigned to any student or the same student
+            $query1 = "SELECT * FROM `student_course_assignments` WHERE `fk_student` = :st AND `fk_course` = :cc";
+            $result1 = $this->dm->getData($query1, array(":st" => $data["student"], ":cc" => $course));
+
+            $studentFullName = "{$studentData["prefix"]} {$studentData["first_name"]} {$studentData["last_name"]} ({$studentData["index_number"]})";
+
+            if ($result1) {
+                $errorEncountered++;
+                if ($result1[0]["fk_student"] == $data["student"]) {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to  {$studentFullName}.");
+                } else {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to another student.");
+                }
+                continue;
+            }
+
+            // fetch student course details from section table using fk_class and fk_course
+            $query2 = "SELECT * FROM `section` WHERE `fk_class` = :cl AND `fk_course` = :co";
+            $result2 = $this->dm->getData($query2, array(":co" => $course, ":cl" => $studentData["class_code"]));
+
+            if (empty($result2)) {
+                $errorEncountered++;
+                array_push(
+                    $errors,
+                    "Curricullum not set for this student's class or course {$courseData["name"]} ({$courseData["code"]}) is not assigned to the class of  {$studentFullName}."
+                );
+                continue;
+            }
+
+            $query3 = "INSERT INTO `student_course_assignments` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+                        VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
+            $result3 = $this->dm->inputData(
+                $query3,
+                array(
+                    ":si" => $data["student"],
+                    ":co" => $course,
+                    ":st" => $data["semester"],
+                    ":nt" => $data["notes"],
+                    ":ch" => $result2[0]["credit_hours"],
+                    ":lv" => $result2[0]["level"],
+                    ":sm" => $result2[0]["semester"]
+                )
+            );
+
+            if (!$result3) {
+                $errorEncountered++;
+                array_push($errors, "Fatal error occurred while in server!");
+            }
+
+            $successEncountered++;
+            array_push($coursesAssigned, $course);
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$studentFullName} to {$courseData["name"]} ({$course})");
+        }
+
+        $messageStatus = $successEncountered ? true : false;
+        $courses = $coursesAssigned ? implode(", ", $coursesAssigned) : "";
+        $errors = implode(" | ", $errors);
+        $message = $messageStatus ? "Successfully assigned {$successEncountered} [{$courses}] course(s) to {$studentFullName}!" : $errors;
+
+        return array(
+            "success" => $messageStatus,
+            "message" => $message
+        );
+    }
+
+    public function assignCoursesToClass($data)
+    {
+        $errorEncountered = 0;
+        $successEncountered = 0;
+        $errors = [];
+        $coursesAssigned = [];
+
+        foreach ($data["courses"] as $course) {
+            // Fetch class details
+            $classData = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "code", value: $data["class"], archived: false)[0];
+            // Fetch course details
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+
+            // Check if the course is already assigned to any class or the same class
+            $query1 = "SELECT * FROM `section` WHERE `fk_class` = :cs AND `fk_course` = :cc";
+            $result1 = $this->dm->getData($query1, array(":cs" => $data["class"], ":cc" => $course));
+
+            if ($result1) {
+                $errorEncountered++;
+                if ($result1[0]["fk_class"] == $data["class"]) {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to {$data["class"]}.");
+                } else {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to another class.");
+                }
+                continue;
+            }
+
+            // fetch class course details from curriculum table using fk_class and fk_course
+            $query2 = "SELECT * FROM `curriculum` WHERE `fk_program` = :pg AND `fk_course` = :co";
+            $result2 = $this->dm->getData($query2, array(":pg" => $classData["program_id"], ":co" => $course));
+
+            if (empty($result2)) {
+                $errorEncountered++;
+                array_push(
+                    $errors,
+                    "Curricullum not set for this class {$data["class"]}."
+                );
+                continue;
+            }
+
+            $query3 = "INSERT INTO `section` (`fk_class`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+                        VALUES (:cc, :co, :st, :nt, :ch, :lv, :sm)";
+            $result3 = $this->dm->inputData(
+                $query3,
+                array(
+                    ":cc" => $data["class"],
+                    ":co" => $course,
+                    ":st" => $data["semester"],
+                    ":nt" => $data["notes"],
+                    ":ch" => $courseData[0]["credit_hours"],
+                    ":lv" => $courseData[0]["level"],
+                    ":sm" => $courseData[0]["semester"]
+                )
+            );
+
+            if (!$result3) {
+                $errorEncountered++;
+                array_push($errors, "Fatal error occurred while in server!");
+            }
+
+            // fetch all students in the class
+            $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "class", value: $data["class"], archived: false);
+            // assign course and semester to all students in the class in the student_course_assignments table
+            foreach ($students as $student) {
+                $query4 = "INSERT INTO `student_course_assignments` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+                            VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
+                $result4 = $this->dm->inputData(
+                    $query4,
+                    array(
+                        ":si" => $student["index_number"],
+                        ":co" => $course,
+                        ":st" => $data["semester"],
+                        ":nt" => $data["notes"],
+                        ":ch" => $courseData[0]["credit_hours"],
+                        ":lv" => $courseData[0]["level"],
+                        ":sm" => $courseData[0]["semester"]
+                    )
+                );
+                if (!$result4) {
+                    $errorEncountered++;
+                    array_push($errors, "Failed to assign course {$courseData["name"]} ({$courseData["code"]}) to student {$student["index_number"]}.");
+                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Failed to assign {$courseData["name"]} ({$course}) to student {$student["index_number"]}.");
+                } else {
+                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$courseData["name"]} ({$course}) to student {$student["index_number"]}.");
+                }
+            }
+
+            $successEncountered++;
+            array_push($coursesAssigned, $course);
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$data["class"]} to {$courseData["name"]} ({$course})");
+        }
+
+        $messageStatus = $successEncountered ? true : false;
+        $courses = $coursesAssigned ? implode(", ", $coursesAssigned) : "";
+        $errors = implode(" | ", $errors);
+        $message = $messageStatus ? "Successfully assigned {$successEncountered} [{$courses}] course(s) to {$data["class"]}!" : $errors;
+
+        return array(
+            "success" => $messageStatus,
+            "message" => $message
+        );
+    }
 
     public function fetchSemesterCourseAssignmentsByLecturer($lecturerId, $semesterId)
     {
@@ -368,5 +552,23 @@ class SecretaryController
     {
         $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_semester` = :si";
         return $this->dm->getData($query, array(":si" => $semesterId));
+    }
+
+    public function fetchAllActiveStudents($departmentId = null, $archived = false)
+    {
+        $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        return $students;
+    }
+
+    public function fetchSemesterCourses($semester)
+    {
+        $courses = (new Course($this->db, $this->user, $this->pass))->fetch(key: "semester", value: $semester);
+        return $courses;
+    }
+
+    public function fetchAllActiveClasses($departmentId = null, $archived = false)
+    {
+        $classes = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        return $classes;
     }
 }
