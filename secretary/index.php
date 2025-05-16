@@ -157,7 +157,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         if ($deadlines && is_array($deadlines)) {
                             foreach ($deadlines as $d) {
 
-                                if ($counter >= 4) break;
+                                if ($counter >= 3) break;
 
                                 $deadline_overdue = false;
                                 $deadline_remaining_days = 0;
@@ -232,7 +232,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         if ($recentActivities && is_array($recentActivities)) {
                             foreach ($recentActivities as $a) {
 
-                                if ($counter >= 4) break;
+                                if ($counter >= 3) break;
 
                                 $activity_action = $a["action"];
                                 $activity_description = $a["description"];

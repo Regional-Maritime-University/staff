@@ -139,7 +139,7 @@ class SecretaryController
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
     }
 
-    public function fetchRecentActivities($departmentId = null, $archived = false, $limit = 4)
+    public function fetchRecentActivities($departmentId = null, $archived = false, $limit = 3)
     {
         if (!$limit) $limit = 4;
         $query = "SELECT 
