@@ -39,9 +39,9 @@ use Src\Core\CourseCategory;
 
 require_once('../inc/admin-database-con.php');
 
-$secretary = new SecretaryController($db, $user, $pass);
-$course_category = new CourseCategory($db, $user, $pass);
-$course = new Course($db, $user, $pass);
+$secretary          = new SecretaryController($db, $user, $pass);
+$course_category    = new CourseCategory($db, $user, $pass);
+$course             = new Course($db, $user, $pass);
 $base               = new Base($db, $user, $pass);
 
 $pageTitle = "Secretary Dashboard";
@@ -306,103 +306,101 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="assignCourseForm">
-                        <div class="assign-course-tabs">
-                            <button class="tab-btn active" data-tab="toLecturer">To Lecturer</button>
-                            <button class="tab-btn" data-tab="toStudent">To Student</button>
-                            <button class="tab-btn" data-tab="toClass">To Class</button>
+                    <div class="assign-course-tabs">
+                        <button class="tab-btn active" data-tab="toLecturer">To Lecturer</button>
+                        <button class="tab-btn" data-tab="toStudent">To Student</button>
+                        <button class="tab-btn" data-tab="toClass">To Class</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="semesterSelect">Semester</label>
+                        <select id="semesterSelect" required>
+                            <option value="">-- Select Semester --</option>
+                            <?php
+                            if ($activeSemesters) {
+                                foreach ($activeSemesters as $semester) {
+                                    echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
+                                }
+                            } else {
+                                echo "<option value=''>No active semester</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="course-selection-header">
+                            <label>Selected Courses</label>
+                            <button type="button" id="departmentSelectCoursesBtn">
+                                <i class="fas fa-search"></i> Find Courses
+                            </button>
                         </div>
+                        <div class="department-selected-courses-container">
+                            <div id="departmentSelectedCoursesList">
+                                <!-- Selected courses will be added here dynamically -->
+                            </div>
+                            <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
+                                No courses selected. Click "Find Courses" to add courses.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content active" id="toLecturer">
                         <div class="form-group">
-                            <label for="semesterSelect">Semester</label>
-                            <select id="semesterSelect" required>
-                                <option value="">-- Select Semester --</option>
+                            <label for="lecturerSelect">Lecturer</label>
+                            <select id="lecturerSelect" required>
+                                <option value="">-- Select Lecturer --</option>
                                 <?php
-                                if ($activeSemesters) {
-                                    foreach ($activeSemesters as $semester) {
-                                        echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
-                                    }
+                                if (! $lecturers) {
+                                    echo "<option value=''>No lecturers available</option>";
                                 } else {
-                                    echo "<option value=''>No active semester</option>";
+                                    foreach ($lecturers as $lecturer) {
+                                        echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                    }
                                 }
                                 ?>
                             </select>
                         </div>
+                    </div>
+                    <div class="tab-content" id="toStudent">
                         <div class="form-group">
-                            <div class="course-selection-header">
-                                <label>Selected Courses</label>
-                                <button type="button" id="departmentSelectCoursesBtn">
-                                    <i class="fas fa-search"></i> Find Courses
-                                </button>
-                            </div>
-                            <div class="department-selected-courses-container">
-                                <div id="departmentSelectedCoursesList">
-                                    <!-- Selected courses will be added here dynamically -->
-                                </div>
-                                <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
-                                    No courses selected. Click "Find Courses" to add courses.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-content active" id="toLecturer">
-                            <div class="form-group">
-                                <label for="lecturerSelect">Lecturer</label>
-                                <select id="lecturerSelect" required>
-                                    <option value="">-- Select Lecturer --</option>
-                                    <?php
-                                    if (! $lecturers) {
-                                        echo "<option value=''>No lecturers available</option>";
-                                    } else {
-                                        foreach ($lecturers as $lecturer) {
-                                            echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
-                                        }
+                            <label for="studentSelect">Student</label>
+                            <select id="studentSelect" required>
+                                <option value="">-- Select Student --</option>
+                                <option value="all">All</option>
+                                <?php
+                                if (! $totalActiveStudents) {
+                                    echo "<option value=''>No students available</option>";
+                                } else {
+                                    foreach ($activeStudents as $student) {
+                                        echo "<option value='{$student['index_number']}'>{$student["prefix"]} {$student["first_name"]} {$student["last_name"]} {$student["suffix"]}</option>";
                                     }
-                                    ?>
-                                </select>
-                            </div>
+                                }
+                                ?>
+                            </select>
                         </div>
-                        <div class="tab-content" id="toStudent">
-                            <div class="form-group">
-                                <label for="studentSelect">Student</label>
-                                <select id="studentSelect" required>
-                                    <option value="">-- Select Student --</option>
-                                    <option value="all">All</option>
-                                    <?php
-                                    if (! $totalActiveStudents) {
-                                        echo "<option value=''>No students available</option>";
-                                    } else {
-                                        foreach ($activeStudents as $student) {
-                                            echo "<option value='{$student['index_number']}'>{$student["prefix"]} {$student["first_name"]} {$student["last_name"]} {$student["suffix"]}</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="toClass">
-                            <div class="form-group">
-                                <label for="classSelect">Class</label>
-                                <select id="classSelect" required>
-                                    <option value="">-- Select Class --</option>
-                                    <option value="all">All</option>
-                                    <?php
-                                    if (! $totalActiveClasses) {
-                                        echo "<option value=''>No students available</option>";
-                                    } else {
-                                        foreach ($activeClasses as $class) {
-                                            echo "<option value='{$class['code']}'>{$class["code"]} ({$class["program_name"]})</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="tab-content" id="toClass">
                         <div class="form-group">
-                            <label for="assignmentNotes">Notes (Optional)</label>
-                            <textarea id="assignmentNotes" rows="3" placeholder="Add any additional notes about this assignment"></textarea>
+                            <label for="classSelect">Class</label>
+                            <select id="classSelect" required>
+                                <option value="">-- Select Class --</option>
+                                <option value="all">All</option>
+                                <?php
+                                if (! $totalActiveClasses) {
+                                    echo "<option value=''>No students available</option>";
+                                } else {
+                                    foreach ($activeClasses as $class) {
+                                        echo "<option value='{$class['code']}'>{$class["code"]} ({$class["program_name"]})</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
                         </div>
-                        <input type="hidden" id="departmentSelect" name="department" value="<?= $departmentId ?>">
-                        <input type="hidden" id="assignCourseActionSelect" name="action" value="toLecturer">
-                    </form>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentNotes">Notes (Optional)</label>
+                        <textarea id="assignmentNotes" rows="3" placeholder="Add any additional notes about this assignment"></textarea>
+                    </div>
+                    <input type="hidden" id="departmentSelect" name="department" value="<?= $departmentId ?>">
+                    <input type="hidden" id="assignCourseActionSelect" name="action" value="toLecturer">
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" id="cancelAssignCourse">Cancel</button>
@@ -936,7 +934,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             let notifications = null;
 
             const user = <?= json_encode($staffData); ?>;
-            let departmentCourses = null
+            let departmentCourses = null;
 
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
@@ -1521,7 +1519,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         }
                     });
                 }
-            })
+            });
 
             // Set Deadline Modal
             const setDeadlineBtn = document.getElementById("setDeadlineBtn");
@@ -1549,11 +1547,11 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 // Check if assignedCourses has data
                 if (!assignedCourses || assignedCourses.length === 0) {
                     courseList.innerHTML = `
-                <div class="no-courses-message">
-                    <i class="fas fa-info-circle"></i>
-                    <p>No courses are available.</p>
-                </div>
-            `;
+                        <div class="no-courses-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No courses are available.</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -1570,13 +1568,13 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         }
 
                         courseItem.innerHTML = `
-                    <div class="course-info">
-                        <strong>${course.course_code}</strong> - ${course.course_name}
-                    </div>
-                    <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
-                        <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
-                    </button>
-                `;
+                            <div class="course-info">
+                                <strong>${course.course_code}</strong> - ${course.course_name}
+                            </div>
+                            <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
+                                <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                            </button>
+                        `;
                         courseList.appendChild(courseItem);
                     }
                 });
@@ -1610,14 +1608,14 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 courseItem.className = "selected-course";
                 courseItem.setAttribute("data-code", code);
                 courseItem.innerHTML = `
-            <div class="course-info">
-            <strong>${code}</strong> - ${name}
-            </div>
-            <button class="remove-course-btn" data-code="${code}">
-            <i class="fas fa-times"></i>
-            </button>
-            <input type="hidden" name="selectedCourses[]" value="${code}">
-        `;
+                    <div class="course-info">
+                    <strong>${code}</strong> - ${name}
+                    </div>
+                    <button class="remove-course-btn" data-code="${code}">
+                    <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="selectedCourses[]" value="${code}">
+                `;
                 selectedCoursesList.appendChild(courseItem);
 
                 // Add event listener to the remove button

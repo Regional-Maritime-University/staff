@@ -72,7 +72,7 @@ class DatabaseMethods
             if (explode(' ', $str)[0] == 'SELECT' || explode(' ', $str)[0] == 'CALL') {
                 return $stmt->fetchAll();
             } elseif (explode(' ', $str)[0] == 'INSERT') {
-                return $this->conn->lastInsertId();
+                return 1;
             } elseif (explode(' ', $str)[0] == 'UPDATE' || explode(' ', $str)[0] == 'DELETE') {
                 $result = $stmt->rowCount();
                 return $result > 0 ? $result : 1;

@@ -70,29 +70,80 @@ class SecretaryController
         return $this->dm->getData($query, array(":dp" => $departmentId));
     }
 
+    // public function fetchActiveCourses($departmentId = null, $semester = null, $archived = false)
+    // {
+    //     $select = "";
+    //     $from = "";
+    //     $where = "";
+    //     $params = array(":ar" => $archived);
+
+    //     if ($departmentId) {
+    //         $select = " , `fk_department` AS `fk_department`, d.`name` AS `department_name` ";
+    //         $from .= ", `department` AS d ";
+    //         $where .= " AND c.`fk_department` = d.`id` AND d.`id` = :d ";
+    //         $params[":d"] = $departmentId;
+    //     }
+
+    //     if ($semester) {
+    //         $where .= " AND c.`semester` = :s ";
+    //         $params[":s"] = $semester;
+    //     }
+
+    //     $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
+    //             `fk_category` AS category_id, cg.`name` AS category {$select}
+    //             FROM `course` AS c, `course_category` AS cg {$from}
+    //             WHERE c.`fk_category` = cg.`id` AND c.`archived` = :ar {$where} ORDER BY c.`code` ASC";
+    //     return $this->dm->getData($query, $params);
+    // }
+
     public function fetchActiveCourses($departmentId = null, $semester = null, $archived = false)
     {
-        $select = "";
-        $from = "";
-        $where = "";
-        $params = array(":ar" => $archived);
+        $params = [":ar" => $archived];
+        $where = " WHERE c.`fk_category` = cg.`id` AND c.`archived` = :ar ";
+        $joins = "";
+        $selectExtra = "";
 
+        // Department filter
         if ($departmentId) {
-            $select = " , `fk_department` AS `fk_department`, d.`name` AS `department_name` ";
-            $from .= ", `department` AS d ";
-            $where .= " AND c.`fk_department` = d.`id` AND d.`id` = :d ";
+            $joins .= " LEFT JOIN `department` AS d ON c.`fk_department` = d.`id` ";
+            $where .= " AND d.`id` = :d ";
             $params[":d"] = $departmentId;
+            $selectExtra .= ", c.`fk_department`, d.`name` AS `department_name` ";
         }
 
+        // Semester filter
         if ($semester) {
             $where .= " AND c.`semester` = :s ";
             $params[":s"] = $semester;
         }
 
-        $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
-                `fk_category` AS category_id, cg.`name` AS category {$select}
-                FROM `course` AS c, `course_category` AS cg {$from}
-                WHERE c.`fk_category` = cg.`id` AND c.`archived` = :ar {$where} ORDER BY c.`code` ASC";
+        // Join for category (always required)
+        $joins .= " LEFT JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` ";
+
+        // Join lecturer_course_assignments (optional match)
+        $joins .= " LEFT JOIN `lecturer_course_assignments` AS lca 
+                    ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
+
+        // Join staff (lecturer)
+        $joins .= " LEFT JOIN `staff` AS s ON lca.`fk_staff` = s.`number` ";
+
+        // Join deadlines (optional match)
+        $joins .= " LEFT JOIN `deadlines` AS dl 
+                    ON dl.`fk_course` = c.`code` AND dl.`fk_semester` = c.`semester` ";
+
+        $select = "c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, 
+               c.`semester`, c.`level`, c.`archived`, 
+               cg.`name` AS category {$selectExtra}, 
+               s.`number` AS lecturer_number, s.`avatar` AS lecturer_avatar, s.`email` AS lecturer_email, 
+               s.`prefix` AS lecturer_prefix, s.`first_name` AS lecturer_first_name, s.`last_name` AS lecturer_last_name, 
+               dl.`date` AS deadline_date, dl.`status` AS deadline_status, dl.`note` AS deadline_note";
+
+        $query = "SELECT {$select}
+              FROM `course` AS c
+              {$joins}
+              {$where}
+              ORDER BY c.`code` ASC";
+
         return $this->dm->getData($query, $params);
     }
 

@@ -85,9 +85,103 @@ ALTER TABLE `student_course_assignments` ADD COLUMN `fk_semester` INT AFTER `fk_
 ALTER TABLE `student_course_assignments` ADD CONSTRAINT `fk_student_course_assignments_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `student_course_assignments` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
 
+ALTER TABLE `student_course_assignments` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `semester`; -- will deferred or atcive
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_status_idx1` (`status`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `continues_assessments` DECIMAL(5,2) DEFAULT 0 AFTER `status`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_continues_assessments_idx1` (`continues_assessments`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `project` DECIMAL(5,2) DEFAULT 0 AFTER `continues_assessments`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_project_idx1` (`project`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `exam` DECIMAL(5,2) DEFAULT 0 AFTER `project`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_exam_idx1` (`exam`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `final_score` DECIMAL(5,2) DEFAULT 0 AFTER `exam`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_final_score_idx1` (`final_score`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `grade` VARCHAR(5) DEFAULT NULL AFTER `final_score`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_grade_idx1` (`grade`);
+
+ALTER TABLE `student_course_assignments` ADD COLUMN `continues_assessments_weight` DECIMAL(5,2) DEFAULT 0.4 AFTER `continues_assessments`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_continues_assessments_weight_idx1` (`continues_assessments_weight`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `exam_weight` DECIMAL(5,2) DEFAULT 0.6 AFTER `exam`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_exam_weight_idx1` (`exam_weight`);
+ALTER TABLE `student_course_assignments` ADD COLUMN `project_weight` DECIMAL(5,2) DEFAULT 0 AFTER `project`;
+ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_project_weight_idx1` (`project_weight`);
+
+DELIMITER //
+
+CREATE TRIGGER `student_course_assignments_insert_trigger`
+BEFORE INSERT ON `student_course_assignments`
+FOR EACH ROW
+BEGIN
+    DECLARE final_score DECIMAL(5,2);
+    SET final_score = (NEW.continues_assessments * NEW.continues_assessments_weight) + (NEW.exam * NEW.exam_weight) + (NEW.project * NEW.project_weight);
+    SET NEW.final_score = final_score;
+
+    IF final_score >= 80 THEN
+        SET NEW.grade = 'A';
+    ELSEIF final_score >= 75 THEN
+        SET NEW.grade = 'A-';
+    ELSEIF final_score >= 70 THEN
+        SET NEW.grade = 'B+';
+    ELSEIF final_score >= 65 THEN
+        SET NEW.grade = 'B';
+    ELSEIF final_score >= 60 THEN
+        SET NEW.grade = 'C+';
+    ELSEIF final_score >= 55 THEN
+        SET NEW.grade = 'C';
+    ELSEIF final_score >= 50 THEN
+        SET NEW.grade = 'D';
+    ELSEIF final_score >= 45 THEN
+        SET NEW.grade = 'E';
+    ELSE
+        SET NEW.grade = 'F';
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER `student_course_assignments_update_trigger`
+BEFORE UPDATE ON `student_course_assignments`
+FOR EACH ROW
+BEGIN
+    DECLARE final_score DECIMAL(5,2);
+
+    IF OLD.continues_assessments != NEW.continues_assessments OR OLD.exam != NEW.exam OR OLD.project != NEW.project OR OLD.continues_assessments_weight != NEW.continues_assessments_weight OR OLD.exam_weight != NEW.exam_weight OR OLD.project_weight != NEW.project_weight THEN
+
+        SET final_score = (NEW.continues_assessments * NEW.continues_assessments_weight) + (NEW.exam * NEW.exam_weight) + (NEW.project * NEW.project_weight);
+        SET NEW.final_score = final_score;
+
+        IF final_score >= 80 THEN
+            SET NEW.grade = 'A';
+        ELSEIF final_score >= 75 THEN
+            SET NEW.grade = 'A-';
+        ELSEIF final_score >= 70 THEN
+            SET NEW.grade = 'B+';
+        ELSEIF final_score >= 65 THEN
+            SET NEW.grade = 'B';
+        ELSEIF final_score >= 60 THEN
+            SET NEW.grade = 'C+';
+        ELSEIF final_score >= 55 THEN
+            SET NEW.grade = 'C';
+        ELSEIF final_score >= 50 THEN
+            SET NEW.grade = 'D';
+        ELSEIF final_score >= 45 THEN
+            SET NEW.grade = 'E';
+        ELSE
+            SET NEW.grade = 'F';
+        END IF;
+    END IF;
+END;
+//
+
+DELIMITER ;
+
 ALTER TABLE `section` ADD COLUMN `fk_semester` INT AFTER `fk_course`;
 ALTER TABLE `section` ADD CONSTRAINT `fk_section_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE `section` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
+
+ALTER TABLE staff ADD COLUMN `avatar` VARCHAR(255) AFTER `password`;
 
 
 
