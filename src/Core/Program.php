@@ -80,7 +80,7 @@ class Program
         );
         $query_result = $this->dm->inputData($query, $params);
         if ($query_result)
-            $this->log->activity($_SESSION["user"], "INSERT", "Added new programme {$data["name"]} of programme type {$data["type"]}");
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Created Program", "Added new programme {$data["name"]} of programme type {$data["type"]}");
         return $query_result;
     }
 
@@ -112,7 +112,8 @@ class Program
             ":i" => $data["id"]
         );
         $query_result = $this->dm->inputData($query, $params);
-        if ($query_result) $this->log->activity($_SESSION["user"], "UPDATE", "Updated information for program {$data["id"]}");
+        if ($query_result)
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Program Modification", "Updated information for programme {$data["id"]}");
         return $query_result;
     }
 
@@ -120,7 +121,8 @@ class Program
     {
         $query = "UPDATE programs SET archived = 1 WHERE id = :i";
         $query_result = $this->dm->inputData($query, array(":i" => $id));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Archived programme {$id}");
+        if ($query_result)
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Program Archive", "Archived programme {$id}");
         return $query_result;
     }
 
@@ -128,7 +130,8 @@ class Program
     {
         $query = "DELETE FROM programs WHERE id = :i";
         $query_result = $this->dm->inputData($query, array(":i" => $id));
-        if ($query_result) $this->log->activity($_SESSION["user"], "DELETE", "Deleted programme {$id}");
+        if ($query_result)
+            $this->log->activity($_SESSION["staff"]["number"], "DELETE", "secretary", "Program Deletion", "Deleted programme {$id}");
         return $query_result;
     }
 

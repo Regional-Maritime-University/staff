@@ -183,6 +183,45 @@ ALTER TABLE `section` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
 
 ALTER TABLE staff ADD COLUMN `avatar` VARCHAR(255) AFTER `password`;
 
+CREATE TABLE `grade_points` (
+    `grade` VARCHAR(2) PRIMARY KEY,
+    `point` DECIMAL(3,2)
+);
+
+INSERT INTO `grade_points` VALUES
+('A', 4.0), ('A-', 3.85), ('B+', 3.0), ('B', 2.85),
+('C+', 2.5), ('C', 2.0), ('D', 1.5), ('E', 1.0), ('F', 0.0);
+
+DELIMITER //
+
+CREATE PROCEDURE calculate_gpa_cgpa (IN in_student_id INT, IN in_semester_id INT)
+BEGIN
+    DECLARE semester_gpa DECIMAL(4,2);
+    DECLARE cumulative_gpa DECIMAL(4,2);
+
+    -- GPA for the semester
+    SELECT 
+        ROUND(SUM(gp.point * sca.credit_hours) / SUM(sca.credit_hours), 2)
+    INTO semester_gpa
+    FROM student_course_assignments AS sca
+    JOIN grade_points gp ON sca.grade = gp.grade
+    WHERE sca.fk_student = in_student_id AND sca.fk_semester = in_semester_id;
+
+    -- CGPA for all semesters
+    SELECT 
+        ROUND(SUM(gp.point * sca.credit_hours) / SUM(sca.credit_hours), 2)
+    INTO cumulative_gpa
+    FROM student_course_assignments AS sca
+    JOIN grade_points gp ON sca.grade = gp.grade
+    WHERE sca.fk_student = in_student_id;
+
+    SELECT semester_gpa AS gpa, cumulative_gpa AS cgpa;
+END;
+//
+
+DELIMITER ;
+
+
 
 
 

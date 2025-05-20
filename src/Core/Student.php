@@ -129,4 +129,28 @@ class Student
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }
+
+    public function archive(string $index_number)
+    {
+        $query = "UPDATE `student` SET `archived` = 1 WHERE `index_number` = :i";
+        $params = array(":i" => $index_number);
+        $query_result = $this->dm->inputData($query, $params);
+        if ($query_result) $this->log->activity($_SESSION["staff"]["number"], "ARCHIVE", "secretary", "Student Archive", "Archived student {$index_number}");
+        return $query_result;
+    }
+
+    // calculate the cgpa of a student
+    public function calculateGPAAndCGPA(string $index_number, string $semester = "")
+    {
+        $query = "CALL calculate_gpa_cgpa(:i, :s)";
+        $params = array(":i" => $index_number, ":s" => $semester);
+        return $this->dm->getData($query, $params);
+    }
+
+    public function calculateAllGPAAndCGPA(string $index_number)
+    {
+        $query = "CALL calculate_gpa_cgpa(:i, :s)";
+        $params = array(":i" => $index_number);
+        return $this->dm->getData($query, $params);
+    }
 }
