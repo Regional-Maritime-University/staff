@@ -28,10 +28,6 @@ class Student
                 $concat_stmt = "AND s.`name` = :v";
                 break;
 
-            case 'role':
-                $concat_stmt = "AND s.`role` = :v";
-                break;
-
             case 'gender':
                 $concat_stmt = "AND s.`gender` = :v";
                 break;
@@ -58,8 +54,7 @@ class Student
         }
 
         $query = "SELECT 
-                s.`index_number`, s.`app_number`, s.`email`, s.`password`, s.`phone_number`, 
-                CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`, ' ', s.`suffix`) AS full_name, 
+                s.`index_number`, s.`app_number`, s.`email`, s.`phone_number`, 
                 s.`prefix`, s.`first_name`, s.`middle_name`, s.`last_name`, s.`suffix`, s.`gender`, 
                 s.`dob`, s.`nationality`, s.`photo`, s.`marital_status`, s.`disability`, 
                 s.`date_admitted`, s.`term_admitted`, s.`stream_admitted`, s.`level_admitted`, 

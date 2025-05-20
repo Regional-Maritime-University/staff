@@ -51,21 +51,27 @@ $departmentId = $_SESSION["staff"]["department_id"] ?? null;
 $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
-// $current_semester = $base->getActiveSemesters();
 $activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
-// $courses = $secretary->fetchActiveCourses($departmentId, $semesterId, $archived);
 
 $activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
 $totalActiveCourses = count($activeCourses);
 
-$assignedCourses = $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId);
+$assignedCourses = [];
+foreach ($activeSemesters as $semester) {
+    $semesterId = $semester['id'];
+    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
+}
 $totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
 
-$assignedLecturers = $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId);
+$assignedLecturers = [];
+foreach ($activeSemesters as $semester) {
+    $semesterId = $semester['id'];
+    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
+}
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 
-$deadlines = $secretary->fetchPendingDeadlines($departmentId, $semesterId);
+$deadlines = $secretary->fetchPendingDeadlines($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     foreach ($deadlines as $d) {

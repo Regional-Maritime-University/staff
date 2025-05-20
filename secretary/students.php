@@ -27,21 +27,36 @@ if (isset($_GET['logout']) || !$isUser) {
     header('Location: ../index.php');
 }
 
+$staffData = $_SESSION["staff"] ?? null;
 $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
 
 use Src\Controller\SecretaryController;
+use Src\Core\Base;
+use Src\Core\Course;
+use Src\Core\CourseCategory;
+use Src\Core\Student;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$secretary          = new SecretaryController($db, $user, $pass);
+$course_category    = new CourseCategory($db, $user, $pass);
+$course             = new Course($db, $user, $pass);
+$base               = new Base($db, $user, $pass);
+$student            = new Student($db, $user, $pass);
 
 $pageTitle = "Students";
 $activePage = "students";
 
-// $students = $admin->getStudents($_SESSION["staff"]["number"]);
-// $studentsCount = count($students);
+$departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$semesterId = 2; //$_SESSION["semester"] ?? null;
+$archived = false;
+
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
+$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
+
+$activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(departmentId: $departmentId);
 
 ?>
 
@@ -98,7 +113,7 @@ $activePage = "students";
             </div>
 
             <!-- Quick Actions -->
-            <div class="quick-actions">
+            <!-- <div class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="action-buttons">
                     <button class="action-btn" id="addStudentBtn">
@@ -118,14 +133,14 @@ $activePage = "students";
                         Export Student Data
                     </button>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-group">
                     <label for="program">Program</label>
                     <select id="program">
-                        <option value="">All Programs</option>
+                        <option value="all">All Programs</option>
                         <option value="1">BSc. Marine Engineering</option>
                         <option value="2">BSc. Nautical Science</option>
                         <option value="3">BSc. Logistics Management</option>
@@ -135,7 +150,7 @@ $activePage = "students";
                 <div class="filter-group">
                     <label for="level">Level</label>
                     <select id="level">
-                        <option value="">All Levels</option>
+                        <option value="all">All Levels</option>
                         <option value="100">100</option>
                         <option value="200">200</option>
                         <option value="300">300</option>
@@ -145,18 +160,10 @@ $activePage = "students";
                 <div class="filter-group">
                     <label for="status">Status</label>
                     <select id="status">
-                        <option value="">All Statuses</option>
+                        <option value="all">All Statuses</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="on-leave">On Leave</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="semester">Semester</label>
-                    <select id="semester">
-                        <option value="">All Semesters</option>
-                        <option value="1" selected>First Semester 2023/2024</option>
-                        <option value="2">Second Semester 2023/2024</option>
                     </select>
                 </div>
                 <div class="filter-actions">
@@ -167,323 +174,67 @@ $activePage = "students";
 
             <!-- Student Grid -->
             <div class="student-grid">
-                <!-- Student Card 1 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student1.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Samuel Mensah</h3>
-                            <p class="student-id">RMU/CS/2020/001</p>
-                            <span class="student-program">BSc. Computer Science</span>
-                        </div>
-                        <span class="student-status active">Active</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:samuel.mensah@rmu.edu">samuel.mensah@rmu.edu</a>
+                <?php
+                if ($totalActiveStudents == 0) {
+                    echo "<div class='no-students'>No students available.</div>";
+                } else {
+                    foreach ($activeStudents as $student) {
+                ?>
+                        <div class="student-card">
+                            <div class="student-header">
+                                <div class="student-photo">
+                                    <img src="../uploads/profiles/me.jpg" alt="Student Photo">
+                                </div>
+                                <div class="student-info">
+                                    <h3 class="student-name"><?= $student["first_name"] . " " . $student["middle_name"] . " " . $student["last_name"] ?></h3>
+                                    <p class="student-id"><?= $student["index_number"] ?></p>
+                                    <span class="student-program"><?= $student["program_name"] ?></span>
+                                </div>
+                                <span class="student-status active">Active</span> <!-- Change class based on status (active, inactive, on-leave) -->
+                                <div class="student-actions">
+                                    <!-- <button class="student-action edit-student" title="Edit Student">
+                                        <i class="fas fa-edit"></i>
+                                    </button> -->
+                                    <button class="student-action archive-student" title="Archive Student">
+                                        <i class="fas fa-archive"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233501234567">+233 50 123 4567</a>
+                            <div class="student-content">
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:<?= $student["email"] ?>"><?= $student["email"] ?></a>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <a href="tel:<?= $student["phone_number"] ?>"><?= $student["phone_number"] ?></a>
+                                    </div>
+                                </div>
+                                <div class="academic-info">
+                                    <div class="academic-item">
+                                        <div class="academic-label">Level</div>
+                                        <div class="academic-value">300</div>
+                                    </div>
+                                    <div class="academic-item">
+                                        <div class="academic-label">Credits</div>
+                                        <div class="academic-value">72</div>
+                                    </div>
+                                    <div class="academic-item">
+                                        <div class="academic-label">Courses</div>
+                                        <div class="academic-value">5 Current</div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">300</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">72/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">5 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa excellent">GPA: 3.8</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Samuel Mensah">View Grades</button>
-                    </div>
-                </div>
-
-                <!-- Student Card 2 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student2.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Abena Osei</h3>
-                            <p class="student-id">RMU/ME/2021/042</p>
-                            <span class="student-program">BSc. Marine Engineering</span>
-                        </div>
-                        <span class="student-status active">Active</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:abena.osei@rmu.edu">abena.osei@rmu.edu</a>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233551234568">+233 55 123 4568</a>
+                            <div class="student-footer">
+                                <div class="gpa excellent">CGPA: 3.8</div> <!-- Change class based on GPA (excellent, good, average, pood) -->
+                                <button class="view-profile-btn view-grades-btn" data-student="Samuel Mensah">View Grades</button>
                             </div>
                         </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">200</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">36/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">6 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa good">GPA: 3.5</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Abena Osei">View Grades</button>
-                    </div>
-                </div>
-
-                <!-- Student Card 3 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student3.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Kwame Addo</h3>
-                            <p class="student-id">RMU/NS/2019/015</p>
-                            <span class="student-program">BSc. Nautical Science</span>
-                        </div>
-                        <span class="student-status on-leave">On Leave</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:kwame.addo@rmu.edu">kwame.addo@rmu.edu</a>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233241234569">+233 24 123 4569</a>
-                            </div>
-                        </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">400</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">105/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">0 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa good">GPA: 3.2</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Kwame Addo">View Grades</button>
-                    </div>
-                </div>
-
-                <!-- Student Card 4 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student4.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Fatima Ibrahim</h3>
-                            <p class="student-id">RMU/LM/2022/078</p>
-                            <span class="student-program">BSc. Logistics Management</span>
-                        </div>
-                        <span class="student-status active">Active</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:fatima.ibrahim@rmu.edu">fatima.ibrahim@rmu.edu</a>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233201234570">+233 20 123 4570</a>
-                            </div>
-                        </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">100</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">18/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">6 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa average">GPA: 2.8</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Fatima Ibrahim">View Grades</button>
-                    </div>
-                </div>
-
-                <!-- Student Card 5 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student5.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Daniel Agyei</h3>
-                            <p class="student-id">RMU/CS/2020/045</p>
-                            <span class="student-program">BSc. Computer Science</span>
-                        </div>
-                        <span class="student-status inactive">Inactive</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:daniel.agyei@rmu.edu">daniel.agyei@rmu.edu</a>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233271234571">+233 27 123 4571</a>
-                            </div>
-                        </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">300</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">54/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">0 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa poor">GPA: 1.9</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Daniel Agyei">View Grades</button>
-                    </div>
-                </div>
-
-                <!-- Student Card 6 -->
-                <div class="student-card">
-                    <div class="student-header">
-                        <div class="student-photo">
-                            <img src="student6.jpg" alt="Student Photo">
-                        </div>
-                        <div class="student-info">
-                            <h3 class="student-name">Grace Owusu</h3>
-                            <p class="student-id">RMU/ME/2021/033</p>
-                            <span class="student-program">BSc. Marine Engineering</span>
-                        </div>
-                        <span class="student-status active">Active</span>
-                        <div class="student-actions">
-                            <button class="student-action edit-student" title="Edit Student">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="student-action delete-student" title="Delete Student">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="student-content">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:grace.owusu@rmu.edu">grace.owusu@rmu.edu</a>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:+233551234572">+233 55 123 4572</a>
-                            </div>
-                        </div>
-                        <div class="academic-info">
-                            <div class="academic-item">
-                                <div class="academic-label">Level</div>
-                                <div class="academic-value">200</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Credits</div>
-                                <div class="academic-value">42/120</div>
-                            </div>
-                            <div class="academic-item">
-                                <div class="academic-label">Courses</div>
-                                <div class="academic-value">5 Current</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="student-footer">
-                        <div class="gpa excellent">GPA: 3.9</div>
-                        <button class="view-profile-btn view-grades-btn" data-student="Grace Owusu">View Grades</button>
-                    </div>
-                </div>
+                <?php
+                    }
+                }
+                ?>
             </div>
 
             <!-- Pagination -->
@@ -502,7 +253,7 @@ $activePage = "students";
     </div>
 
     <!-- Add Student Modal -->
-    <div class="modal" id="addStudentModal">
+    <!-- <div class="modal" id="addStudentModal">
         <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -620,10 +371,10 @@ $activePage = "students";
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Import Students Modal -->
-    <div class="modal" id="importStudentsModal">
+    <!-- <div class="modal" id="importStudentsModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -692,7 +443,7 @@ $activePage = "students";
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Course Registration Modal -->
     <div class="modal" id="courseRegistrationModal">
@@ -885,16 +636,16 @@ $activePage = "students";
 
         // Modal functionality
         const modals = {
-            addStudentModal: document.getElementById('addStudentModal'),
-            importStudentsModal: document.getElementById('importStudentsModal'),
-            courseRegistrationModal: document.getElementById('courseRegistrationModal'),
+            // addStudentModal: document.getElementById('addStudentModal'),
+            // importStudentsModal: document.getElementById('importStudentsModal'),
+            // courseRegistrationModal: document.getElementById('courseRegistrationModal'),
             viewGradesModal: document.getElementById('viewGradesModal')
         };
 
         // Open modals
-        document.getElementById('addStudentBtn').addEventListener('click', () => openModal('addStudentModal'));
-        document.getElementById('importStudentsBtn').addEventListener('click', () => openModal('importStudentsModal'));
-        document.getElementById('registerCoursesBtn').addEventListener('click', () => openModal('courseRegistrationModal'));
+        // document.getElementById('addStudentBtn').addEventListener('click', () => openModal('addStudentModal'));
+        // document.getElementById('importStudentsBtn').addEventListener('click', () => openModal('importStudentsModal'));
+        // document.getElementById('registerCoursesBtn').addEventListener('click', () => openModal('courseRegistrationModal'));
 
         // View grades buttons
         document.querySelectorAll('.view-grades-btn').forEach(button => {
@@ -926,47 +677,47 @@ $activePage = "students";
         }
 
         // File input handling
-        const fileInput = document.getElementById('studentFileInput');
-        const fileNameDisplay = document.getElementById('selectedFileName');
+        // const fileInput = document.getElementById('studentFileInput');
+        // const fileNameDisplay = document.getElementById('selectedFileName');
 
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-            } else {
-                fileNameDisplay.textContent = '';
-            }
-        });
+        // fileInput.addEventListener('change', function() {
+        //     if (this.files.length > 0) {
+        //         fileNameDisplay.textContent = this.files[0].name;
+        //     } else {
+        //         fileNameDisplay.textContent = '';
+        //     }
+        // });
 
-        // Photo preview
-        const photoInput = document.getElementById('studentPhoto');
-        const photoPreview = document.getElementById('photoPreview');
+        // // Photo preview
+        // const photoInput = document.getElementById('studentPhoto');
+        // const photoPreview = document.getElementById('photoPreview');
 
-        photoInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    photoPreview.src = e.target.result;
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
+        // photoInput.addEventListener('change', function() {
+        //     if (this.files && this.files[0]) {
+        //         const reader = new FileReader();
+        //         reader.onload = function(e) {
+        //             photoPreview.src = e.target.result;
+        //         };
+        //         reader.readAsDataURL(this.files[0]);
+        //     }
+        // });
 
-        // Import options toggle
-        document.querySelectorAll('.import-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.import-option').forEach(opt => opt.classList.remove('active'));
-                this.classList.add('active');
+        // // Import options toggle
+        // document.querySelectorAll('.import-option').forEach(option => {
+        //     option.addEventListener('click', function() {
+        //         document.querySelectorAll('.import-option').forEach(opt => opt.classList.remove('active'));
+        //         this.classList.add('active');
 
-                const importType = this.getAttribute('data-option');
-                if (importType === 'file') {
-                    document.getElementById('fileImportSection').style.display = 'block';
-                    document.getElementById('apiImportSection').style.display = 'none';
-                } else {
-                    document.getElementById('fileImportSection').style.display = 'none';
-                    document.getElementById('apiImportSection').style.display = 'block';
-                }
-            });
-        });
+        //         const importType = this.getAttribute('data-option');
+        //         if (importType === 'file') {
+        //             document.getElementById('fileImportSection').style.display = 'block';
+        //             document.getElementById('apiImportSection').style.display = 'none';
+        //         } else {
+        //             document.getElementById('fileImportSection').style.display = 'none';
+        //             document.getElementById('apiImportSection').style.display = 'block';
+        //         }
+        //     });
+        // });
 
         // Course registration credit calculation
         const courseCheckboxes = document.querySelectorAll('.course-checkbox input');
@@ -999,63 +750,63 @@ $activePage = "students";
         }
 
         // Form submissions
-        document.getElementById('saveStudentBtn').addEventListener('click', function() {
-            const form = document.getElementById('addStudentForm');
-            if (form.checkValidity()) {
-                // Simulate form submission
-                alert('Student added successfully!');
-                modals.addStudentModal.classList.remove('active');
-                // In a real application, you would reset the form and update the UI
-            } else {
-                alert('Please fill all required fields.');
-            }
-        });
+        // document.getElementById('saveStudentBtn').addEventListener('click', function() {
+        //     const form = document.getElementById('addStudentForm');
+        //     if (form.checkValidity()) {
+        //         // Simulate form submission
+        //         alert('Student added successfully!');
+        //         modals.addStudentModal.classList.remove('active');
+        //         // In a real application, you would reset the form and update the UI
+        //     } else {
+        //         alert('Please fill all required fields.');
+        //     }
+        // });
 
-        document.getElementById('importBtn').addEventListener('click', function() {
-            const activeOption = document.querySelector('.import-option.active').getAttribute('data-option');
+        // document.getElementById('importBtn').addEventListener('click', function() {
+        //     const activeOption = document.querySelector('.import-option.active').getAttribute('data-option');
 
-            if (activeOption === 'file') {
-                if (fileInput.files.length > 0) {
-                    // Simulate file upload
-                    alert('Students imported successfully!');
-                    modals.importStudentsModal.classList.remove('active');
-                    fileInput.value = '';
-                    fileNameDisplay.textContent = '';
-                } else {
-                    alert('Please select a file to upload.');
-                }
-            } else {
-                const endpoint = document.getElementById('apiEndpoint').value;
-                const apiKey = document.getElementById('apiKey').value;
+        //     if (activeOption === 'file') {
+        //         if (fileInput.files.length > 0) {
+        //             // Simulate file upload
+        //             alert('Students imported successfully!');
+        //             modals.importStudentsModal.classList.remove('active');
+        //             fileInput.value = '';
+        //             fileNameDisplay.textContent = '';
+        //         } else {
+        //             alert('Please select a file to upload.');
+        //         }
+        //     } else {
+        //         const endpoint = document.getElementById('apiEndpoint').value;
+        //         const apiKey = document.getElementById('apiKey').value;
 
-                if (endpoint && apiKey) {
-                    // Simulate API import
-                    alert('Students imported successfully from API!');
-                    modals.importStudentsModal.classList.remove('active');
-                } else {
-                    alert('Please provide API endpoint and key.');
-                }
-            }
-        });
+        //         if (endpoint && apiKey) {
+        //             // Simulate API import
+        //             alert('Students imported successfully from API!');
+        //             modals.importStudentsModal.classList.remove('active');
+        //         } else {
+        //             alert('Please provide API endpoint and key.');
+        //         }
+        //     }
+        // });
 
-        document.getElementById('registerCoursesSubmitBtn').addEventListener('click', function() {
-            const student = document.getElementById('registrationStudent').value;
-            const totalCredits = parseInt(document.getElementById('totalCredits').textContent);
+        // document.getElementById('registerCoursesSubmitBtn').addEventListener('click', function() {
+        //     const student = document.getElementById('registrationStudent').value;
+        //     const totalCredits = parseInt(document.getElementById('totalCredits').textContent);
 
-            if (student && totalCredits > 0) {
-                if (totalCredits > 18) {
-                    alert('Warning: Credit limit exceeded. Maximum allowed is 18 credits.');
-                } else {
-                    // Simulate course registration
-                    alert('Courses registered successfully!');
-                    modals.courseRegistrationModal.classList.remove('active');
-                }
-            } else {
-                alert('Please select a student and at least one course.');
-            }
-        });
+        //     if (student && totalCredits > 0) {
+        //         if (totalCredits > 18) {
+        //             alert('Warning: Credit limit exceeded. Maximum allowed is 18 credits.');
+        //         } else {
+        //             // Simulate course registration
+        //             alert('Courses registered successfully!');
+        //             modals.courseRegistrationModal.classList.remove('active');
+        //         }
+        //     } else {
+        //         alert('Please select a student and at least one course.');
+        //     }
+        // });
 
-        // Edit and delete student buttons
+        // Edit and archive student buttons
         document.querySelectorAll('.edit-student').forEach(button => {
             button.addEventListener('click', function() {
                 const studentCard = this.closest('.student-card');
@@ -1066,14 +817,14 @@ $activePage = "students";
             });
         });
 
-        document.querySelectorAll('.delete-student').forEach(button => {
+        document.querySelectorAll('.archive-student').forEach(button => {
             button.addEventListener('click', function() {
                 const studentCard = this.closest('.student-card');
                 const studentName = studentCard.querySelector('.student-name').textContent;
-                if (confirm(`Are you sure you want to delete ${studentName}?`)) {
+                if (confirm(`Are you sure you want to archive ${studentName}?`)) {
                     // Simulate deletion
                     studentCard.remove();
-                    alert('Student deleted successfully!');
+                    alert('Student archived successfully!');
                 }
             });
         });
@@ -1081,16 +832,13 @@ $activePage = "students";
         // Filter functionality
         document.querySelector('.filter-btn.apply').addEventListener('click', function() {
             // Simulate filtering
-            alert('Filters applied!');
         });
 
         document.querySelector('.filter-btn.reset').addEventListener('click', function() {
             // Reset all filter inputs
             document.querySelectorAll('.filter-group select, .filter-group input').forEach(input => {
-                input.value = '';
+                input.value = 'all';
             });
-            document.getElementById('semester').value = '1'; // Reset to default semester
-            alert('Filters reset!');
         });
 
         // Pagination
@@ -1105,10 +853,10 @@ $activePage = "students";
         });
 
         // Export Data
-        document.getElementById('exportDataBtn').addEventListener('click', function() {
-            // Simulate export
-            alert('Student data exported successfully!');
-        });
+        // document.getElementById('exportDataBtn').addEventListener('click', function() {
+        //     // Simulate export
+        //     alert('Student data exported successfully!');
+        // });
     </script>
 </body>
 

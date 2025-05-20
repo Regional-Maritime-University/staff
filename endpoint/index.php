@@ -88,8 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode($result));
         }
 
-        $_SESSION['staffLoginSuccess']  = true;
-        $_SESSION['staff']              = $result["data"];
+        $secretary->setInitialSessions($result["data"]);
 
         die(json_encode(["success" => true, "message" => $result["data"]["role"]]));
     }

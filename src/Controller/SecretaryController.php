@@ -7,6 +7,7 @@ use Src\System\DatabaseMethods;
 use Src\Controller\ExposeDataController;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Src\Base\Log;
+use Src\Core\Base;
 use Src\Core\Classes;
 use Src\Core\Course;
 use Src\Core\Staff;
@@ -20,6 +21,7 @@ class SecretaryController
     private $pass = null;
     private $expose = null;
     private $log = null;
+    private $base = null;
 
     public function __construct($db, $user, $pass)
     {
@@ -29,6 +31,19 @@ class SecretaryController
         $this->dm = new DatabaseMethods($db, $user, $pass);
         $this->log = new Log($db, $user, $pass);
         $this->expose = new ExposeDataController($db, $user, $pass);
+        $this->base = new Base($db, $user, $pass);
+    }
+
+    public function setInitialSessions($data)
+    {
+        if (!isset($_SESSION["staff"])) {
+            $_SESSION['staffLoginSuccess']  = true;
+            $_SESSION["staff"] = $data;
+        }
+        if (!isset($_SESSION["active_semesters"])) {
+            $activeSemesters = $this->base->getActiveSemesters();
+            $_SESSION["active_semesters"] = $activeSemesters;
+        }
     }
 
     public function getTimeStamp($period)
@@ -121,28 +136,22 @@ class SecretaryController
         $joins .= " LEFT JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` ";
 
         // Join lecturer_course_assignments (optional match)
-        $joins .= " LEFT JOIN `lecturer_course_assignments` AS lca 
-                    ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
+        $joins .= " LEFT JOIN `lecturer_course_assignments` AS lca ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
 
         // Join staff (lecturer)
         $joins .= " LEFT JOIN `staff` AS s ON lca.`fk_staff` = s.`number` ";
 
         // Join deadlines (optional match)
-        $joins .= " LEFT JOIN `deadlines` AS dl 
-                    ON dl.`fk_course` = c.`code` AND dl.`fk_semester` = c.`semester` ";
+        $joins .= " LEFT JOIN `deadlines` AS dl ON dl.`fk_course` = c.`code` AND dl.`fk_semester` = c.`semester` ";
 
         $select = "c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, 
-               c.`semester`, c.`level`, c.`archived`, 
-               cg.`name` AS category {$selectExtra}, 
-               s.`number` AS lecturer_number, s.`avatar` AS lecturer_avatar, s.`email` AS lecturer_email, 
-               s.`prefix` AS lecturer_prefix, s.`first_name` AS lecturer_first_name, s.`last_name` AS lecturer_last_name, 
-               dl.`date` AS deadline_date, dl.`status` AS deadline_status, dl.`note` AS deadline_note";
+                c.`semester`, c.`level`, c.`archived`, 
+                cg.`name` AS category {$selectExtra}, 
+                s.`number` AS lecturer_number, s.`avatar` AS lecturer_avatar, s.`email` AS lecturer_email, 
+                s.`prefix` AS lecturer_prefix, s.`first_name` AS lecturer_first_name, s.`last_name` AS lecturer_last_name, 
+                dl.`date` AS deadline_date, dl.`status` AS deadline_status, dl.`note` AS deadline_note";
 
-        $query = "SELECT {$select}
-              FROM `course` AS c
-              {$joins}
-              {$where}
-              ORDER BY c.`code` ASC";
+        $query = "SELECT {$select} FROM `course` AS c {$joins} {$where} ORDER BY c.`code` ASC";
 
         return $this->dm->getData($query, $params);
     }
@@ -165,20 +174,20 @@ class SecretaryController
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
     }
 
-    public function fetchPendingDeadlines($departmentId = null, $semesterId = null, $archived = false)
+    public function fetchPendingDeadlines($departmentId = null, $archived = false)
     {
         $query = "SELECT dl.`id`, dl.`note`, dl.`date`, dl.`status`, dl.`created_at`, dl.`updated_at`, 
-                 dl.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours`, c.`contact_hours`, c.`semester` AS course_semester, 
-                 c.`level` AS course_level, c.`archived` AS course_status, c.`fk_category` AS category_id, cg.`name` AS category, 
-                 dl.`fk_staff` AS staff_number, CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name 
-              FROM `deadlines` AS dl 
-              JOIN `department` AS d ON dl.`fk_department` = d.`id` 
-              JOIN `staff` AS sf ON dl.`fk_staff` = sf.`number` 
-              JOIN `course` AS c ON dl.`fk_course` = c.`code` 
-              JOIN `semester` AS s ON dl.`fk_semester` = s.`id` 
-              JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
-              WHERE dl.`fk_department` = :d AND dl.`fk_semester` = :s AND c.`archived` = :ar ORDER BY (dl.`status` = 'pending') DESC, dl.`date` ASC";
-        return $this->dm->getData($query, array(":d" => $departmentId, ":s" => $semesterId, ":ar" => $archived));
+                dl.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours`, c.`contact_hours`, c.`semester` AS course_semester, 
+                c.`level` AS course_level, c.`archived` AS course_status, c.`fk_category` AS category_id, cg.`name` AS category, 
+                dl.`fk_staff` AS staff_number, CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name 
+            FROM `deadlines` AS dl 
+            JOIN `department` AS d ON dl.`fk_department` = d.`id` 
+            JOIN `staff` AS sf ON dl.`fk_staff` = sf.`number` 
+            JOIN `course` AS c ON dl.`fk_course` = c.`code` 
+            JOIN `semester` AS s ON dl.`fk_semester` = s.`id` 
+            JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+            WHERE dl.`fk_department` = :d AND c.`archived` = :ar ORDER BY (dl.`status` = 'pending') DESC, dl.`date` ASC";
+        return $this->dm->getData($query, array(":d" => $departmentId, ":ar" => $archived));
     }
 
     public function fetchUpcomingDeadlines($departmentId = null, $archived = false)
@@ -509,7 +518,13 @@ class SecretaryController
 
     public function fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_department` = :di AND `fk_semester` = :si GROUP BY `fk_staff`";
+        $query = "SELECT lca.*, st.`number` AS lecturer_number, st.`avatar` AS lecturer_avatar, st.`email` AS lecturer_email, 
+                st.`prefix` AS lecturer_prefix, st.`first_name` AS lecturer_first_name, st.`last_name` AS lecturer_last_name, 
+                cc.`name` AS course_name, cc.`credit_hours` AS course_credit_hours, cc.`contact_hours` AS course_contact_hours,
+                cc.`semester` AS course_semester, cc.`level` AS course_level 
+                FROM `lecturer_course_assignments` AS lca, `course` AS cc, `staff` AS st 
+                WHERE lca.`fk_course` = cc.`code` AND lca.`fk_staff` = st.`number` AND 
+                    lca.`fk_department` = :di AND lca.`fk_semester` = :si GROUP BY `fk_staff`";
         return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
     }
 
@@ -611,6 +626,14 @@ class SecretaryController
     {
         $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
         return $students;
+    }
+
+    public function fetchAllActiveStudentsExamAndAssessment($departmentId = null, $archived = false)
+    {
+        $query = "SELECT sca.* 
+                FROM `student` AS s, `department` AS d, `student_course_assignments` AS sca 
+                WHERE s.`fk_department` = d.`id` AND d.`id` = :d AND s.`archived` = :ar AND sca.`status` = 'active'";
+        return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
     }
 
     public function fetchSemesterCourses($semester)
