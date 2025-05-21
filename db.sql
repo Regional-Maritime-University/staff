@@ -105,6 +105,8 @@ ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_e
 ALTER TABLE `student_course_assignments` ADD COLUMN `project_weight` DECIMAL(5,2) DEFAULT 0 AFTER `project`;
 ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_project_weight_idx1` (`project_weight`);
 
+-- Trigger to calculate the final score and grade when a new record is inserted
+-- This trigger will automatically calculate the final score and grade based on the assessment scores and weights
 DELIMITER //
 
 CREATE TRIGGER `student_course_assignments_insert_trigger`
@@ -139,6 +141,8 @@ END;
 
 DELIMITER ;
 
+-- Trigger to update the final score and grade when the assessment scores or weights are updated
+-- This trigger will automatically calculate the final score and grade based on the assessment scores and weights
 DELIMITER //
 
 CREATE TRIGGER `student_course_assignments_update_trigger`
@@ -183,15 +187,18 @@ ALTER TABLE `section` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
 
 ALTER TABLE staff ADD COLUMN `avatar` VARCHAR(255) AFTER `password`;
 
+-- Create a table to store grade points
 CREATE TABLE `grade_points` (
     `grade` VARCHAR(2) PRIMARY KEY,
     `point` DECIMAL(3,2)
 );
-
+-- Insert grade points into the table
 INSERT INTO `grade_points` VALUES
 ('A', 4.0), ('A-', 3.85), ('B+', 3.0), ('B', 2.85),
 ('C+', 2.5), ('C', 2.0), ('D', 1.5), ('E', 1.0), ('F', 0.0);
 
+-- Calculate GPA and CGPA for a specific student in a specific semester
+-- This procedure will return the GPA and CGPA for a specific student in a given semester
 DELIMITER //
 
 CREATE PROCEDURE calculate_gpa_cgpa (IN in_student_id INT, IN in_semester_id INT)
@@ -220,6 +227,35 @@ END;
 //
 
 DELIMITER ;
+
+-- Calculate GPA and CGPA for all students in a specific semester
+-- This procedure will return the GPA and CGPA for all students in a given semester
+DELIMITER //
+
+CREATE PROCEDURE calculate_all_students_gpa_cgpa(IN in_semester_id INT)
+BEGIN
+    SELECT 
+        s.id AS student_id,
+        s.name,
+        ROUND(
+            SUM(CASE WHEN sca.fk_semester = in_semester_id THEN gp.point * sca.credit_hours ELSE 0 END) /
+            NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0),
+            2
+        ) AS gpa,
+        ROUND(
+            SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0),
+            2
+        ) AS cgpa
+    FROM students s
+    JOIN student_course_assignments sca ON s.id = sca.fk_student
+    JOIN grade_points gp ON sca.grade = gp.grade
+    WHERE s.status = 'active'
+    GROUP BY s.id;
+END;
+//
+
+DELIMITER ;
+
 
 
 
