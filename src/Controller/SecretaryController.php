@@ -10,6 +10,7 @@ use Src\Base\Log;
 use Src\Core\Base;
 use Src\Core\Classes;
 use Src\Core\Course;
+use Src\Core\Program;
 use Src\Core\Staff;
 use Src\Core\Student;
 
@@ -628,11 +629,30 @@ class SecretaryController
         return $students;
     }
 
-    public function fetchAllActiveStudentsExamAndAssessment($semesterId)
+    public function fetchAllActiveStudentsExamAndAssessment(array $students, $semesterId = null)
     {
-        $query = "CALL `calculate_all_students_gpa_cgpa`(:s)";
-        return $this->dm->getData($query, array(":s" => $semesterId));
+        if (!empty($students)) {
+            foreach ($students as &$student) {  // Use reference to modify the original array
+                $query = "CALL `calculate_gpa_cgpa`(:s, :m)";
+                $params = array(":s" => $student["index_number"], ":m" => $semesterId);
+                $result = $this->dm->getData($query, $params);
+                if (!empty($result)) {
+                    $student["gpa"] = $result[0]["gpa"] ? $result[0]["gpa"] : 0;
+                    $student["cgpa"] = $result[0]["cgpa"] ? $result[0]["cgpa"] : 0;
+                    $student["total_credit_hours"] = $result[0]["total_credits"] ? $result[0]["total_credits"] : 0;
+                    $student["total_courses"] = $result[0]["total_courses"] ? $result[0]["total_courses"] : 0;
+                } else {
+                    $student["gpa"] = 0;
+                    $student["cgpa"] = 0;
+                    $student["total_credit_hours"] = 0;
+                    $student["total_courses"] = 0;
+                }
+            }
+            return $students;
+        }
+        return false;
     }
+
 
     public function fetchSemesterCourses($semester)
     {
@@ -644,5 +664,10 @@ class SecretaryController
     {
         $classes = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
         return $classes;
+    }
+    public function fetchAllActivePrograms($departmentId = null, $archived = false)
+    {
+        $programs = (new Program($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        return $programs;
     }
 }

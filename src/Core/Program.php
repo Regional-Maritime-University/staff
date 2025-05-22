@@ -37,7 +37,7 @@ class Program
                 break;
 
             case 'department':
-                $concat_stmt = "AND p.`fk_department` = :v";
+                $concat_stmt = "AND p.`department` = :v";
                 break;
 
             default:

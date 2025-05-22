@@ -441,6 +441,26 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Student's index number is required!"]));
         }
         die(json_encode($student->archive($_POST["indexNumber"])));
+    } elseif ($_GET["url"] == "unarchive-student") {
+        if (! isset($_POST["indexNumber"]) || empty($_POST["indexNumber"])) {
+            die(json_encode(["success" => false, "message" => "Student's index number is required!"]));
+        }
+        die(json_encode($student->unarchive($_POST["indexNumber"])));
+    } elseif ($_GET["url"] == "delete-student") {
+        if (! isset($_POST["indexNumber"]) || empty($_POST["indexNumber"])) {
+            die(json_encode(["success" => false, "message" => "Student's index number is required!"]));
+        }
+        die(json_encode($student->delete($_POST["indexNumber"])));
+    } elseif ($_GET["url"] == "total-student") {
+        //die(json_encode($student->total($_POST)));
+    } elseif ($_GET["url"] == "fetch-student-grades") {
+        if (! isset($_POST["indexNumber"]) || empty($_POST["indexNumber"])) {
+            die(json_encode(["success" => false, "message" => "Student's index number is required!"]));
+        }
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+        die(json_encode($student->fetchStudentGrades($_POST["indexNumber"], $_POST["semester"])));
     }
 
     // Deadline

@@ -53,11 +53,16 @@ $departmentId = $_SESSION["staff"]["department_id"] ?? null;
 $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
+$activeSemesters = $secretary->fetchActiveSemesters();
+$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
+
+$activePrograms = $secretary->fetchAllActivePrograms(departmentId: $departmentId);
+$totalActivePrograms = $activePrograms && is_array($activePrograms) ? count($activePrograms) : 0;
+
 $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
-
-$activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(semesterId: 2);
-dd($activeStudentsExamAndAssessment);
+$activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(students: $activeStudents, semesterId: $semesterId);
+$activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsExamAndAssessment) ? $activeStudentsExamAndAssessment : $activeStudents;
 
 ?>
 
@@ -142,10 +147,15 @@ dd($activeStudentsExamAndAssessment);
                     <label for="program">Program</label>
                     <select id="program">
                         <option value="all">All Programs</option>
-                        <option value="1">BSc. Marine Engineering</option>
-                        <option value="2">BSc. Nautical Science</option>
-                        <option value="3">BSc. Logistics Management</option>
-                        <option value="4">BSc. Computer Science</option>
+                        <?php
+                        if ($activePrograms && is_array($activePrograms)) {
+                            foreach ($activePrograms as $program) {
+                                echo "<option value='{$program['id']}'>{$program['name']}</option>";
+                            }
+                        } else {
+                            echo "<option value=''>No active programs available</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -163,8 +173,7 @@ dd($activeStudentsExamAndAssessment);
                     <select id="status">
                         <option value="all">All Statuses</option>
                         <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="on-leave">On Leave</option>
+                        <option value="deferred">Deferred</option>
                     </select>
                 </div>
                 <div class="filter-actions">
@@ -219,17 +228,17 @@ dd($activeStudentsExamAndAssessment);
                                     </div>
                                     <div class="academic-item">
                                         <div class="academic-label">Credits</div>
-                                        <div class="academic-value">72</div>
+                                        <div class="academic-value"><?= $student["total_credit_hours"] ?></div>
                                     </div>
                                     <div class="academic-item">
                                         <div class="academic-label">Courses</div>
-                                        <div class="academic-value">5 Current</div>
+                                        <div class="academic-value"><?= $student["total_courses"] ?></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="student-footer">
-                                <div class="gpa excellent">CGPA: 3.8</div> <!-- Change class based on GPA (excellent, good, average, pood) -->
-                                <button class="view-profile-btn view-grades-btn" data-student="Samuel Mensah">View Grades</button>
+                                <div class="gpa excellent">CGPA: <?= $student["cgpa"] ?></div> <!-- Change class based on GPA (excellent, good, average, pood) -->
+                                <button class="view-profile-btn view-grades-btn" data-student="Samuel Mensah" id="<?= $student["index_number"] ?>">View Grades</button>
                             </div>
                         </div>
                 <?php
@@ -539,19 +548,27 @@ dd($activeStudentsExamAndAssessment);
 
     <!-- View Grades Modal -->
     <div class="modal" id="viewGradesModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Grades for <span id="studentNameGrades">Student</span></h2>
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
+
                     <div class="form-group">
                         <label for="gradeSemester">Select Semester</label>
-                        <select id="gradeSemester">
-                            <option value="1" selected>First Semester 2023/2024</option>
-                            <option value="2">Second Semester 2022/2023</option>
-                            <option value="3">First Semester 2022/2023</option>
+                        <select id="gradeSemester" required>
+                            <option value="">-- Select Semester --</option>
+                            <?php
+                            if ($activeSemesters) {
+                                foreach ($activeSemesters as $semester) {
+                                    echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
+                                }
+                            } else {
+                                echo "<option value=''>No active semester</option>";
+                            }
+                            ?>
                         </select>
                     </div>
 
@@ -565,58 +582,17 @@ dd($activeStudentsExamAndAssessment);
                                 <th>GPA</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>CS301</td>
-                                <td>Database Management Systems</td>
-                                <td>3</td>
-                                <td><span class="grade-value a">A</span></td>
-                                <td>4.0</td>
-                            </tr>
-                            <tr>
-                                <td>CS302</td>
-                                <td>Software Engineering</td>
-                                <td>3</td>
-                                <td><span class="grade-value a">A-</span></td>
-                                <td>3.7</td>
-                            </tr>
-                            <tr>
-                                <td>CS303</td>
-                                <td>Computer Networks</td>
-                                <td>3</td>
-                                <td><span class="grade-value b">B+</span></td>
-                                <td>3.3</td>
-                            </tr>
-                            <tr>
-                                <td>CS304</td>
-                                <td>Operating Systems</td>
-                                <td>3</td>
-                                <td><span class="grade-value b">B</span></td>
-                                <td>3.0</td>
-                            </tr>
-                            <tr>
-                                <td>CS305</td>
-                                <td>Web Development</td>
-                                <td>3</td>
-                                <td><span class="grade-value a">A</span></td>
-                                <td>4.0</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="2"><strong>Semester Total</strong></td>
-                                <td><strong>15</strong></td>
-                                <td></td>
-                                <td><strong>3.6</strong></td>
-                            </tr>
-                        </tfoot>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
                     </table>
 
-                    <div style="margin-top: 20px; text-align: right;">
-                        <button class="action-btn" style="width: auto; height: auto; padding: 8px 15px; background-color: var(--primary-color);">
+                    <input type="hidden" name="viewGradesStudent" id="viewGradesStudent" value="<?= $student["index_number"] ?>">
+
+                    <div style="display: flex; margin-top: 20px; text-align: right;">
+                        <button class="action-btn" id="exportGradesToPDF" style="width: auto; height: auto; padding: 8px 15px; background-color: var(--primary-color); margin-right: 10px;">
                             <i class="fas fa-file-pdf"></i> Export as PDF
                         </button>
-                        <button class="action-btn" style="width: auto; height: auto; padding: 8px 15px; background-color: var(--success-color);">
+                        <button class="action-btn" id="exportGradesToExcel" style="width: auto; height: auto; padding: 8px 15px; background-color: var(--success-color);">
                             <i class="fas fa-file-excel"></i> Export as Excel
                         </button>
                     </div>
@@ -631,264 +607,518 @@ dd($activeStudentsExamAndAssessment);
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/main.js"></script>
     <script>
-        // Toggle sidebar
-        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('collapsed');
-            document.querySelector('.main-content').classList.toggle('expanded');
-        });
+        document.addEventListener('DOMContentLoaded', function() {
 
-        // Modal functionality
-        const modals = {
-            // addStudentModal: document.getElementById('addStudentModal'),
-            // importStudentsModal: document.getElementById('importStudentsModal'),
-            // courseRegistrationModal: document.getElementById('courseRegistrationModal'),
-            viewGradesModal: document.getElementById('viewGradesModal')
-        };
 
-        // Open modals
-        // document.getElementById('addStudentBtn').addEventListener('click', () => openModal('addStudentModal'));
-        // document.getElementById('importStudentsBtn').addEventListener('click', () => openModal('importStudentsModal'));
-        // document.getElementById('registerCoursesBtn').addEventListener('click', () => openModal('courseRegistrationModal'));
+            const applyButton = document.querySelector('.filter-btn.apply');
+            const resetButton = document.querySelector('.filter-btn.reset');
+            const studentCards = document.querySelectorAll('.student-card');
 
-        // View grades buttons
-        document.querySelectorAll('.view-grades-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const studentName = this.getAttribute('data-student');
-                document.getElementById('studentNameGrades').textContent = studentName;
-                openModal('viewGradesModal');
-            });
-        });
+            // Add event listeners
+            applyButton.addEventListener('click', applyFilters);
+            resetButton.addEventListener('click', resetFilters);
 
-        // Close modals
-        document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const modal = this.closest('.modal');
-                if (modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
+            /**
+             * Apply filters to the course grid
+             */
+            function applyFilters() {
+                const levelValue = levelFilter.value;
+                const semesterValue = semesterFilter.value;
+                const lecturerValue = lecturerFilter.value;
+                const statusValue = statusFilter.value;
 
-        function openModal(modalId) {
-            // Close all modals first
-            Object.values(modals).forEach(modal => {
-                modal.classList.remove('active');
-            });
+                // Loop through each student cards and check if it matches the filters
+                studentCards.forEach(card => {
+                    // Initially assume the card matches all filters
+                    let matchesSemester = true;
+                    let matchesLevel = true;
+                    let matchesLecturer = true;
+                    let matchesStatus = true;
 
-            // Open the requested modal
-            modals[modalId].classList.add('active');
-        }
-
-        // File input handling
-        // const fileInput = document.getElementById('studentFileInput');
-        // const fileNameDisplay = document.getElementById('selectedFileName');
-
-        // fileInput.addEventListener('change', function() {
-        //     if (this.files.length > 0) {
-        //         fileNameDisplay.textContent = this.files[0].name;
-        //     } else {
-        //         fileNameDisplay.textContent = '';
-        //     }
-        // });
-
-        // // Photo preview
-        // const photoInput = document.getElementById('studentPhoto');
-        // const photoPreview = document.getElementById('photoPreview');
-
-        // photoInput.addEventListener('change', function() {
-        //     if (this.files && this.files[0]) {
-        //         const reader = new FileReader();
-        //         reader.onload = function(e) {
-        //             photoPreview.src = e.target.result;
-        //         };
-        //         reader.readAsDataURL(this.files[0]);
-        //     }
-        // });
-
-        // // Import options toggle
-        // document.querySelectorAll('.import-option').forEach(option => {
-        //     option.addEventListener('click', function() {
-        //         document.querySelectorAll('.import-option').forEach(opt => opt.classList.remove('active'));
-        //         this.classList.add('active');
-
-        //         const importType = this.getAttribute('data-option');
-        //         if (importType === 'file') {
-        //             document.getElementById('fileImportSection').style.display = 'block';
-        //             document.getElementById('apiImportSection').style.display = 'none';
-        //         } else {
-        //             document.getElementById('fileImportSection').style.display = 'none';
-        //             document.getElementById('apiImportSection').style.display = 'block';
-        //         }
-        //     });
-        // });
-
-        // Course registration credit calculation
-        const courseCheckboxes = document.querySelectorAll('.course-checkbox input');
-        const totalCreditsDisplay = document.getElementById('totalCredits');
-        const creditProgress = document.getElementById('creditProgress');
-
-        courseCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateCredits);
-        });
-
-        function updateCredits() {
-            let totalCredits = 0;
-            courseCheckboxes.forEach(checkbox => {
-                if (checkbox.checked) {
-                    totalCredits += 3; // Assuming each course is 3 credits
-                }
-            });
-
-            totalCreditsDisplay.textContent = totalCredits;
-            const percentage = Math.min((totalCredits / 18) * 100, 100);
-            creditProgress.style.width = percentage + '%';
-
-            if (totalCredits > 18) {
-                creditProgress.style.backgroundColor = 'var(--danger-color)';
-                totalCreditsDisplay.style.color = 'var(--danger-color)';
-            } else {
-                creditProgress.style.backgroundColor = 'var(--accent-color)';
-                totalCreditsDisplay.style.color = 'var(--primary-color)';
-            }
-        }
-
-        // Form submissions
-        // document.getElementById('saveStudentBtn').addEventListener('click', function() {
-        //     const form = document.getElementById('addStudentForm');
-        //     if (form.checkValidity()) {
-        //         // Simulate form submission
-        //         alert('Student added successfully!');
-        //         modals.addStudentModal.classList.remove('active');
-        //         // In a real application, you would reset the form and update the UI
-        //     } else {
-        //         alert('Please fill all required fields.');
-        //     }
-        // });
-
-        // document.getElementById('importBtn').addEventListener('click', function() {
-        //     const activeOption = document.querySelector('.import-option.active').getAttribute('data-option');
-
-        //     if (activeOption === 'file') {
-        //         if (fileInput.files.length > 0) {
-        //             // Simulate file upload
-        //             alert('Students imported successfully!');
-        //             modals.importStudentsModal.classList.remove('active');
-        //             fileInput.value = '';
-        //             fileNameDisplay.textContent = '';
-        //         } else {
-        //             alert('Please select a file to upload.');
-        //         }
-        //     } else {
-        //         const endpoint = document.getElementById('apiEndpoint').value;
-        //         const apiKey = document.getElementById('apiKey').value;
-
-        //         if (endpoint && apiKey) {
-        //             // Simulate API import
-        //             alert('Students imported successfully from API!');
-        //             modals.importStudentsModal.classList.remove('active');
-        //         } else {
-        //             alert('Please provide API endpoint and key.');
-        //         }
-        //     }
-        // });
-
-        // document.getElementById('registerCoursesSubmitBtn').addEventListener('click', function() {
-        //     const student = document.getElementById('registrationStudent').value;
-        //     const totalCredits = parseInt(document.getElementById('totalCredits').textContent);
-
-        //     if (student && totalCredits > 0) {
-        //         if (totalCredits > 18) {
-        //             alert('Warning: Credit limit exceeded. Maximum allowed is 18 credits.');
-        //         } else {
-        //             // Simulate course registration
-        //             alert('Courses registered successfully!');
-        //             modals.courseRegistrationModal.classList.remove('active');
-        //         }
-        //     } else {
-        //         alert('Please select a student and at least one course.');
-        //     }
-        // });
-
-        // Edit and archive student buttons
-        document.querySelectorAll('.edit-student').forEach(button => {
-            button.addEventListener('click', function() {
-                const studentCard = this.closest('.student-card');
-                const studentName = studentCard.querySelector('.student-name').textContent;
-                alert(`Edit student: ${studentName}`);
-                // In a real application, you would populate the edit form with student data
-                openModal('addStudentModal');
-            });
-        });
-
-        document.querySelectorAll('.archive-student').forEach(button => {
-            button.addEventListener('click', function() {
-                const studentCard = this.closest('.student-card');
-                const studentName = studentCard.querySelector('.student-name').textContent;
-                if (confirm(`Are you sure you want to archive ${studentName}?`)) {
-
-                    const indexNumber = this.id;
-
-                    if (!indexNumber) {
-                        alert("There was an error archiving the student. Please try again.");
-                        return;
+                    // Check semester filter
+                    if (semesterValue !== 'all') {
+                        // Get semester value from the card
+                        const cardSemester = card.dataset.semester;
+                        matchesSemester = cardSemester === semesterValue;
                     }
 
-                    // Simulate API call
-                    const formData = {
-                        indexNumber: indexNumber
-                    };
+                    // Check level filter
+                    if (levelValue !== 'all') {
+                        // Get level value from the card
+                        const cardSemester = card.dataset.level;
+                        matchesSemester = cardSemester === levelValue;
+                    }
 
-                    console.log(formData);
+                    // Check lecturer filter
+                    if (lecturerValue !== 'all') {
+                        const lecturerNumber = card.dataset.lecturerNumber || '';
 
-                    $.ajax({
-                        type: "POST",
-                        url: "../endpoint/archive-student",
-                        data: formData,
-                        success: function(result) {
-                            console.log(result);
-                            if (result.success) {
-                                alert(result.message);
-                                studentCard.remove();
-                            } else {
-                                alert(result.message);
-                            }
-                        },
-                        error: function(error) {
-                            console.log(error);
+                        if (lecturerValue === 'unassigned') {
+                            // If filtering for unassigned courses
+                            matchesLecturer = lecturerNumber === '' || lecturerNumber === 'null';
+                        } else {
+                            // If filtering for a specific lecturer
+                            matchesLecturer = lecturerNumber === lecturerValue;
                         }
-                    });
-                }
-            });
-        });
+                    }
 
-        // Filter functionality
-        document.querySelector('.filter-btn.apply').addEventListener('click', function() {
-            // Simulate filtering
-        });
+                    // Check status filter
+                    if (statusValue !== 'all') {
+                        const hasLecturer = card.dataset.lecturerNumber && card.dataset.lecturerNumber !== 'null';
+                        const hasDeadline = card.dataset.hasDeadline === 'true';
 
-        document.querySelector('.filter-btn.reset').addEventListener('click', function() {
-            // Reset all filter inputs
-            document.querySelectorAll('.filter-group select, .filter-group input').forEach(input => {
-                input.value = 'all';
-            });
-        });
+                        switch (statusValue) {
+                            case 'active':
+                                matchesStatus = hasLecturer;
+                                break;
+                            case 'deferred':
+                                matchesStatus = !hasLecturer;
+                                break;
+                        }
+                    }
 
-        // Pagination
-        document.querySelectorAll('.pagination .page-item:not(.disabled)').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.pagination .page-item').forEach(p => {
-                    p.classList.remove('active');
+                    // Show or hide the card based on combined filter results
+                    if (matchesSemester && matchesLevel && matchesLecturer && matchesStatus) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
-                this.classList.add('active');
-                // In a real application, you would load the corresponding page of students
-            });
+
+                // Display message if no courses match the filters
+                updateNoCoursesMessage();
+            }
+
+            /**
+             * Reset all filters and show all courses
+             */
+            function resetFilters() {
+                // Reset filter dropdowns to default values
+                semesterFilter.value = 'all';
+                levelFilter.value = 'all';
+                lecturerFilter.value = 'all';
+                statusFilter.value = 'all';
+
+                // Show all student cardss
+                studentCards.forEach(card => {
+                    card.style.display = '';
+                });
+
+                // Hide "no courses" message if it exists
+                const noCoursesMessage = document.querySelector('.no-courses');
+                if (noCoursesMessage) {
+                    noCoursesMessage.style.display = 'none';
+                }
+            }
+
+            // Add data attributes to student cardss for easier filtering
+            function initializeDataAttributes() {
+                studentCards.forEach(card => {
+                    // Extract course data from the card elements
+                    const courseTitle = card.querySelector('.course-title').textContent;
+                    const courseCode = card.querySelector('.course-code').textContent;
+
+                    // Extract semester information
+                    const semesterText = card.querySelector('.course-details .detail-item:nth-child(4) .detail-value').textContent;
+                    const semesterValue = semesterText.includes('First') ? '1' :
+                        semesterText.includes('Second') ? '2' : '';
+                    card.dataset.semester = semesterValue;
+
+                    // Extract level information
+                    const levelElement = card.querySelector('.course-details .detail-item:nth-child(3) .detail-value');
+                    const levelValue = levelElement ? levelElement.textContent : '';
+                    card.dataset.level = levelValue;
+
+                    // Extract lecturer information
+                    const lecturerInfo = card.querySelector('.lecturer-info');
+                    const lecturerName = lecturerInfo.querySelector('.lecturer-name');
+
+                    if (lecturerName) {
+                        // Set a data attribute for the lecturer number if we can extract it
+                        // This is a placeholder - you'll need to adapt based on your actual HTML structure
+                        // In a real scenario, this would be added server-side directly to the HTML
+                        const lecturerNameText = lecturerName.textContent;
+
+                        // Since we don't have direct access to lecturer numbers in the HTML,
+                        // we'll use a lookup based on the dataset you provided
+                        const lecturerMapping = {
+                            'Mr. Francis Anlimah': 'ICT0002'
+                            // Add more mappings as needed
+                        };
+
+                        const lecturerNumber = lecturerMapping[lecturerNameText.trim()] || '';
+                        card.dataset.lecturerNumber = lecturerNumber;
+                    } else {
+                        card.dataset.lecturerNumber = 'null';
+                    }
+
+                    // Check if the course has a deadline
+                    const deadlineInfo = card.querySelector('.deadline-info');
+                    const hasDeadline = !deadlineInfo.textContent.includes('No deadline set');
+                    card.dataset.hasDeadline = hasDeadline;
+                });
+            }
+
+            // Initialize data attributes
+            initializeDataAttributes();
         });
 
-        // Export Data
-        // document.getElementById('exportDataBtn').addEventListener('click', function() {
-        //     // Simulate export
-        //     alert('Student data exported successfully!');
-        // });
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Toggle sidebar
+            document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('collapsed');
+                document.querySelector('.main-content').classList.toggle('expanded');
+            });
+
+            // Modal functionality
+            const modals = {
+                // addStudentModal: document.getElementById('addStudentModal'),
+                // importStudentsModal: document.getElementById('importStudentsModal'),
+                // courseRegistrationModal: document.getElementById('courseRegistrationModal'),
+                viewGradesModal: document.getElementById('viewGradesModal')
+            };
+
+            // Open modals
+            // document.getElementById('addStudentBtn').addEventListener('click', () => openModal('addStudentModal'));
+            // document.getElementById('importStudentsBtn').addEventListener('click', () => openModal('importStudentsModal'));
+            // document.getElementById('registerCoursesBtn').addEventListener('click', () => openModal('courseRegistrationModal'));
+
+            // Close modals
+            document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+
+            function openModal(modalId) {
+                // Close all modals first
+                Object.values(modals).forEach(modal => {
+                    modal.classList.remove('active');
+                });
+
+                // Open the requested modal
+                modals[modalId].classList.add('active');
+            }
+
+            // File input handling
+            // const fileInput = document.getElementById('studentFileInput');
+            // const fileNameDisplay = document.getElementById('selectedFileName');
+
+            // fileInput.addEventListener('change', function() {
+            //     if (this.files.length > 0) {
+            //         fileNameDisplay.textContent = this.files[0].name;
+            //     } else {
+            //         fileNameDisplay.textContent = '';
+            //     }
+            // });
+
+            // // Photo preview
+            // const photoInput = document.getElementById('studentPhoto');
+            // const photoPreview = document.getElementById('photoPreview');
+
+            // photoInput.addEventListener('change', function() {
+            //     if (this.files && this.files[0]) {
+            //         const reader = new FileReader();
+            //         reader.onload = function(e) {
+            //             photoPreview.src = e.target.result;
+            //         };
+            //         reader.readAsDataURL(this.files[0]);
+            //     }
+            // });
+
+            // // Import options toggle
+            // document.querySelectorAll('.import-option').forEach(option => {
+            //     option.addEventListener('click', function() {
+            //         document.querySelectorAll('.import-option').forEach(opt => opt.classList.remove('active'));
+            //         this.classList.add('active');
+
+            //         const importType = this.getAttribute('data-option');
+            //         if (importType === 'file') {
+            //             document.getElementById('fileImportSection').style.display = 'block';
+            //             document.getElementById('apiImportSection').style.display = 'none';
+            //         } else {
+            //             document.getElementById('fileImportSection').style.display = 'none';
+            //             document.getElementById('apiImportSection').style.display = 'block';
+            //         }
+            //     });
+            // });
+
+            // Course registration credit calculation
+            const courseCheckboxes = document.querySelectorAll('.course-checkbox input');
+            const totalCreditsDisplay = document.getElementById('totalCredits');
+            const creditProgress = document.getElementById('creditProgress');
+
+            courseCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateCredits);
+            });
+
+            function updateCredits() {
+                let totalCredits = 0;
+                courseCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        totalCredits += 3; // Assuming each course is 3 credits
+                    }
+                });
+
+                totalCreditsDisplay.textContent = totalCredits;
+                const percentage = Math.min((totalCredits / 18) * 100, 100);
+                creditProgress.style.width = percentage + '%';
+
+                if (totalCredits > 18) {
+                    creditProgress.style.backgroundColor = 'var(--danger-color)';
+                    totalCreditsDisplay.style.color = 'var(--danger-color)';
+                } else {
+                    creditProgress.style.backgroundColor = 'var(--accent-color)';
+                    totalCreditsDisplay.style.color = 'var(--primary-color)';
+                }
+            }
+
+            // Form submissions
+            // document.getElementById('saveStudentBtn').addEventListener('click', function() {
+            //     const form = document.getElementById('addStudentForm');
+            //     if (form.checkValidity()) {
+            //         // Simulate form submission
+            //         alert('Student added successfully!');
+            //         modals.addStudentModal.classList.remove('active');
+            //         // In a real application, you would reset the form and update the UI
+            //     } else {
+            //         alert('Please fill all required fields.');
+            //     }
+            // });
+
+            // document.getElementById('importBtn').addEventListener('click', function() {
+            //     const activeOption = document.querySelector('.import-option.active').getAttribute('data-option');
+
+            //     if (activeOption === 'file') {
+            //         if (fileInput.files.length > 0) {
+            //             // Simulate file upload
+            //             alert('Students imported successfully!');
+            //             modals.importStudentsModal.classList.remove('active');
+            //             fileInput.value = '';
+            //             fileNameDisplay.textContent = '';
+            //         } else {
+            //             alert('Please select a file to upload.');
+            //         }
+            //     } else {
+            //         const endpoint = document.getElementById('apiEndpoint').value;
+            //         const apiKey = document.getElementById('apiKey').value;
+
+            //         if (endpoint && apiKey) {
+            //             // Simulate API import
+            //             alert('Students imported successfully from API!');
+            //             modals.importStudentsModal.classList.remove('active');
+            //         } else {
+            //             alert('Please provide API endpoint and key.');
+            //         }
+            //     }
+            // });
+
+            // document.getElementById('registerCoursesSubmitBtn').addEventListener('click', function() {
+            //     const student = document.getElementById('registrationStudent').value;
+            //     const totalCredits = parseInt(document.getElementById('totalCredits').textContent);
+
+            //     if (student && totalCredits > 0) {
+            //         if (totalCredits > 18) {
+            //             alert('Warning: Credit limit exceeded. Maximum allowed is 18 credits.');
+            //         } else {
+            //             // Simulate course registration
+            //             alert('Courses registered successfully!');
+            //             modals.courseRegistrationModal.classList.remove('active');
+            //         }
+            //     } else {
+            //         alert('Please select a student and at least one course.');
+            //     }
+            // });
+
+            // Edit and archive student buttons
+            document.querySelectorAll('.edit-student').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentCard = this.closest('.student-card');
+                    const studentName = studentCard.querySelector('.student-name').textContent;
+                    alert(`Edit student: ${studentName}`);
+                    // In a real application, you would populate the edit form with student data
+                    openModal('addStudentModal');
+                });
+            });
+
+            document.querySelectorAll('.archive-student').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentCard = this.closest('.student-card');
+                    const studentName = studentCard.querySelector('.student-name').textContent;
+                    if (confirm(`Are you sure you want to archive ${studentName}?`)) {
+
+                        const indexNumber = this.id;
+
+                        if (!indexNumber) {
+                            alert("There was an error archiving the student. Please try again.");
+                            return;
+                        }
+
+                        // Simulate API call
+                        const formData = {
+                            indexNumber: indexNumber
+                        };
+
+                        console.log(formData);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "../endpoint/archive-student",
+                            data: formData,
+                            success: function(result) {
+                                console.log(result);
+                                if (result.success) {
+                                    alert(result.message);
+                                    studentCard.remove();
+                                } else {
+                                    alert(result.message);
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // View grades buttons
+            document.querySelectorAll('.view-grades-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentName = this.getAttribute('data-student');
+                    const indexNumber = this.id;
+                    document.getElementById('studentNameGrades').textContent = `${studentName} (${indexNumber})`;
+                    document.getElementById('viewGradesStudent').value = indexNumber;
+                    openModal('viewGradesModal');
+                });
+            });
+
+            document.getElementById('gradeSemester').addEventListener('change', function() {
+                const selectedSemester = this.value;
+                const indexNumber = document.getElementById('viewGradesStudent').value;
+                if (!indexNumber) {
+                    alert("There was an error retrieving the student's grades. Please try again.");
+                    return;
+                }
+                // Simulate API call
+                const formData = {
+                    indexNumber: indexNumber,
+                    semester: selectedSemester
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "../endpoint/fetch-student-grades",
+                    data: formData,
+                    success: function(result) {
+                        console.log(result);
+                        if (result.success) {
+                            console.log("result", result.data);
+                            // Populate the grades table with the result data
+                            // For example, you can use result.data to fill the table
+                            const gradesTableBody = document.querySelector('.grades-table tbody');
+                            const gradesTableFoot = document.querySelector('.grades-table tfoot');
+                            let totalCredits = 0;
+                            let totalGpa = 0;
+                            gradesTableBody.innerHTML = ''; // Clear existing rows
+                            result.data.forEach(grade => {
+                                const row = document.createElement('tr');
+                                gradeColor = '';
+                                switch (grade.grade) {
+                                    case 'A':
+                                        gradeColor = 'A'.toLowerCase();
+                                        break;
+                                    case 'A-':
+                                        gradeColor = 'A-minus'.toLowerCase();
+                                        break;
+                                    case 'B+':
+                                        gradeColor = 'B-plus'.toLowerCase();
+                                        break;
+                                    case 'B':
+                                        gradeColor = 'B'.toLowerCase();
+                                        break;
+                                    case 'C+':
+                                        gradeColor = 'C-plus'.toLowerCase();
+                                        break;
+                                    case 'C':
+                                        gradeColor = 'C'.toLowerCase();
+                                        break;
+                                    case 'D':
+                                        gradeColor = 'D'.toLowerCase();
+                                        break;
+                                    case 'E':
+                                        gradeColor = 'E'.toLowerCase();
+                                        break;
+                                    case 'F':
+                                        gradeColor = 'F'.toLowerCase();
+                                        break;
+                                    default:
+                                        gradeColor = 'N/A';
+                                }
+                                row.innerHTML = `
+                                    <td>${grade.course_code}</td>
+                                    <td>${grade.course_name}</td>
+                                    <td>${grade.course_credit_hours}</td>
+                                    <td><span class="grade-value ${gradeColor}">${grade.grade}</span></td>
+                                    <td>${grade.gpa}</td>
+                                `;
+                                gradesTableBody.appendChild(row);
+                                totalCredits += parseInt(grade.course_credit_hours);
+                                totalGpa += parseFloat(grade.gpa);
+                            });
+                            const averageGpa = (totalGpa / result.data.length).toFixed(2);
+                            const footerRow = document.createElement('tr');
+                            gradesTableFoot.innerHTML = ''; // Clear existing rows
+                            footerRow.innerHTML = `
+                            <td colspan="2"><strong>Semester Total</strong></td>
+                            <td><strong>${totalCredits}</strong></td>
+                            <td></td>
+                            <td><strong>${averageGpa}</strong></td>
+                        `;
+                            gradesTableFoot.appendChild(footerRow);
+                        } else {
+                            alert(result.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Filter functionality
+            document.querySelector('.filter-btn.apply').addEventListener('click', function() {
+                // Simulate filtering
+            });
+
+            document.querySelector('.filter-btn.reset').addEventListener('click', function() {
+                // Reset all filter inputs
+                document.querySelectorAll('.filter-group select, .filter-group input').forEach(input => {
+                    input.value = 'all';
+                });
+            });
+
+            // Pagination
+            document.querySelectorAll('.pagination .page-item:not(.disabled)').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.pagination .page-item').forEach(p => {
+                        p.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    // In a real application, you would load the corresponding page of students
+                });
+            });
+
+            // Export Data
+            // document.getElementById('exportDataBtn').addEventListener('click', function() {
+            //     // Simulate export
+            //     alert('Student data exported successfully!');
+            // });
+        });
     </script>
 </body>
 

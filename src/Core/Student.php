@@ -160,6 +160,37 @@ class Student
         );
     }
 
+    public function delete(string $index_number)
+    {
+        $query = "DELETE FROM `student` WHERE `index_number` = :i";
+        $params = array(":i" => $index_number);
+        $query_result = $this->dm->inputData($query, $params);
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "DELETE", "secretary", "Student Deletion", "Deleted student {$index_number}");
+            return array("success" => true, "message" => "Student with index number {$index_number} successfully deleted!");
+        }
+        return array("success" => false, "message" => "Failed to delete student!");
+    }
+
+    public function fetchStudentGrades(string $index_number, int $semester)
+    {
+        $query = "SELECT 
+                    s.`index_number`, sca.`fk_semester` AS semester_id, sca.`fk_course` AS course_code, c.`name` AS course_name, 
+                    sca.`credit_hours` AS course_credit_hours, sca.`level` AS course_level, sca.`semester` AS course_semester, 
+                    sca.`continues_assessments` AS continues_assessments_score, sca.`exam` AS exam_score, sca.`final_score`, sca.`grade`, sca.`gpa`  
+                FROM `student_course_assignments` AS sca 
+                JOIN `student` AS s ON sca.`fk_student` = s.`index_number` 
+                JOIN `course` AS c ON sca.`fk_course` = c.`code` 
+                JOIN `semester` AS m ON sca.`fk_semester` = m.`id` 
+                WHERE sca.`fk_student` = :i AND sca.`fk_semester` = :s";
+        $params = array(":i" => $index_number, ":s" => $semester);
+        $ressult = $this->dm->getData($query, $params);
+        if (!$ressult) {
+            return array("success" => false, "message" => "No grades found for student {$index_number} in semester {$semester}");
+        }
+        return array("success" => true, "data" => $ressult);
+    }
+
     // calculate the cgpa of a student
     public function calculateGPAAndCGPA(string $index_number, string $semester = "")
     {

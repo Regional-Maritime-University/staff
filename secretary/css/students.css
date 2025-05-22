@@ -269,11 +269,23 @@
 }
 
 .grade-value.a {
-	color: var(--success-color);
+	color: #1e88e5;
+}
+
+.grade-value.a-minus {
+	color: #388e3c;
+}
+
+.grade-value.b-plus {
+	color: #66bb6a;
 }
 
 .grade-value.b {
 	color: #4caf50;
+}
+
+.grade-value.c-plus {
+	color: #ffa726;
 }
 
 .grade-value.c {
@@ -282,6 +294,10 @@
 
 .grade-value.d {
 	color: var(--warning-color);
+}
+
+.grade-value.e {
+	color: #ff9800;
 }
 
 .grade-value.f {
