@@ -56,7 +56,8 @@ $archived = false;
 $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
 
-$activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(departmentId: $departmentId);
+$activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(semesterId: 2);
+dd($activeStudentsExamAndAssessment);
 
 ?>
 
@@ -195,8 +196,8 @@ $activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAsse
                                     <!-- <button class="student-action edit-student" title="Edit Student">
                                         <i class="fas fa-edit"></i>
                                     </button> -->
-                                    <button class="student-action archive-student" title="Archive Student">
-                                        <i class="fas fa-archive"></i>
+                                    <button class="student-action archive-student" title="Archive Student" id="<?= $student["index_number"] ?>">
+                                        <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
                             </div>
@@ -627,6 +628,8 @@ $activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAsse
         </div>
     </div>
 
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/main.js"></script>
     <script>
         // Toggle sidebar
         document.querySelector('.toggle-sidebar').addEventListener('click', function() {
@@ -822,9 +825,38 @@ $activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAsse
                 const studentCard = this.closest('.student-card');
                 const studentName = studentCard.querySelector('.student-name').textContent;
                 if (confirm(`Are you sure you want to archive ${studentName}?`)) {
-                    // Simulate deletion
-                    studentCard.remove();
-                    alert('Student archived successfully!');
+
+                    const indexNumber = this.id;
+
+                    if (!indexNumber) {
+                        alert("There was an error archiving the student. Please try again.");
+                        return;
+                    }
+
+                    // Simulate API call
+                    const formData = {
+                        indexNumber: indexNumber
+                    };
+
+                    console.log(formData);
+
+                    $.ajax({
+                        type: "POST",
+                        url: "../endpoint/archive-student",
+                        data: formData,
+                        success: function(result) {
+                            console.log(result);
+                            if (result.success) {
+                                alert(result.message);
+                                studentCard.remove();
+                            } else {
+                                alert(result.message);
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
                 }
             });
         });

@@ -135,8 +135,29 @@ class Student
         $query = "UPDATE `student` SET `archived` = 1 WHERE `index_number` = :i";
         $params = array(":i" => $index_number);
         $query_result = $this->dm->inputData($query, $params);
-        if ($query_result) $this->log->activity($_SESSION["staff"]["number"], "ARCHIVE", "secretary", "Student Archive", "Archived student {$index_number}");
-        return $query_result;
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "ARCHIVE", "secretary", "Student Archive", "Archived student {$index_number}");
+            return array("success" => true, "message" => "Student with index number {$index_number} successfully archived!");
+        }
+        return array("success" => false, "message" => "Failed to archive student!");
+    }
+
+    public function unarchive(array $students)
+    {
+        $unarchived = 0;
+        foreach ($students as $student) {
+            $query = "UPDATE `student` SET `archived` = 0 WHERE `index_number` = :i";
+            $query_result = $this->dm->inputData($query, array(":i" => $student));
+            if ($query_result) {
+                $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Student Archive", "Unarchived student {$student}");
+                $unarchived += 1;
+            }
+        }
+        return array(
+            "success" => true,
+            "message" => "{$unarchived} successfully unarchived!",
+            "errors" => "Failed to unarchive " . (count($students) - $unarchived) . " students"
+        );
     }
 
     // calculate the cgpa of a student

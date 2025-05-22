@@ -166,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     //Departments
-
     elseif ($_GET["url"] == "fetch-department") {
         if (! isset($_POST["department"]) || empty($_POST["department"])) {
             die(json_encode(["success" => false, "message" => "Department id is required!"]));
@@ -205,8 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode($department->total($_POST["archived"])));
     }
 
-    //programs
-
+    //staffs
     elseif ($_GET["url"] == "fetch-staff") {
         if (isset($_POST["staff"]) && ! empty($_POST["staff"])) {
             $_POST["key"]   = "number";
@@ -262,7 +260,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     //programs
-
     elseif ($_GET["url"] == "fetch-program") {
         die(json_encode($program->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
     } elseif ($_GET["url"] == "add-program") {
@@ -278,7 +275,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     //courses
-
     elseif ($_GET["url"] == "fetch-course") {
         if (isset($_POST["course"]) && ! empty($_POST["course"])) {
             $_POST["key"]   = "code";
@@ -302,16 +298,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Department is required!"]));
         }
         die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($_POST["department"])]));
-    }
-    // fetch semester courses
-    elseif ($_GET["url"] == "fetch-semester-courses") {
+    } elseif ($_GET["url"] == "fetch-semester-courses") {
         if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester is required!"]));
         }
         die(json_encode(["success" => true, "data" => $secretary->fetchSemesterCourses($_POST["semester"])]));
-    }
-    //add
-    elseif ($_GET["url"] == "add-course") {
+    } elseif ($_GET["url"] == "add-course") {
         if (! isset($_POST["courseCode"]) || empty($_POST["courseCode"])) {
             die(json_encode(["success" => false, "message" => "Course code is required!"]));
         }
@@ -338,13 +330,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
 
         die(json_encode($course->add($_POST)));
-    }
-    //edit
-    elseif ($_GET["url"] == "edit-course") {
-        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+    } elseif ($_GET["url"] == "edit-course") {
+        if (! isset($_POST["courseCode"]) || empty($_POST["courseCode"])) {
             die(json_encode(["success" => false, "message" => "Course code is required!"]));
         }
-        if (! isset($_POST["name"]) || empty($_POST["name"])) {
+        if (! isset($_POST["courseName"]) || empty($_POST["courseName"])) {
             die(json_encode(["success" => false, "message" => "Course name is required!"]));
         }
         if (! isset($_POST["creditHours"]) || empty($_POST["creditHours"])) {
@@ -362,31 +352,23 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["category"]) || empty($_POST["category"])) {
             die(json_encode(["success" => false, "message" => "Course category is required!"]));
         }
-        if (! isset($_POST["department"]) || empty($_POST["department"])) {
+        if (! isset($_POST["departmentId"]) || empty($_POST["departmentId"])) {
             die(json_encode(["success" => false, "message" => "Course department is required!"]));
         }
         die(json_encode($course->update($_POST)));
-    }
-    //archive
-    elseif ($_GET["url"] == "archive-course") {
+    } elseif ($_GET["url"] == "archive-course") {
+        if (! isset($_POST["courseCode"]) || empty($_POST["courseCode"])) {
+            die(json_encode(["success" => false, "message" => "Course code is required!"]));
+        }
+        die(json_encode($course->archive($_POST["courseCode"])));
+    } elseif ($_GET["url"] == "delete-course") {
         if (! isset($_POST["code"]) || empty($_POST["code"])) {
             die(json_encode(["success" => false, "message" => "Course code is required!"]));
         }
         die(json_encode($course->archive($_POST["code"])));
-    }
-    //delete
-    elseif ($_GET["url"] == "delete-course") {
-        if (! isset($_POST["code"]) || empty($_POST["code"])) {
-            die(json_encode(["success" => false, "message" => "Course code is required!"]));
-        }
-        die(json_encode($course->archive($_POST["code"])));
-    }
-    //total
-    elseif ($_GET["url"] == "total-course") {
+    } elseif ($_GET["url"] == "total-course") {
         die(json_encode($program->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
-    }
-    //upload
-    elseif ($_GET["url"] == "upload-courses") {
+    } elseif ($_GET["url"] == "upload-courses") {
         if (! isset($_FILES["courseFile"]) || empty($_FILES["courseFile"])) {
             die(json_encode(["success" => false, "message" => "Invalid request. An Excel file is required!"]));
         }
@@ -454,6 +436,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode($program->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
     } elseif ($_GET["url"] == "update-student") {
         die(json_encode($student->update($_POST)));
+    } elseif ($_GET["url"] == "archive-student") {
+        if (! isset($_POST["indexNumber"]) || empty($_POST["indexNumber"])) {
+            die(json_encode(["success" => false, "message" => "Student's index number is required!"]));
+        }
+        die(json_encode($student->archive($_POST["indexNumber"])));
     }
 
     // Deadline

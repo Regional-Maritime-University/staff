@@ -116,14 +116,14 @@ class SecretaryController
         $params = [":ar" => $archived];
         $where = " WHERE c.`fk_category` = cg.`id` AND c.`archived` = :ar ";
         $joins = "";
-        $selectExtra = "";
+        $selectExtra = ", cg.`id` AS category_id, cg.`name` AS category_name ";
 
         // Department filter
         if ($departmentId) {
             $joins .= " LEFT JOIN `department` AS d ON c.`fk_department` = d.`id` ";
             $where .= " AND d.`id` = :d ";
             $params[":d"] = $departmentId;
-            $selectExtra .= ", c.`fk_department`, d.`name` AS `department_name` ";
+            $selectExtra .= ", c.`fk_department` AS department_id, d.`name` AS `department_name` ";
         }
 
         // Semester filter
@@ -628,12 +628,10 @@ class SecretaryController
         return $students;
     }
 
-    public function fetchAllActiveStudentsExamAndAssessment($departmentId = null, $archived = false)
+    public function fetchAllActiveStudentsExamAndAssessment($semesterId)
     {
-        $query = "SELECT sca.* 
-                FROM `student` AS s, `department` AS d, `student_course_assignments` AS sca 
-                WHERE s.`fk_department` = d.`id` AND d.`id` = :d AND s.`archived` = :ar AND sca.`status` = 'active'";
-        return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
+        $query = "CALL `calculate_all_students_gpa_cgpa`(:s)";
+        return $this->dm->getData($query, array(":s" => $semesterId));
     }
 
     public function fetchSemesterCourses($semester)

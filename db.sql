@@ -235,27 +235,40 @@ DELIMITER //
 CREATE PROCEDURE calculate_all_students_gpa_cgpa(IN in_semester_id INT)
 BEGIN
     SELECT 
-        s.id AS student_id,
-        s.name,
-        ROUND(
-            SUM(CASE WHEN sca.fk_semester = in_semester_id THEN gp.point * sca.credit_hours ELSE 0 END) /
-            NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0),
-            2
-        ) AS gpa,
-        ROUND(
-            SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0),
-            2
-        ) AS cgpa
-    FROM students s
-    JOIN student_course_assignments sca ON s.id = sca.fk_student
-    JOIN grade_points gp ON sca.grade = gp.grade
-    WHERE s.status = 'active'
-    GROUP BY s.id;
+        s.index_number, 
+        ROUND(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN gp.point * sca.credit_hours ELSE 0 END) /
+            NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0), 2) AS gpa,
+        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
+    FROM student AS s 
+    JOIN student_course_assignments AS sca ON s.index_number = sca.fk_student 
+    JOIN grade_points AS gp ON sca.grade = gp.grade 
+    WHERE s.archived = 1 
+    GROUP BY s.index_number 
 END;
 //
 
 DELIMITER ;
 
+-- 
+DELIMITER //
+
+CREATE PROCEDURE calculate_all_students_gpa_cgpa_in_a_department(IN in_department_id INT, IN in_semester_id INT)
+BEGIN
+    SELECT 
+        s.index_number AS student_id, 
+        ROUND(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN gp.point * sca.credit_hours ELSE 0 END) /
+            NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0), 2) AS gpa,
+        ROUND( SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2 ) AS cgpa
+    FROM students AS s 
+    JOIN student_course_assignments AS sca ON s.index_number = sca.fk_student 
+    JOIN department AS d ON s.fk_department = d.id 
+    JOIN grade_points AS gp ON sca.grade = gp.grade 
+    WHERE s.status = 'active' AND d.id = in_department_id 
+    GROUP BY s.index_number;
+END;
+//
+
+DELIMITER ;
 
 
 

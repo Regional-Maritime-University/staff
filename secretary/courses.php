@@ -244,11 +244,11 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                     <div class="course-code"><?= $course["code"] ?></div>
                                 </div>
                                 <div class="course-actions">
-                                    <button class="action-icon edit-course" title="Edit Course">
+                                    <button class="action-icon edit-course" title="Edit Course" id="<?= $course["code"] ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-icon delete-course" title="Delete Course">
-                                        <i class="fas fa-trash"></i>
+                                    <button class="action-icon archive-course" title="Archive Course" id="<?= $course["code"] ?>">
+                                        <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
                             </div>
@@ -380,6 +380,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             </select>
                         </div>
                         <input type="hidden" name="department" id="courseDepartment" value="<?= $departmentId ?>">
+                        <input type="hidden" name="action" id="courseAction" value="add">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -880,19 +881,19 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 button.addEventListener('click', function() {
                     const modal = this.closest('.modal');
                     if (modal) {
+                        const form = modal.querySelector('form');
+                        if (form) form.reset();
                         modal.classList.remove('active');
                     }
                 });
             });
 
             let semesterCourses = assignedCourses = null;
+            let activeCourses = <?= json_encode($activeCourses) ?>;
             const user = <?= json_encode($staffData); ?>;
-
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
 
-            let activeCourses = <?= json_encode($activeCourses) ?>;
-            console.log("Active Courses", activeCourses);
 
             // Open modals
             document.getElementById('addCourseBtn').addEventListener('click', () => openModal('addCourseModal'));
@@ -931,10 +932,25 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 const courseCategory = document.getElementById("courseCategory");
                 const courseSemester = document.getElementById("courseSemester");
                 const department = document.getElementById("courseDepartment");
+                const courseAction = document.getElementById("courseAction");
 
                 if (!courseCode.value || !courseName.value || !creditHours.value || !contactHours.value || !department.value || !courseLevel.value || !courseSemester.value) {
                     alert("Please fill in all required fields");
                     return;
+                }
+
+                let url = null;
+
+                switch (courseAction.value) {
+                    case "add":
+                        url = "../endpoint/add-course";
+                        break;
+                    case "edit":
+                        url = "../endpoint/edit-course";
+                        break;
+                    default:
+                        alert("Invalid action");
+                        return;
                 }
 
                 // Simulate API call
@@ -951,13 +967,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
 
                 $.ajax({
                     type: "POST",
-                    url: "../endpoint/add-course",
+                    url: url,
                     data: formData,
                     success: function(result) {
                         console.log(result);
                         if (result.success) {
                             alert(result.message);
-                            //closeModal("addCourseModal');
                             form.reset();
                             closeModal("addCourseModal");
                         } else {
@@ -1455,6 +1470,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         .then(data => {
                             if (data.success) {
                                 assignedCourses = data.data;
+                                console.log("Assigned Courses", assignedCourses);
                                 setTimeout(() => {
                                     searchCourses();
                                 }, 100);
@@ -1553,42 +1569,80 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
             });
 
-            // Edit and delete course buttons
+            // Edit and archive course buttons
             document.querySelectorAll('.edit-course').forEach(button => {
                 button.addEventListener('click', function() {
                     const courseCard = this.closest('.course-card');
                     const courseTitle = courseCard.querySelector('.course-title').textContent;
-                    alert(`Edit course: ${courseTitle}`);
                     // In a real application, you would populate the edit form with course data
+                    const courseCode = this.id;
+                    const course = activeCourses.find(course => course.code === courseCode);
+                    if (course) {
+                        // Populate the edit form with course data
+                        document.getElementById("courseAction").value = "edit";
+                        document.getElementById("courseCode").value = course.code;
+                        document.getElementById("courseName").value = course.name;
+                        document.getElementById("creditHours").value = course.credit_hours;
+                        document.getElementById("contactHours").value = course.contact_hours;
+                        document.getElementById("courseLevel").value = course.level;
+                        document.getElementById("courseCategory").value = course.category_id;
+                        document.getElementById("courseSemester").value = course.semester;
+                        document.getElementById("courseDepartment").value = course.department_id;
+                        // Open the course modal
+                        openModal('addCourseModal');
+                    } else {
+                        alert("Course not found");
+                    }
                     openModal('addCourseModal');
                 });
             });
 
-            document.querySelectorAll('.delete-course').forEach(button => {
+            document.querySelectorAll('.archive-course').forEach(button => {
                 button.addEventListener('click', function() {
                     const courseCard = this.closest('.course-card');
                     const courseTitle = courseCard.querySelector('.course-title').textContent;
-                    if (confirm(`Are you sure you want to delete the course: ${courseTitle}?`)) {
-                        // Simulate deletion
-                        courseCard.remove();
-                        alert('Course deleted successfully!');
+                    if (confirm(`Are you sure you want to archive the course: ${courseTitle}?`)) {
+                        const courseCode = this.id;
+
+                        if (!courseCode) {
+                            alert("There was an error archiving the course. Please try again.");
+                            return;
+                        }
+
+                        // Simulate API call
+                        const formData = {
+                            courseCode: courseCode
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "../endpoint/archive-course",
+                            data: formData,
+                            success: function(result) {
+                                console.log(result);
+                                if (result.success) {
+                                    alert(result.message);
+                                    courseCard.remove();
+                                } else {
+                                    alert(result.message);
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
                     }
                 });
             });
 
             // Filter functionality
-            document.querySelector('.filter-btn.apply').addEventListener('click', function() {
-                // Simulate filtering
-                alert('Filters applied!');
-            });
+            document.querySelector('.filter-btn.apply').addEventListener('click', function() {});
 
             document.querySelector('.filter-btn.reset').addEventListener('click', function() {
                 // Reset all filter inputs
                 document.querySelectorAll('.filter-group select, .filter-group input').forEach(input => {
-                    input.value = '';
+                    input.value = 'all';
                 });
-                document.getElementById('semester').value = '1'; // Reset to default semester
-                alert('Filters reset!');
             });
 
             // Pagination

@@ -118,7 +118,7 @@ class Course
             $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Course Modification", "Archived course {$code}");
             return array("success" => true, "message" => "Course with code {$code} successfully archived!");
         }
-        return array("success" => false, "message" => "Failed to archive new course!");
+        return array("success" => false, "message" => "Failed to archive course!");
     }
 
     public function unarchive(array $courses)
