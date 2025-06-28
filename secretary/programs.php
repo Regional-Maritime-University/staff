@@ -50,6 +50,17 @@ $activePage = "programs";
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
 $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
+
+$activePrograms = $secretary->fetchAllActivePrograms(departmentId: $departmentId);
+// dd($activePrograms);
+$totalActivePrograms = $activePrograms && is_array($activePrograms) ? count($activePrograms) : 0;
+
+$activeCummulativePrograms = $secretary->fetchAllCummulativeProgramsDetails(departmentId: $departmentId);
+// /dd($activeCummulativePrograms);
+
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
+$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -540,12 +551,12 @@ $archived = false;
             font-weight: 500;
         }
 
-        .program-level.undergraduate {
+        .program-level.degree {
             background-color: #e8f5e9;
             color: var(--success-color);
         }
 
-        .program-level.postgraduate {
+        .program-level.masters {
             background-color: #e3f2fd;
             color: var(--accent-color);
         }
@@ -994,8 +1005,8 @@ $archived = false;
                 <div class="filter-group">
                     <select class="filter-select" id="levelFilter">
                         <option value="all">All Levels</option>
-                        <option value="undergraduate">Undergraduate</option>
-                        <option value="postgraduate">Postgraduate</option>
+                        <option value="degree">Degree</option>
+                        <option value="masters">Masters</option>
                         <option value="diploma">Diploma</option>
                     </select>
                     <select class="filter-select" id="departmentFilter">
@@ -1177,92 +1188,112 @@ $archived = false;
     </div>
 
     <script>
+        function capitalizeWords(str) {
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+
         // Sample data
-        const programsData = [{
-                id: 1,
-                title: "Bachelor of Marine Engineering",
-                code: "BME",
-                level: "undergraduate",
-                department: "marine-engineering",
-                description: "A comprehensive program covering marine propulsion systems, ship design, and maritime technology.",
-                duration: "4 Years",
-                credits: 120,
-                students: 145,
-                courses: 32,
-                classes: 8,
-                status: "active"
-            },
-            {
-                id: 2,
-                title: "Master of Nautical Science",
-                code: "MNS",
-                level: "postgraduate",
-                department: "nautical-science",
-                description: "Advanced studies in navigation, ship handling, and maritime operations management.",
-                duration: "2 Years",
-                credits: 60,
-                students: 78,
-                courses: 18,
-                classes: 4,
-                status: "active"
-            },
-            {
-                id: 3,
-                title: "Diploma in Port Management",
-                code: "DPM",
-                level: "diploma",
-                department: "port-management",
-                description: "Specialized training in port operations, logistics, and terminal management.",
-                duration: "18 Months",
-                credits: 45,
-                students: 92,
-                courses: 15,
-                classes: 6,
-                status: "active"
-            },
-            {
-                id: 4,
-                title: "Bachelor of Maritime Law",
-                code: "BML",
-                level: "undergraduate",
-                department: "maritime-law",
-                description: "Comprehensive study of maritime law, international shipping regulations, and marine insurance.",
-                duration: "4 Years",
-                credits: 120,
-                students: 67,
-                courses: 28,
-                classes: 5,
-                status: "active"
-            },
-            {
-                id: 5,
-                title: "Master of Marine Engineering",
-                code: "MME",
-                level: "postgraduate",
-                department: "marine-engineering",
-                description: "Advanced research and development in marine engineering technologies and systems.",
-                duration: "2 Years",
-                credits: 60,
-                students: 34,
-                courses: 16,
-                classes: 3,
-                status: "active"
-            },
-            {
-                id: 6,
-                title: "Certificate in Maritime Safety",
-                code: "CMS",
-                level: "diploma",
-                department: "nautical-science",
-                description: "Essential training in maritime safety protocols and emergency response procedures.",
-                duration: "6 Months",
-                credits: 20,
-                students: 156,
-                courses: 8,
-                classes: 12,
-                status: "inactive"
-            }
-        ];
+        const staticProgramData = <?= json_encode($activeCummulativePrograms) ?>;
+        const programsData = staticProgramData.map(program => ({
+            id: program.program_id,
+            title: capitalizeWords(program.program_name),
+            code: program.program_code,
+            level: program.program_type.toLowerCase(),
+            department: program.department_name,
+            description: program.description ?? '',
+            duration: program.duration + " " + program.dur_format,
+            credits: program.total_credits,
+            students: program.total_students,
+            courses: program.total_courses,
+            classes: program.total_classes,
+            status: program.status
+        }));
+        // const programsData = [{
+        //         id: 1,
+        //         title: "Bachelor of Marine Engineering",
+        //         code: "BME",
+        //         level: "undergraduate",
+        //         department: "marine-engineering",
+        //         description: "A comprehensive program covering marine propulsion systems, ship design, and maritime technology.",
+        //         duration: "4 Years",
+        //         credits: 120,
+        //         students: 145,
+        //         courses: 32,
+        //         classes: 8,
+        //         status: "active"
+        //     },
+        //     {
+        //         id: 2,
+        //         title: "Master of Nautical Science",
+        //         code: "MNS",
+        //         level: "postgraduate",
+        //         department: "nautical-science",
+        //         description: "Advanced studies in navigation, ship handling, and maritime operations management.",
+        //         duration: "2 Years",
+        //         credits: 60,
+        //         students: 78,
+        //         courses: 18,
+        //         classes: 4,
+        //         status: "active"
+        //     },
+        //     {
+        //         id: 3,
+        //         title: "Diploma in Port Management",
+        //         code: "DPM",
+        //         level: "diploma",
+        //         department: "port-management",
+        //         description: "Specialized training in port operations, logistics, and terminal management.",
+        //         duration: "18 Months",
+        //         credits: 45,
+        //         students: 92,
+        //         courses: 15,
+        //         classes: 6,
+        //         status: "active"
+        //     },
+        //     {
+        //         id: 4,
+        //         title: "Bachelor of Maritime Law",
+        //         code: "BML",
+        //         level: "undergraduate",
+        //         department: "maritime-law",
+        //         description: "Comprehensive study of maritime law, international shipping regulations, and marine insurance.",
+        //         duration: "4 Years",
+        //         credits: 120,
+        //         students: 67,
+        //         courses: 28,
+        //         classes: 5,
+        //         status: "active"
+        //     },
+        //     {
+        //         id: 5,
+        //         title: "Master of Marine Engineering",
+        //         code: "MME",
+        //         level: "postgraduate",
+        //         department: "marine-engineering",
+        //         description: "Advanced research and development in marine engineering technologies and systems.",
+        //         duration: "2 Years",
+        //         credits: 60,
+        //         students: 34,
+        //         courses: 16,
+        //         classes: 3,
+        //         status: "active"
+        //     },
+        //     {
+        //         id: 6,
+        //         title: "Certificate in Maritime Safety",
+        //         code: "CMS",
+        //         level: "diploma",
+        //         department: "nautical-science",
+        //         description: "Essential training in maritime safety protocols and emergency response procedures.",
+        //         duration: "6 Months",
+        //         credits: 20,
+        //         students: 156,
+        //         courses: 8,
+        //         classes: 12,
+        //         status: "inactive"
+        //     }
+        // ];
 
         const curriculumData = {
             1: [ // BME curriculum

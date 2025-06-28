@@ -644,4 +644,43 @@ class SecretaryController
     {
         return (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
     }
+
+    public function fetchAllCummulativeProgramsDetails($departmentId = null, $archived = false)
+    {
+        $query = "SELECT 
+                    p.id AS program_id,
+                    p.name AS program_name,
+                    p.code AS program_code,
+                    f.name AS program_type,
+                    d.name AS department_name,
+                    p.duration,
+                    p.dur_format, 
+                    p.num_of_semesters,
+                    p.archived AS status,
+
+                    CASE 
+                        WHEN p.archived = 1 THEN 'archived'
+                        ELSE 'active'
+                    END AS status,
+                    
+                    COUNT(DISTINCT s.index_number) AS total_students, 
+                    COUNT(DISTINCT sec.fk_course) AS total_courses, 
+                    COUNT(DISTINCT c.code) AS total_classes, 
+                    SUM(DISTINCT cr.credit_hours) AS total_credits 
+
+                FROM programs p
+                INNER JOIN department d ON d.id = p.department
+                LEFT JOIN student s ON s.fk_program = p.id
+                LEFT JOIN class c ON c.fk_program = p.id
+                LEFT JOIN section sec ON sec.fk_class = c.code
+                LEFT JOIN forms f ON f.id = p.type 
+                LEFT JOIN course cr ON cr.code = sec.fk_course 
+
+                WHERE d.id = :d AND p.archived = :a  -- Replace ? with the desired department ID
+
+                GROUP BY 
+                    p.id, p.name, p.code, p.type, d.name, p.duration, p.num_of_semesters, p.archived;";
+        $params = array(":d" => $departmentId, ":a" => $archived);
+        return $this->dm->getData($query, $params);
+    }
 }
