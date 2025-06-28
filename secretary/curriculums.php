@@ -34,18 +34,18 @@ require_once('../bootstrap.php');
 
 use Src\Controller\SecretaryController;
 use Src\Core\Base;
-use Src\Core\Course;
+use Src\Core\Curriculum;
 use Src\Core\CourseCategory;
 
 require_once('../inc/admin-database-con.php');
 
 $secretary = new SecretaryController($db, $user, $pass);
 $course_category = new CourseCategory($db, $user, $pass);
-$course = new Course($db, $user, $pass);
+$course = new Curriculum($db, $user, $pass);
 $base               = new Base($db, $user, $pass);
 
-$pageTitle = "Courses";
-$activePage = "courses";
+$pageTitle = "Curriculums";
+$activePage = "curriculums";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
 $semesterId = 2; //$_SESSION["semester"] ?? null;
@@ -54,20 +54,20 @@ $archived = false;
 $activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
-$activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
-$totalActiveCourses = count($activeCourses);
+$activeCurriculums = $secretary->fetchActiveCurriculums($departmentId, null, $archived);
+$totalActiveCurriculums = count($activeCurriculums);
 
-$assignedCourses = [];
+$assignedCurriculums = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
+    $assignedCurriculums = array_merge($assignedCurriculums, $secretary->fetchSemesterCurriculumAssignmentsByDepartment($departmentId, $semesterId));
 }
-$totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
+$totalAssignedCurriculums = $assignedCurriculums && is_array($assignedCurriculums) ? count($assignedCurriculums) : 0;
 
 $assignedLecturers = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
+    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCurriculumAssignmentsGroupByLecturer($departmentId, $semesterId));
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 
@@ -93,7 +93,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RMU Staff Portal - Courses</title>
+    <title>RMU Staff Portal - Curriculums</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/courses.css">
     <link rel="stylesheet" href="./css/course-selection-modal.css">
@@ -110,61 +110,22 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         <?php require_once '../components/header.php'; ?>
 
         <div class="dashboard-content">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: var(--success-color);">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>24</h3>
-                        <p>Semester Courses</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: var(--primary-color);">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?= $totalAssignedCourses ?></h3>
-                        <p>Assigned Courses</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: var(--accent-color);">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?= $totalAssignedLecturers ?></h3>
-                        <p>Assigned Lecturers</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: var(--danger-color);">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?= $totalPendingDeadlines ?></h3>
-                        <p>Pending Deadlines</p>
-                    </div>
-                </div>
-            </div>
 
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="action-buttons">
-                    <button class="action-btn" id="addCourseBtn">
+                    <button class="action-btn" id="addCurriculumBtn">
                         <i class="fas fa-plus"></i>
-                        Add New Course
+                        Add New Curriculum
                     </button>
                     <button class="action-btn" id="bulkUploadBtn">
                         <i class="fas fa-upload"></i>
-                        Bulk Upload Courses
+                        Bulk Upload Curriculums
                     </button>
-                    <button class="action-btn" id="assignCoursesBtn">
+                    <button class="action-btn" id="assignCurriculumsBtn">
                         <i class="fas fa-user-plus"></i>
-                        Assign Courses
+                        Assign Curriculums
                     </button>
                     <button class="action-btn" id="setDeadlinesBtn">
                         <i class="fas fa-clock"></i>
@@ -224,14 +185,14 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
             </div>
 
-            <!-- Course Grid -->
+            <!-- Curriculum Grid -->
             <div class="course-grid">
 
                 <?php
-                if ($totalActiveCourses == 0) {
+                if ($totalActiveCurriculums == 0) {
                     echo "<div class='no-courses'>No courses available.</div>";
                 } else {
-                    foreach ($activeCourses as $course) {
+                    foreach ($activeCurriculums as $course) {
                 ?>
                         <div class="course-card"
                             data-semester="<?= $course["semester"] ?>"
@@ -244,10 +205,10 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                     <div class="course-code"><?= $course["code"] ?></div>
                                 </div>
                                 <div class="course-actions">
-                                    <button class="action-icon edit-course" title="Edit Course" id="<?= $course["code"] ?>">
+                                    <button class="action-icon edit-course" title="Edit Curriculum" id="<?= $course["code"] ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-icon archive-course" title="Archive Course" id="<?= $course["code"] ?>">
+                                    <button class="action-icon archive-course" title="Archive Curriculum" id="<?= $course["code"] ?>">
                                         <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
@@ -322,22 +283,22 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         </div>
     </div>
 
-    <!-- Add Course Modal -->
-    <div class="modal" id="addCourseModal">
+    <!-- Add Curriculum Modal -->
+    <div class="modal" id="addCurriculumModal">
         <div class="modal-dialog modal-md modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Add New Course</h2>
+                    <h2>Add New Curriculum</h2>
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="addCourseForm">
+                    <form id="addCurriculumForm">
                         <div class="form-group">
-                            <label for="courseCode">Course Code</label>
+                            <label for="courseCode">Curriculum Code</label>
                             <input type="text" id="courseCode" placeholder="e.g. ML201" required>
                         </div>
                         <div class="form-group">
-                            <label for="courseName">Course Name</label>
+                            <label for="courseName">Curriculum Name</label>
                             <input type="text" id="courseName" placeholder="e.g. Maritime Law" required>
                         </div>
                         <div class="form-group">
@@ -386,7 +347,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>
-                    <button class="submit-btn" id="saveCourseBtn">Save Course</button>
+                    <button class="submit-btn" id="saveCurriculumBtn">Save Curriculum</button>
                 </div>
             </div>
         </div>
@@ -397,7 +358,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Bulk Upload Courses</h2>
+                    <h2>Bulk Upload Curriculums</h2>
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -405,7 +366,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         <div class="upload-icon">
                             <i class="fas fa-file-upload fa-3x"></i>
                         </div>
-                        <h3>Upload Course List</h3>
+                        <h3>Upload Curriculum List</h3>
                         <p>Drag and drop your CSV or Excel file here, or click the button below to select a file.</p>
                         <input type="file" id="courseFileInput" class="file-input" accept=".csv, .xlsx">
                         <label for="courseFileInput" class="file-label">Choose File</label>
@@ -418,18 +379,18 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>
-                    <button class="submit-btn" id="uploadCoursesBtn">Upload Courses</button>
+                    <button class="submit-btn" id="uploadCurriculumsBtn">Upload Curriculums</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Assign Courses Modal -->
-    <div class="modal" id="assignCoursesModal">
+    <!-- Assign Curriculums Modal -->
+    <div class="modal" id="assignCurriculumsModal">
         <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Assign Courses to Lecturers</h2>
+                    <h2>Assign Curriculums to Lecturers</h2>
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -455,17 +416,17 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     </div>
                     <div class="form-group">
                         <div class="course-selection-header">
-                            <label>Selected Courses</label>
-                            <button type="button" id="departmentSelectCoursesBtn">
-                                <i class="fas fa-search"></i> Find Courses
+                            <label>Selected Curriculums</label>
+                            <button type="button" id="departmentSelectCurriculumsBtn">
+                                <i class="fas fa-search"></i> Find Curriculums
                             </button>
                         </div>
                         <div class="department-selected-courses-container">
-                            <div id="departmentSelectedCoursesList">
+                            <div id="departmentSelectedCurriculumsList">
                                 <!-- Selected courses will be added here dynamically -->
                             </div>
-                            <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
-                                No courses selected. Click "Find Courses" to add courses.
+                            <div class="department-selected-courses-empty" id="departmentNoCurriculumsMessage">
+                                No courses selected. Click "Find Curriculums" to add courses.
                             </div>
                         </div>
                     </div>
@@ -527,7 +488,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         <textarea id="assignmentNotes" rows="3" placeholder="Add any additional notes about this assignment"></textarea>
                     </div>
                     <input type="hidden" id="departmentSelect" name="department" value="<?= $departmentId ?>">
-                    <input type="hidden" id="assignCourseActionSelect" name="action" value="toLecturer">
+                    <input type="hidden" id="assignCurriculumActionSelect" name="action" value="toLecturer">
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>
@@ -547,7 +508,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
                 <div class="modal-body">
                     <form id="deadlineForm">
-                        <!-- Inside the deadlineForm, replace the deadlineCourse select with this: -->
+                        <!-- Inside the deadlineForm, replace the deadlineCurriculum select with this: -->
                         <div class="course-selection-container">
                             <div class="form-group">
                                 <label for="deadlineLecturerSelect">Lecturer</label>
@@ -566,17 +527,17 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             </div>
                             <div class="form-group">
                                 <div class="course-selection-header">
-                                    <label>Selected Courses</label>
-                                    <button type="button" id="selectCoursesBtn" class="selectCoursesBtn">
-                                        <i class="fas fa-search"></i> Find Courses
+                                    <label>Selected Curriculums</label>
+                                    <button type="button" id="selectCurriculumsBtn" class="selectCurriculumsBtn">
+                                        <i class="fas fa-search"></i> Find Curriculums
                                     </button>
                                 </div>
                                 <div class="selected-courses-container">
-                                    <div id="selectedCoursesList">
+                                    <div id="selectedCurriculumsList">
                                         <!-- Selected courses will be added here dynamically -->
                                     </div>
-                                    <div class="selected-courses-empty" id="noCoursesMessage">
-                                        No courses selected. Click "Find Courses" to add courses.
+                                    <div class="selected-courses-empty" id="noCurriculumsMessage">
+                                        No courses selected. Click "Find Curriculums" to add courses.
                                     </div>
                                 </div>
                             </div>
@@ -601,40 +562,40 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         </div>
     </div>
 
-    <!-- Course Selection Modal -->
-    <div class="modal" id="departmentCourseSelectionModal">
+    <!-- Curriculum Selection Modal -->
+    <div class="modal" id="departmentCurriculumSelectionModal">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Select Courses</h2>
-                    <button class="close-btn" id="closeDepartmentCourseSelectionModal">
+                    <h2>Select Curriculums</h2>
+                    <button class="close-btn" id="closeDepartmentCurriculumSelectionModal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="department-course-search">
-                        <input type="text" id="departmentCourseSearchInput" placeholder="Search by course code or name">
+                        <input type="text" id="departmentCurriculumSearchInput" placeholder="Search by course code or name">
                         <i class="fas fa-search"></i>
                     </div>
-                    <div class="department-course-list" id="departmentCourseList">
-                        <!-- Course items will be added here dynamically -->
+                    <div class="department-course-list" id="departmentCurriculumList">
+                        <!-- Curriculum items will be added here dynamically -->
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="cancel-btn" id="closeDepartmentCourseSelectionModal">Cancel</button>
-                    <button class="submit-btn" id="confirmDepartmentCourseSelectionBtn">Confirm Selection</button>
+                    <button class="cancel-btn" id="closeDepartmentCurriculumSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmDepartmentCurriculumSelectionBtn">Confirm Selection</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Course Selection Modal -->
+    <!-- Curriculum Selection Modal -->
     <div class="modal" id="courseSelectionModal">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Select Courses</h2>
-                    <button class="close-btn" id="closeCourseSelectionModal">
+                    <h2>Select Curriculums</h2>
+                    <button class="close-btn" id="closeCurriculumSelectionModal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -644,12 +605,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         <i class="fas fa-search"></i>
                     </div>
                     <div class="course-list" id="courseList">
-                        <!-- Course items will be added here dynamically -->
+                        <!-- Curriculum items will be added here dynamically -->
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="cancel-btn" id="closeCourseSelectionModal">Cancel</button>
-                    <button class="submit-btn" id="confirmCourseSelectionBtn">Confirm Selection</button>
+                    <button class="cancel-btn" id="closeCurriculumSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmCurriculumSelectionBtn">Confirm Selection</button>
                 </div>
             </div>
         </div>
@@ -747,7 +708,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
 
                 // Display message if no courses match the filters
-                updateNoCoursesMessage();
+                updateNoCurriculumsMessage();
             }
 
             /**
@@ -766,35 +727,35 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
 
                 // Hide "no courses" message if it exists
-                const noCoursesMessage = document.querySelector('.no-courses');
-                if (noCoursesMessage) {
-                    noCoursesMessage.style.display = 'none';
+                const noCurriculumsMessage = document.querySelector('.no-courses');
+                if (noCurriculumsMessage) {
+                    noCurriculumsMessage.style.display = 'none';
                 }
             }
 
             /**
              * Show or hide "No courses available" message based on filter results
              */
-            function updateNoCoursesMessage() {
+            function updateNoCurriculumsMessage() {
                 // Check if any courses are visible
-                const visibleCourses = Array.from(courseCards).filter(card =>
+                const visibleCurriculums = Array.from(courseCards).filter(card =>
                     card.style.display !== 'none'
                 );
 
                 // Get or create the "no courses" message element
-                let noCoursesMessage = document.querySelector('.no-courses');
-                if (!noCoursesMessage) {
-                    noCoursesMessage = document.createElement('div');
-                    noCoursesMessage.className = 'no-courses';
-                    noCoursesMessage.textContent = 'No courses match the selected filters.';
-                    document.querySelector('.course-grid').appendChild(noCoursesMessage);
+                let noCurriculumsMessage = document.querySelector('.no-courses');
+                if (!noCurriculumsMessage) {
+                    noCurriculumsMessage = document.createElement('div');
+                    noCurriculumsMessage.className = 'no-courses';
+                    noCurriculumsMessage.textContent = 'No courses match the selected filters.';
+                    document.querySelector('.course-grid').appendChild(noCurriculumsMessage);
                 }
 
                 // Show or hide the message
-                if (visibleCourses.length === 0) {
-                    noCoursesMessage.style.display = 'block';
+                if (visibleCurriculums.length === 0) {
+                    noCurriculumsMessage.style.display = 'block';
                 } else {
-                    noCoursesMessage.style.display = 'none';
+                    noCurriculumsMessage.style.display = 'none';
                 }
             }
 
@@ -878,20 +839,20 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
             });
 
-            let semesterCourses = assignedCourses = null;
-            let activeCourses = <?= json_encode($activeCourses) ?>;
+            let semesterCurriculums = assignedCurriculums = null;
+            let activeCurriculums = <?= json_encode($activeCurriculums) ?>;
             const user = <?= json_encode($staffData); ?>;
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
 
 
             // Open modals
-            document.getElementById('addCourseBtn').addEventListener('click', () => openModal('addCourseModal'));
+            document.getElementById('addCurriculumBtn').addEventListener('click', () => openModal('addCurriculumModal'));
             document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
-            document.getElementById('assignCoursesBtn').addEventListener('click', () => openModal('assignCoursesModal'));
+            document.getElementById('assignCurriculumsBtn').addEventListener('click', () => openModal('assignCurriculumsModal'));
             document.getElementById('setDeadlinesBtn').addEventListener('click', () => openModal('setDeadlinesModal'));
-            document.getElementById('departmentSelectCoursesBtn').addEventListener('click', () => openModal('departmentCourseSelectionModal'));
-            document.getElementById('selectCoursesBtn').addEventListener('click', () => openModal('courseSelectionModal'));
+            document.getElementById('departmentSelectCurriculumsBtn').addEventListener('click', () => openModal('departmentCurriculumSelectionModal'));
+            document.getElementById('selectCurriculumsBtn').addEventListener('click', () => openModal('courseSelectionModal'));
 
             // File input handling
             const fileInput = document.getElementById('courseFileInput');
@@ -906,8 +867,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             });
 
             // Add a single course Form submissions
-            document.getElementById('saveCourseBtn').addEventListener('click', function() {
-                const form = document.getElementById('addCourseForm');
+            document.getElementById('saveCurriculumBtn').addEventListener('click', function() {
+                const form = document.getElementById('addCurriculumForm');
                 if (!form.checkValidity()) {
                     alert("Please fill in all required fields");
                     return;
@@ -964,7 +925,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         if (result.success) {
                             alert(result.message);
                             form.reset();
-                            closeModal("addCourseModal");
+                            closeModal("addCurriculumModal");
                         } else {
                             alert(result['message']);
                         }
@@ -976,7 +937,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             });
 
             // Upload bulk courses
-            document.getElementById('uploadCoursesBtn').addEventListener('click', function() {
+            document.getElementById('uploadCurriculumsBtn').addEventListener('click', function() {
                 if (!fileInput.files.length) {
                     alert("Please select a file to upload");
                     return;
@@ -1021,7 +982,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             });
 
             document.getElementById("semesterSelect").addEventListener("change", function() {
-                if (semesterCourses !== null) {
+                if (semesterCurriculums !== null) {
                     return;
                 }
                 const selectedSemester = this.value;
@@ -1037,46 +998,46 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         })
                         .then(response => response.json())
                         .then(data => {
-                            if (data.success) semesterCourses = data.data;
+                            if (data.success) semesterCurriculums = data.data;
                             else alert("Failed to fetch courses for selected semester: ", data.message);
                         })
                         .catch(error => console.error("Error fetching courses for selected semester:", error));
                 }
             });
 
-            // Course Selection Modal
-            const confirmDepartmentCourseSelectionBtn = document.getElementById("confirmDepartmentCourseSelectionBtn");
-            const departmentCourseSearchInput = document.getElementById("departmentCourseSearchInput");
+            // Curriculum Selection Modal
+            const confirmDepartmentCurriculumSelectionBtn = document.getElementById("confirmDepartmentCurriculumSelectionBtn");
+            const departmentCurriculumSearchInput = document.getElementById("departmentCurriculumSearchInput");
 
-            confirmDepartmentCourseSelectionBtn.addEventListener("click", () => {
-                closeModal("departmentCourseSelectionModal");
+            confirmDepartmentCurriculumSelectionBtn.addEventListener("click", () => {
+                closeModal("departmentCurriculumSelectionModal");
             });
 
-            departmentCourseSearchInput.addEventListener("input", () => {
-                departmentSearchCourses();
+            departmentCurriculumSearchInput.addEventListener("input", () => {
+                departmentSearchCurriculums();
             });
 
             // Initialize course list on modal open
-            departmentCourseSearchInput.addEventListener("focus", () => {
-                if (departmentCourseSearchInput.value === "") {
-                    departmentSearchCourses();
+            departmentCurriculumSearchInput.addEventListener("focus", () => {
+                if (departmentCurriculumSearchInput.value === "") {
+                    departmentSearchCurriculums();
                 }
             });
 
             // Initialize course list when modal opens
-            departmentSelectCoursesBtn.addEventListener("click", () => {
+            departmentSelectCurriculumsBtn.addEventListener("click", () => {
                 setTimeout(() => {
-                    departmentSearchCourses();
+                    departmentSearchCurriculums();
                 }, 100);
             });
 
-            function departmentSearchCourses() {
-                const searchTerm = document.getElementById("departmentCourseSearchInput").value.toLowerCase();
-                const courseList = document.getElementById("departmentCourseList");
+            function departmentSearchCurriculums() {
+                const searchTerm = document.getElementById("departmentCurriculumSearchInput").value.toLowerCase();
+                const courseList = document.getElementById("departmentCurriculumList");
                 courseList.innerHTML = "";
 
                 // Check if semester courses has data
-                if (!semesterCourses || semesterCourses.length === 0) {
+                if (!semesterCurriculums || semesterCurriculums.length === 0) {
                     courseList.innerHTML = `
                         <div class="department-no-courses-message">
                             <i class="fas fa-info-circle"></i>
@@ -1086,7 +1047,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     return;
                 }
 
-                semesterCourses.forEach((course) => {
+                semesterCurriculums.forEach((course) => {
                     if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
                         // Check if course is already selected
                         const isSelected = document.querySelector(`.department-selected-course[data-code="${course.code}"]`) !== null;
@@ -1115,7 +1076,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     btn.addEventListener("click", function() {
                         const code = this.getAttribute("data-code");
                         const name = this.getAttribute("data-name");
-                        departmentAddCourseToSelection(code, name);
+                        departmentAddCurriculumToSelection(code, name);
 
                         // Update the button to show it's selected
                         this.classList.add("selected");
@@ -1127,8 +1088,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
             }
 
-            function departmentAddCourseToSelection(code, name) {
-                const selectedCoursesList = document.getElementById("departmentSelectedCoursesList");
+            function departmentAddCurriculumToSelection(code, name) {
+                const selectedCurriculumsList = document.getElementById("departmentSelectedCurriculumsList");
 
                 // Check if course is already added
                 if (document.querySelector(`.department-selected-course[data-code="${code}"]`)) {
@@ -1145,9 +1106,9 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     <button class="department-remove-course-btn" data-code="${code}"">
                         <i class="fas fa-times"></i>
                     </button>
-                    <input type="hidden" name="departmentSelectedCourses[]" value="${code}">
+                    <input type="hidden" name="departmentSelectedCurriculums[]" value="${code}">
                 `;
-                selectedCoursesList.appendChild(courseItem);
+                selectedCurriculumsList.appendChild(courseItem);
 
                 // Add event listener to the remove button
                 courseItem.querySelector(".department-remove-course-btn").addEventListener("click", function() {
@@ -1173,7 +1134,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         // Re-add the click event listener
                         courseInList.addEventListener("click", function() {
                             const name = this.getAttribute("data-name")
-                            departmentAddCourseToSelection(code, name)
+                            departmentAddCurriculumToSelection(code, name)
 
                             // Update the button to show it's selected
                             this.classList.add("selected")
@@ -1186,15 +1147,15 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 }
             }
 
-            // Tab functionality for Upload Courses Modal
-            const assignCourseTabs = document.querySelectorAll(".assign-course-tabs .tab-btn")
+            // Tab functionality for Upload Curriculums Modal
+            const assignCurriculumTabs = document.querySelectorAll(".assign-course-tabs .tab-btn")
 
-            assignCourseTabs.forEach((btn) => {
+            assignCurriculumTabs.forEach((btn) => {
                 btn.addEventListener("click", function() {
                     const tabId = this.getAttribute("data-tab");
 
                     // Remove active class from all tabs and contents
-                    assignCourseTabs.forEach((btn) => btn.classList.remove("active"));
+                    assignCurriculumTabs.forEach((btn) => btn.classList.remove("active"));
                     document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
 
                     // Add active class to clicked tab and corresponding content
@@ -1202,8 +1163,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     document.getElementById(tabId).classList.add("active");
 
                     // add to actionSelect
-                    document.getElementById("assignCourseActionSelect").value = tabId;
-                    console.log(document.getElementById("assignCourseActionSelect").value);
+                    document.getElementById("assignCurriculumActionSelect").value = tabId;
+                    console.log(document.getElementById("assignCurriculumActionSelect").value);
                 });
             });
 
@@ -1220,24 +1181,24 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     return;
                 }
 
-                const selectedCourseElements = document.querySelectorAll('#departmentSelectedCoursesList .department-selected-course');
-                if (selectedCourseElements.length === 0) {
+                const selectedCurriculumElements = document.querySelectorAll('#departmentSelectedCurriculumsList .department-selected-course');
+                if (selectedCurriculumElements.length === 0) {
                     alert("Please select at least one course");
                     return;
                 }
 
-                const selectedCourses = [];
-                selectedCourseElements.forEach((element) => {
-                    selectedCourses.push(element.getAttribute("data-code"));
+                const selectedCurriculums = [];
+                selectedCurriculumElements.forEach((element) => {
+                    selectedCurriculums.push(element.getAttribute("data-code"));
                 });
 
-                const form = document.getElementById("assignCourseForm");
-                const action = document.getElementById("assignCourseActionSelect").value;
+                const form = document.getElementById("assignCurriculumForm");
+                const action = document.getElementById("assignCurriculumActionSelect").value;
 
                 // Simulate API call
                 let formData = {
                     semester: semesterSelect.value,
-                    courses: selectedCourses,
+                    courses: selectedCurriculums,
                     notes: assignmentNotes.value,
                     department: departmentSelect.value,
                 }
@@ -1280,7 +1241,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         break;
 
                     default:
-                        alert("Course(s) can only be asigned to lecturer(s), student(s) and class(es)!");
+                        alert("Curriculum(s) can only be asigned to lecturer(s), student(s) and class(es)!");
                         return;
                 }
 
@@ -1294,7 +1255,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         console.log(result);
                         if (result.success) {
                             alert(result.message);
-                            closeModal("assignCoursesModal");
+                            closeModal("assignCurriculumsModal");
                             form.reset();
                         } else {
                             alert(result['message']);
@@ -1309,13 +1270,13 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             // Set Deadline Modal
             const submitSetDeadline = document.getElementById("submitSetDeadline");
 
-            function searchCourses() {
+            function searchCurriculums() {
                 const searchTerm = document.getElementById("courseSearchInput").value.toLowerCase();
                 const courseList = document.getElementById("courseList");
                 courseList.innerHTML = "";
 
-                // Check if assignedCourses has data
-                if (!assignedCourses || assignedCourses.length === 0) {
+                // Check if assignedCurriculums has data
+                if (!assignedCurriculums || assignedCurriculums.length === 0) {
                     courseList.innerHTML = `
                         <div class="no-courses-message">
                             <i class="fas fa-info-circle"></i>
@@ -1325,7 +1286,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     return;
                 }
 
-                assignedCourses.forEach((course) => {
+                assignedCurriculums.forEach((course) => {
                     if (course.course_code.toLowerCase().includes(searchTerm) || course.course_name.toLowerCase().includes(searchTerm)) {
                         // Check if course is already selected
                         const isSelected = document.querySelector(`.selected-course[data-code="${course.course_code}"]`) !== null;
@@ -1354,7 +1315,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     btn.addEventListener("click", function() {
                         const code = this.getAttribute("data-code");
                         const name = this.getAttribute("data-name");
-                        addCourseToSelection(code, name);
+                        addCurriculumToSelection(code, name);
 
                         // Update the button to show it's selected
                         this.classList.add("selected");
@@ -1366,8 +1327,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
             }
 
-            function addCourseToSelection(code, name) {
-                const selectedCoursesList = document.getElementById("selectedCoursesList");
+            function addCurriculumToSelection(code, name) {
+                const selectedCurriculumsList = document.getElementById("selectedCurriculumsList");
 
                 // Check if course is already added
                 if (document.querySelector(`.selected-course[data-code="${code}"]`)) {
@@ -1384,9 +1345,9 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     <button class="remove-course-btn" data-code="${code}">
                     <i class="fas fa-times"></i>
                     </button>
-                    <input type="hidden" name="selectedCourses[]" value="${code}">
+                    <input type="hidden" name="selectedCurriculums[]" value="${code}">
                 `;
-                selectedCoursesList.appendChild(courseItem);
+                selectedCurriculumsList.appendChild(courseItem);
 
                 // Add event listener to the remove button
                 courseItem.querySelector(".remove-course-btn").addEventListener("click", function() {
@@ -1412,7 +1373,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         // Re-add the click event listener
                         courseInList.addEventListener("click", function() {
                             const name = this.getAttribute("data-name")
-                            addCourseToSelection(code, name)
+                            addCurriculumToSelection(code, name)
 
                             // Update the button to show it's selected
                             this.classList.add("selected")
@@ -1425,28 +1386,28 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 }
             }
 
-            // Course Selection Modal
-            const confirmCourseSelectionBtn = document.getElementById("confirmCourseSelectionBtn");
+            // Curriculum Selection Modal
+            const confirmCurriculumSelectionBtn = document.getElementById("confirmCurriculumSelectionBtn");
             const courseSearchInput = document.getElementById("courseSearchInput");
 
-            confirmCourseSelectionBtn.addEventListener("click", () => {
+            confirmCurriculumSelectionBtn.addEventListener("click", () => {
                 closeModal("courseSelectionModal");
             });
 
             courseSearchInput.addEventListener("input", () => {
-                searchCourses();
+                searchCurriculums();
             });
 
             // Initialize course list on modal open
             courseSearchInput.addEventListener("focus", () => {
                 if (courseSearchInput.value === "") {
-                    searchCourses();
+                    searchCurriculums();
                 }
             });
 
             // Initialize course list when modal opens
-            selectCoursesBtn.addEventListener("click", () => {
-                if (assignedCourses == null) {
+            selectCurriculumsBtn.addEventListener("click", () => {
+                if (assignedCurriculums == null) {
                     fetch(`../endpoint/fetch-assigned-courses`, {
                             method: 'POST',
                             headers: {
@@ -1459,10 +1420,10 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                assignedCourses = data.data;
-                                console.log("Assigned Courses", assignedCourses);
+                                assignedCurriculums = data.data;
+                                console.log("Assigned Curriculums", assignedCurriculums);
                                 setTimeout(() => {
-                                    searchCourses();
+                                    searchCurriculums();
                                 }, 100);
                             } else alert("Failed to fetch courses for selected semester: ", data.message);
                         })
@@ -1478,8 +1439,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     return;
                 }
 
-                const selectedCourseElements = document.querySelectorAll('#selectedCoursesList .selected-course');
-                if (selectedCourseElements.length === 0) {
+                const selectedCurriculumElements = document.querySelectorAll('#selectedCurriculumsList .selected-course');
+                if (selectedCurriculumElements.length === 0) {
                     alert("Please select at least one course");
                     return;
                 }
@@ -1502,14 +1463,14 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     return;
                 }
 
-                const selectedCourses = [];
-                selectedCourseElements.forEach((element) => {
-                    selectedCourses.push(element.getAttribute("data-code"));
+                const selectedCurriculums = [];
+                selectedCurriculumElements.forEach((element) => {
+                    selectedCurriculums.push(element.getAttribute("data-code"));
                 });
 
                 // Create the form data
                 const formData = {
-                    courses: selectedCourses,
+                    courses: selectedCurriculums,
                     lecturer: selectedLecturer,
                     department: deadlineSelectDepartment.value,
                     semester: deadlineSelectSemester.value,
@@ -1535,12 +1496,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             document.getElementById("deadlineForm").reset();
 
                             // Clear the selected courses list
-                            document.getElementById("selectedCoursesList").innerHTML = "";
+                            document.getElementById("selectedCurriculumsList").innerHTML = "";
 
                             // Show the "no courses" message
-                            const noCoursesMessage = document.getElementById("noCoursesMessage");
-                            if (noCoursesMessage) {
-                                noCoursesMessage.style.display = "block";
+                            const noCurriculumsMessage = document.getElementById("noCurriculumsMessage");
+                            if (noCurriculumsMessage) {
+                                noCurriculumsMessage.style.display = "block";
                             }
                             closeModal("setDeadlinesModal");
                         } else {
@@ -1566,7 +1527,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     const courseTitle = courseCard.querySelector('.course-title').textContent;
                     // In a real application, you would populate the edit form with course data
                     const courseCode = this.id;
-                    const course = activeCourses.find(course => course.code === courseCode);
+                    const course = activeCurriculums.find(course => course.code === courseCode);
                     if (course) {
                         // Populate the edit form with course data
                         document.getElementById("courseAction").value = "edit";
@@ -1579,11 +1540,11 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         document.getElementById("courseSemester").value = course.semester;
                         document.getElementById("courseDepartment").value = course.department_id;
                         // Open the course modal
-                        openModal('addCourseModal');
+                        openModal('addCurriculumModal');
                     } else {
-                        alert("Course not found");
+                        alert("Curriculum not found");
                     }
-                    openModal('addCourseModal');
+                    openModal('addCurriculumModal');
                 });
             });
 

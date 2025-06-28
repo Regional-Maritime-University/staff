@@ -8,8 +8,10 @@
     </div>
     <div class="header-right">
         <div class="search-bar">
-            <input type="text" placeholder="Search...">
-            <button class="search-btn"><i class="fas fa-search"></i></button>
+            <input type="text" placeholder="Search..." id="globalSearch">
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
         <div class="header-actions">
             <a href="notifications.php" class="action-btn notifications">

@@ -89,32 +89,32 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
             <!-- Student Stats -->
             <div class="student-stats">
                 <div class="stat-card">
-                    <div class="stat-icon blue">
-                        <i class="fas fa-user-graduate"></i>
-                    </div>
-                    <div class="stat-value">1,245</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-icon green">
                         <i class="fas fa-user-check"></i>
                     </div>
-                    <div class="stat-value">1,180</div>
-                    <div class="stat-label">Active Students</div>
+                    <div class="stat-value"><?= $totalActiveStudents ?></div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Final Year</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange">
                         <i class="fas fa-user-clock"></i>
                     </div>
-                    <div class="stat-value">45</div>
-                    <div class="stat-label">On Leave</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">Deferred</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon red">
                         <i class="fas fa-user-slash"></i>
                     </div>
                     <div class="stat-value">20</div>
-                    <div class="stat-label">Inactive</div>
+                    <div class="stat-label">Final Year</div>
                 </div>
             </div>
 
@@ -582,7 +582,11 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                                 <th>GPA</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            <tr style="color: var(--accent-color);">
+                                <td colspan="5">Choose a semester to see student's grades</td>
+                            </tr>
+                        </tbody>
                         <tfoot></tfoot>
                     </table>
 
@@ -788,9 +792,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
             document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const modal = this.closest('.modal');
-                    if (modal) {
-                        modal.classList.remove('active');
-                    }
+                    if (modal) modal.classList.remove('active');
                 });
             });
 
@@ -999,6 +1001,14 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
 
             document.getElementById('gradeSemester').addEventListener('change', function() {
                 const selectedSemester = this.value;
+                if (!selectedSemester) {
+                    const gradesTableBody = document.querySelector('.grades-table tbody');
+                    const gradesTableFoot = document.querySelector('.grades-table tfoot');
+                    gradesTableBody.innerHTML = '<tr style="color: var(--accent-color)"><td colspan="5">Choose a semester to see student\'s grades</td></tr>';
+                    gradesTableFoot.innerHTML = '';
+                    return;
+                }
+
                 const indexNumber = document.getElementById('viewGradesStudent').value;
                 if (!indexNumber) {
                     alert("There was an error retrieving the student's grades. Please try again.");

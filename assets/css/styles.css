@@ -47,10 +47,6 @@ body {
 	background: var(--primary-color);
 }
 
-a {
-	text-decoration: none;
-}
-
 /* Sidebar Styles */
 .sidebar {
 	width: 250px;

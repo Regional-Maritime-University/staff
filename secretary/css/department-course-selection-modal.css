@@ -1,22 +1,26 @@
 /* Course Selection Modal Styles */
-.course-selection-container {
+.course-selection-container,
+.class-selection-container {
 	margin-top: 15px;
 }
 
-.course-selection-header {
+.course-selection-header,
+.class-selection-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 15px;
 }
 
-.course-selection-header h3 {
+.course-selection-header h3,
+.class-selection-header h3 {
 	color: var(--primary-color);
 	margin: 0;
 }
 
 #selectCoursesBtn,
-#departmentSelectCoursesBtn {
+#departmentSelectCoursesBtn,
+#classSelectCoursesBtn {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -31,12 +35,14 @@
 }
 
 #selectCoursesBtn:hover,
-#departmentSelectCoursesBtn:hover {
+#departmentSelectCoursesBtn:hover,
+#classSelectCoursesBtn:hover {
 	background-color: var(--primary-color);
 }
 
 .selected-courses-container,
-.department-selected-courses-container {
+.department-selected-courses-container,
+.class-selected-courses-container {
 	border: 1px solid var(--border-color);
 	border-radius: 8px;
 	padding: 15px;
@@ -47,14 +53,16 @@
 }
 
 .selected-courses-empty,
-.department-selected-courses-empty {
+.department-selected-courses-empty,
+.class-selected-courses-empty {
 	color: #888;
 	text-align: center;
 	padding: 20px 0;
 }
 
 .selected-course,
-.department-selected-course {
+.department-selected-course,
+.class-selected-course {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -65,7 +73,8 @@
 }
 
 .remove-course-btn,
-.department-remove-course-btn {
+.department-remove-course-btn,
+.class-remove-course-btn {
 	background: none;
 	border: none;
 	color: var(--danger-color);
@@ -78,24 +87,28 @@
 }
 
 .remove-course-btn:hover,
-.department-remove-course-btn:hover {
+.department-remove-course-btn:hover,
+.class-remove-course-btn:hover {
 	background-color: rgba(231, 76, 60, 0.1);
 }
 
 /* Course Selection Modal */
 #courseSelectionModal,
-#courseSelectionModal {
+#departmentCourseSelectionModal,
+#classCourseSelectionModal {
 	z-index: 1100; /* Higher than the parent modal */
 }
 
 .course-search,
-.department-course-search {
+.department-course-search,
+.class-course-search {
 	position: relative;
 	margin-bottom: 15px;
 }
 
 .course-search input,
-.department-course-search input {
+.department-course-search input,
+.class-course-search input {
 	width: 100%;
 	padding: 12px 40px 12px 12px;
 	border: 1px solid var(--border-color);
@@ -104,7 +117,8 @@
 }
 
 .course-search i,
-.department-course-search i {
+.department-course-search i,
+.class-course-search i {
 	position: absolute;
 	right: 15px;
 	top: 50%;
@@ -113,7 +127,8 @@
 }
 
 .course-list,
-.department-course-list {
+.department-course-list,
+.class-course-list {
 	max-height: 300px;
 	overflow-y: auto;
 	border: 1px solid var(--border-color);
@@ -121,7 +136,8 @@
 }
 
 .course-item,
-.department-course-item {
+.department-course-item,
+.class-course-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -130,23 +146,27 @@
 }
 
 .course-item:last-child,
-.department-course-item:last-child {
+.department-course-item:last-child,
+.class-course-item:last-child {
 	border-bottom: none;
 }
 
 .course-item:hover,
-.department-course-item:hover {
+.department-course-item:hover,
+.class-course-item:hover {
 	background-color: var(--light-bg);
 }
 
 /* Add these styles for selected courses */
 .course-item.course-selected,
-.department-course-item.department-course-selected {
+.department-course-item.department-course-selected,
+.class-course-item.class-course-selected {
 	background-color: rgba(46, 204, 113, 0.1);
 }
 
 .add-course-btn,
-.department-add-course-btn {
+.department-add-course-btn,
+.class-add-course-btn {
 	background-color: var(--success-color);
 	color: white;
 	border: none;
@@ -161,25 +181,29 @@
 }
 
 .add-course-btn.selected,
-.department-add-course-btn.department-selected {
+.department-add-course-btn.department-selected,
+.class-add-course-btn.class-selected {
 	background-color: var(--success-color);
 	opacity: 0.7;
 	cursor: not-allowed;
 }
 
 .add-course-btn.selected:hover,
-.department-add-course-btn.department-selected:hover {
+.department-add-course-btn.department-selected:hover,
+.class-add-course-btn.class-selected:hover {
 	background-color: var(--success-color);
 }
 
 .add-course-btn:hover,
-.department-add-course-btn:hover {
+.department-add-course-btn:hover,
+.class-add-course-btn:hover {
 	background-color: #219653;
 }
 
 /* Improved styling for the no courses message */
 .no-courses-message,
-.department-no-courses-message {
+.department-no-courses-message,
+.class-no-courses-message {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -194,7 +218,8 @@
 }
 
 .no-courses-message i,
-.department-no-courses-message i {
+.department-no-courses-message i,
+.class-no-courses-message i {
 	font-size: 2.5rem;
 	margin-bottom: 15px;
 	color: var(--accent-color);
@@ -202,7 +227,8 @@
 }
 
 .no-courses-message p,
-.department-no-courses-message p {
+.department-no-courses-message p,
+.class-no-courses-message p {
 	margin: 0;
 	font-size: 1.1rem;
 	line-height: 1.5;
@@ -211,7 +237,8 @@
 
 /* Add a subtle animation for loading spinner if used */
 .no-courses-message .fa-spinner,
-.department-no-courses-message .fa-spinner {
+.department-no-courses-message .fa-spinner,
+.class-no-courses-message .fa-spinner {
 	animation: spin 1.5s linear infinite;
 }
 
@@ -227,7 +254,8 @@
 /* Make sure the message is visible in dark mode if applicable */
 @media (prefers-color-scheme: dark) {
 	.no-courses-message,
-	.department-no-courses-message {
+	.department-no-courses-message,
+	.class-no-courses-message {
 		background-color: rgba(255, 255, 255, 0.05);
 		color: rgba(255, 255, 255, 0.8);
 	}

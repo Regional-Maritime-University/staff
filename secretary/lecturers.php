@@ -32,13 +32,61 @@ $_SESSION["lastAccessed"] = time();
 require_once('../bootstrap.php');
 
 use Src\Controller\SecretaryController;
+use Src\Core\Base;
+use Src\Core\Course;
+use Src\Core\CourseCategory;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$secretary          = new SecretaryController($db, $user, $pass);
+$course_category    = new CourseCategory($db, $user, $pass);
+$course             = new Course($db, $user, $pass);
+$base               = new Base($db, $user, $pass);
 
 $pageTitle = "Lecturers";
 $activePage = "lecturers";
+
+$departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$semesterId = 2; //$_SESSION["semester"] ?? null;
+$archived = false;
+
+$activeSemesters = $secretary->fetchActiveSemesters();
+$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
+
+$activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
+$totalActiveCourses = count($activeCourses);
+
+$assignedCourses = [];
+foreach ($activeSemesters as $semester) {
+    $semesterId = $semester['id'];
+    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
+}
+$totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
+
+$assignedLecturers = [];
+foreach ($activeSemesters as $semester) {
+    $semesterId = $semester['id'];
+    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
+}
+$totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
+
+$deadlines = $secretary->fetchPendingDeadlines($departmentId);
+$totalPendingDeadlines = 0;
+if ($deadlines && is_array($deadlines)) {
+    foreach ($deadlines as $d) {
+        if ($d['status'] == 'pending') $totalPendingDeadlines++;
+    }
+}
+
+$courseWithNoDeadlines = $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($departmentId);
+
+$recentActivities = $secretary->fetchRecentActivities($departmentId, false);
+
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
+$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
+
+$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
+$totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
 
 ?>
 
@@ -88,16 +136,6 @@ $activePage = "lecturers";
 
             <!-- Filter Bar -->
             <div class="filter-bar">
-                <div class="filter-group">
-                    <label for="department">Department</label>
-                    <select id="department">
-                        <option value="">All Departments</option>
-                        <option value="1">Marine Engineering</option>
-                        <option value="2">Nautical Science</option>
-                        <option value="3">Logistics Management</option>
-                        <option value="4">Computer Science</option>
-                    </select>
-                </div>
                 <div class="filter-group">
                     <label for="expertise">Area of Expertise</label>
                     <select id="expertise">

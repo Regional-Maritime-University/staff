@@ -170,7 +170,8 @@
 	transition: background-color var(--transition-speed);
 }
 
-.filter-btn.apply {
+.filter-btn.apply,
+.filter-btn.assign {
 	background-color: var(--accent-color);
 	color: white;
 }
@@ -180,7 +181,8 @@
 	color: var(--primary-color);
 }
 
-.filter-btn.apply:hover {
+.filter-btn.apply:hover,
+.filter-btn.assign:hover {
 	background-color: var(--primary-color);
 }
 

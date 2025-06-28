@@ -86,32 +86,6 @@ class SecretaryController
         return $this->dm->getData($query, array(":dp" => $departmentId));
     }
 
-    // public function fetchActiveCourses($departmentId = null, $semester = null, $archived = false)
-    // {
-    //     $select = "";
-    //     $from = "";
-    //     $where = "";
-    //     $params = array(":ar" => $archived);
-
-    //     if ($departmentId) {
-    //         $select = " , `fk_department` AS `fk_department`, d.`name` AS `department_name` ";
-    //         $from .= ", `department` AS d ";
-    //         $where .= " AND c.`fk_department` = d.`id` AND d.`id` = :d ";
-    //         $params[":d"] = $departmentId;
-    //     }
-
-    //     if ($semester) {
-    //         $where .= " AND c.`semester` = :s ";
-    //         $params[":s"] = $semester;
-    //     }
-
-    //     $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
-    //             `fk_category` AS category_id, cg.`name` AS category {$select}
-    //             FROM `course` AS c, `course_category` AS cg {$from}
-    //             WHERE c.`fk_category` = cg.`id` AND c.`archived` = :ar {$where} ORDER BY c.`code` ASC";
-    //     return $this->dm->getData($query, $params);
-    // }
-
     public function fetchActiveCourses($departmentId = null, $semester = null, $archived = false)
     {
         $params = [":ar" => $archived];
@@ -625,8 +599,7 @@ class SecretaryController
 
     public function fetchAllActiveStudents($departmentId = null, $archived = false)
     {
-        $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
-        return $students;
+        return (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
     }
 
     public function fetchAllActiveStudentsExamAndAssessment(array $students, $semesterId = null)
@@ -660,14 +633,15 @@ class SecretaryController
         return $courses;
     }
 
-    public function fetchAllActiveClasses($departmentId = null, $archived = false)
-    {
-        $classes = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
-        return $classes;
-    }
     public function fetchAllActivePrograms($departmentId = null, $archived = false)
     {
-        $programs = (new Program($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
-        return $programs;
+        return (new Program($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+    }
+
+    // For classes
+
+    public function fetchAllActiveClasses($departmentId = null, $archived = false)
+    {
+        return (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
     }
 }
