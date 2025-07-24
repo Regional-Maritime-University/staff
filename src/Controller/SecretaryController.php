@@ -684,7 +684,7 @@ class SecretaryController
         return $this->dm->getData($query, $params);
     }
 
-    public function fetchCurriculumCourses($programId, $departmentId = null, $archived = false)
+    public function fetchProgramCourses($programId, $departmentId = null, $archived = false)
     {
         $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
                 `fk_category` AS category_id, cg.`name` AS category, `fk_department` AS `fk_department`, d.`name` AS `department_name` 
