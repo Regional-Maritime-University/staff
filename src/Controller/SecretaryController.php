@@ -684,12 +684,63 @@ class SecretaryController
         return $this->dm->getData($query, $params);
     }
 
-    public function fetchProgramCourses($programId, $departmentId = null, $archived = false)
+    public function fetchProgramCurriculum($programId, $departmentId = null, $archived = false)
     {
-        $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
+        $query = "SELECT DISTINCT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
                 `fk_category` AS category_id, cg.`name` AS category, `fk_department` AS `fk_department`, d.`name` AS `department_name` 
                 FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
                 WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = :ar";
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId, ":p" => $programId));
+    }
+
+    public function fetchProgramClasses($programId)
+    {
+        $query = "SELECT 
+                    cls.`code`, cls.`year`, COUNT(DISTINCT st.index_number) AS total_students,
+
+                    -- Assuming status is derived from class archived flag (set your actual logic here)
+                    CASE 
+                        WHEN cls.archived = 1 THEN 'Inactive'
+                        ELSE 'Active'
+                    END AS status,
+
+                    CONCAT(sf.first_name, ' ', sf.last_name) AS lecturer
+
+                FROM class cls
+                LEFT JOIN student st ON st.fk_class = cls.code
+                LEFT JOIN staff sf ON sf.number = cls.fk_staff
+
+                WHERE cls.fk_program = :p
+
+                GROUP BY 
+                    cls.code, cls.archived, sf.first_name, sf.last_name;";
+        return $this->dm->getData($query, array(":p" => $programId));
+    }
+
+    public function fetchProgramStudents($programId)
+    {
+        $query = "SELECT 
+                    DISTINCT s.`index_number` AS id, s.`first_name`, s.`last_name`, s.`gender`, s.`email`, s.`phone_number`, s.`photo`, 
+                    CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS full_name, 
+                    cls.`code` AS class_code, l.`level`, p.`name` AS program_name, p.`code` AS program_code
+
+                FROM `student` s
+                LEFT JOIN `level` l ON l.`fk_student` = s.`index_number`
+                LEFT JOIN `department` d ON d.`id` = s.`fk_department`
+                LEFT JOIN `class` cls ON cls.`code` = s.`fk_class`
+                LEFT JOIN `programs` p ON p.`id` = s.`fk_program`
+
+                WHERE s.fk_program = :p AND s.archived = 0 AND l.`active` = 1";
+        return $this->dm->getData($query, array(":p" => $programId));
+    }
+
+    public function fetchProgramCourses($programId, $departmentId = null)
+    {
+        $query = "SELECT 
+                    c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
+                    `fk_category` AS category_id, cg.`name` AS category, `fk_department` AS `fk_department`, d.`name` AS `department_name` 
+                FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
+                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = 0";
+        return $this->dm->getData($query, array(":p" => $programId, ":d" => $departmentId));
     }
 }

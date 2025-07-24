@@ -597,12 +597,16 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="lecturerLastName">Last Name</label>
+                                <input type="text" id="lecturerLastName" required>
+                            </div>
+                            <div class="form-group">
                                 <label for="lecturerFirstName">First Name</label>
                                 <input type="text" id="lecturerFirstName" required>
                             </div>
                             <div class="form-group">
-                                <label for="lecturerLastName">Last Name</label>
-                                <input type="text" id="lecturerLastName" required>
+                                <label for="lecturerMiddleName">Middle Name</label>
+                                <input type="text" id="lecturerMiddleName" required>
                             </div>
                             <div class="form-group">
                                 <label for="lecturerPosition">Position</label>
@@ -617,31 +621,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="lecturerDepartment">Department</label>
-                                <select id="lecturerDepartment" required>
-                                    <option value="">Select Department</option>
-                                    <option value="1">Marine Engineering</option>
-                                    <option value="2">Nautical Science</option>
-                                    <option value="3">Logistics Management</option>
-                                    <option value="4">Computer Science</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label for="lecturerEmail">Email Address</label>
                                 <input type="email" id="lecturerEmail" required>
                             </div>
                             <div class="form-group">
                                 <label for="lecturerPhone">Phone Number</label>
                                 <input type="tel" id="lecturerPhone" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="lecturerAvailability">Availability Status</label>
-                                <select id="lecturerAvailability" required>
-                                    <option value="">Select Status</option>
-                                    <option value="available">Available</option>
-                                    <option value="busy">Busy</option>
-                                    <option value="unavailable">Unavailable</option>
-                                </select>
                             </div>
                         </div>
 
@@ -667,41 +652,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 </div>
                             </div>
                         </div>
-
-                        <div class="import-courses">
-                            <div class="import-title">
-                                <i class="fas fa-book"></i>
-                                Assign Courses
-                            </div>
-                            <div class="form-group">
-                                <div class="checkbox-list">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course1" value="ME101">
-                                        <label for="course1">ME101 - Introduction to Marine Engineering</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course2" value="ML202">
-                                        <label for="course2">ML202 - Maritime Law and Regulations</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course3" value="NS305">
-                                        <label for="course3">NS305 - Ship Navigation Systems</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course4" value="CS304">
-                                        <label for="course4">CS304 - Database Management Systems</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course5" value="LM201">
-                                        <label for="course5">LM201 - Supply Chain Management</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="course6" value="ME302">
-                                        <label for="course6">ME302 - Marine Propulsion Systems</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="hidden" id="departmentId" value="<?php echo $departmentId; ?>">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -721,29 +672,22 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="upload-area">
-                        <div class="upload-icon">
-                            <i class="fas fa-file-upload fa-3x"></i>
+                    <form id="bulkUploadLecturerForm">
+                        <div class="upload-area">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-upload fa-3x"></i>
+                            </div>
+                            <h3>Upload Lecturer List</h3>
+                            <p>Drag and drop your CSV or Excel file here, or click the button below to select a file.</p>
+                            <input type="file" id="lecturerFileInput" class="file-input" accept=".csv, .xlsx">
+                            <label for="lecturerFileInput" class="file-label">Choose File</label>
+                            <div class="selected-file-name" id="selectedFileName"></div>
+                            <div class="template-download">
+                                <a href="#" class="download-link">Download Template</a>
+                            </div>
+                            <input type="hidden" id="departmentId" value="<?php echo $departmentId; ?>">
                         </div>
-                        <h3>Upload Lecturer List</h3>
-                        <p>Drag and drop your CSV or Excel file here, or click the button below to select a file.</p>
-                        <input type="file" id="lecturerFileInput" class="file-input" accept=".csv, .xlsx">
-                        <label for="lecturerFileInput" class="file-label">Choose File</label>
-                        <div class="selected-file-name" id="selectedFileName"></div>
-                        <div class="template-download">
-                            <a href="#" class="download-link">Download Template</a>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="defaultDepartment">Default Department</label>
-                        <select id="defaultDepartment">
-                            <option value="">No Default (Use from file)</option>
-                            <option value="1">Marine Engineering</option>
-                            <option value="2">Nautical Science</option>
-                            <option value="3">Logistics Management</option>
-                            <option value="4">Computer Science</option>
-                        </select>
-                    </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>
@@ -762,53 +706,56 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="assignLecturer">Select Lecturer</label>
-                        <select id="assignLecturer" required>
-                            <option value="">Select Lecturer</option>
-                            <option value="1">Dr. John Doe - Marine Engineering</option>
-                            <option value="2">Prof. Jane Smith - Nautical Science</option>
-                            <option value="3">Dr. Robert Johnson - Nautical Science</option>
-                            <option value="4">Prof. Emily Brown - Computer Science</option>
-                            <option value="5">Dr. Michael Wilson - Logistics Management</option>
-                            <option value="6">Prof. David Clark - Marine Engineering</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Select Courses to Assign</label>
-                        <div class="checkbox-list">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse1" value="ME101">
-                                <label for="assignCourse1">ME101 - Introduction to Marine Engineering</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse2" value="ML202">
-                                <label for="assignCourse2">ML202 - Maritime Law and Regulations</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse3" value="NS305">
-                                <label for="assignCourse3">NS305 - Ship Navigation Systems</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse4" value="CS304">
-                                <label for="assignCourse4">CS304 - Database Management Systems</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse5" value="LM201">
-                                <label for="assignCourse5">LM201 - Supply Chain Management</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="assignCourse6" value="ME302">
-                                <label for="assignCourse6">ME302 - Marine Propulsion Systems</label>
+                    <form id="assignLecturerForm">
+                        <div class="form-group">
+                            <label for="assignLecturer">Select Lecturer</label>
+                            <select id="assignLecturer" required>
+                                <option value="">Select Lecturer</option>
+                                <option value="1">Dr. John Doe - Marine Engineering</option>
+                                <option value="2">Prof. Jane Smith - Nautical Science</option>
+                                <option value="3">Dr. Robert Johnson - Nautical Science</option>
+                                <option value="4">Prof. Emily Brown - Computer Science</option>
+                                <option value="5">Dr. Michael Wilson - Logistics Management</option>
+                                <option value="6">Prof. David Clark - Marine Engineering</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Courses to Assign</label>
+                            <div class="checkbox-list">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse1" value="ME101">
+                                    <label for="assignCourse1">ME101 - Introduction to Marine Engineering</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse2" value="ML202">
+                                    <label for="assignCourse2">ML202 - Maritime Law and Regulations</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse3" value="NS305">
+                                    <label for="assignCourse3">NS305 - Ship Navigation Systems</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse4" value="CS304">
+                                    <label for="assignCourse4">CS304 - Database Management Systems</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse5" value="LM201">
+                                    <label for="assignCourse5">LM201 - Supply Chain Management</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="assignCourse6" value="ME302">
+                                    <label for="assignCourse6">ME302 - Marine Propulsion Systems</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="notifyLecturer">
-                            <input type="checkbox" id="notifyLecturer" checked>
-                            Notify lecturer about course assignment
-                        </label>
-                    </div>
+                        <div class="form-group">
+                            <label for="notifyLecturer">
+                                <input type="checkbox" id="notifyLecturer" checked>
+                                Notify lecturer about course assignment
+                            </label>
+                        </div>
+                        <input type="hidden" id="departmentId" value="<?php echo $departmentId; ?>">
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>

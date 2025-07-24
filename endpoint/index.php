@@ -275,11 +275,26 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     //courses
-    elseif ($_GET["url"] == "fetch-program-courses") {
+    elseif ($_GET["url"] == "fetch-program-curriculum") {
         if (! isset($_POST["program"]) || empty($_POST["program"])) {
             die(json_encode(["success" => false, "message" => "Program is required!"]));
         }
-        die(json_encode(["success" => true, "data" => $secretary->fetchProgramCourses($_POST["program"])]));
+        die(json_encode(["success" => true, "data" => $secretary->fetchProgramCurriculum($programId = $_POST["program"], $departmentId = $_SESSION["staff"]["department_id"])]));
+    } elseif ($_GET["url"] == "fetch-program-classes") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchProgramClasses($programId = $_POST["program"])]));
+    } elseif ($_GET["url"] == "fetch-program-students") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchProgramStudents($programId = $_POST["program"])]));
+    } elseif ($_GET["url"] == "fetch-program-courses") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchProgramCourses($programId = $_POST["program"], $departmentId = $_SESSION["staff"]["department_id"])]));
     } elseif ($_GET["url"] == "fetch-course") {
         if (isset($_POST["course"]) && ! empty($_POST["course"])) {
             $_POST["key"]   = "code";

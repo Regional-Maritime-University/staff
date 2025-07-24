@@ -440,6 +440,14 @@ END;
 
 DELIMITER ;
 
+ALTER TABLE `class` ADD COLUMN `fk_staff` VARCHAR(10) AFTER `fk_program`;
+ALTER TABLE `class` ADD CONSTRAINT `fk_class_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `class` ADD COLUMN `archived` TINYINT(1) DEFAULT 0 AFTER `fk_staff`;
+ALTER TABLE `class` ADD COLUMN `year` TEXT DEFAULT NULL AFTER `fk_staff`;
+ALTER TABLE `class` ADD INDEX `class_archived_idx1` (`archived`);
+ALTER TABLE `class` ADD INDEX `class_year_idx1` (`year`);
+
+
 
 
 

@@ -74,7 +74,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
     <title>RMU Staff Portal - Programs</title>
     <link rel="stylesheet" href="./css/program.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
 </head>
 
 <body>
@@ -135,11 +135,11 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                         </button>
                     </div>
                     <select class="modal-filter-select" id="curriculumYearFilter">
-                        <option value="all">All Years</option>
-                        <option value="1">Year 1</option>
-                        <option value="2">Year 2</option>
-                        <option value="3">Year 3</option>
-                        <option value="4">Year 4</option>
+                        <option value="all">All Levels</option>
+                        <option value="100">Level 100</option>
+                        <option value="200">Level 200</option>
+                        <option value="300">Level 300</option>
+                        <option value="400">Level 400</option>
                     </select>
                     <select class="modal-filter-select" id="curriculumSemesterFilter">
                         <option value="all">All Semesters</option>
@@ -289,131 +289,9 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             status: program.status
         }));
 
-        const curriculumData = {
-            1: [ // BME curriculum
-                {
-                    id: 1,
-                    code: "ME101",
-                    title: "Introduction to Marine Engineering",
-                    year: 1,
-                    semester: 1,
-                    credits: 3,
-                    type: "core"
-                },
-                {
-                    id: 2,
-                    code: "MA101",
-                    title: "Engineering Mathematics I",
-                    year: 1,
-                    semester: 1,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 3,
-                    code: "PH101",
-                    title: "Engineering Physics",
-                    year: 1,
-                    semester: 1,
-                    credits: 3,
-                    type: "core"
-                },
-                {
-                    id: 4,
-                    code: "ME102",
-                    title: "Marine Thermodynamics",
-                    year: 1,
-                    semester: 2,
-                    credits: 3,
-                    type: "core"
-                },
-                {
-                    id: 5,
-                    code: "ME201",
-                    title: "Marine Propulsion Systems",
-                    year: 2,
-                    semester: 1,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 6,
-                    code: "ME202",
-                    title: "Ship Design Principles",
-                    year: 2,
-                    semester: 2,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 7,
-                    code: "ME301",
-                    title: "Advanced Marine Engineering",
-                    year: 3,
-                    semester: 1,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 8,
-                    code: "ME302",
-                    title: "Marine Electrical Systems",
-                    year: 3,
-                    semester: 2,
-                    credits: 3,
-                    type: "elective"
-                }
-            ],
-            2: [ // MNS curriculum
-                {
-                    id: 9,
-                    code: "NS201",
-                    title: "Advanced Navigation",
-                    year: 1,
-                    semester: 1,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 10,
-                    code: "NS202",
-                    title: "Ship Handling",
-                    year: 1,
-                    semester: 1,
-                    credits: 3,
-                    type: "core"
-                },
-                {
-                    id: 11,
-                    code: "NS203",
-                    title: "Maritime Operations",
-                    year: 1,
-                    semester: 2,
-                    credits: 4,
-                    type: "core"
-                },
-                {
-                    id: 12,
-                    code: "NS301",
-                    title: "Port Management",
-                    year: 2,
-                    semester: 1,
-                    credits: 3,
-                    type: "elective"
-                },
-                {
-                    id: 13,
-                    code: "NS302",
-                    title: "Maritime Law",
-                    year: 2,
-                    semester: 2,
-                    credits: 3,
-                    type: "core"
-                }
-            ]
-        };
+        var curriculumData = {};
 
-        const classesData = {
+        var classesData = {
             1: [ // BME classes
                 {
                     id: 1,
@@ -547,35 +425,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             ]
         };
 
-        async function fetchProgramCourses(programId) {
-            if (!programId) {
-                alert("Program ID is required to fetch courses.");
-                return;
-            }
-
-            try {
-                const response = await fetch('../endpoint/fetch-program-courses', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'program': programId
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data;
-
-            } catch (error) {
-                console.error("Failed to fetch courses:", error);
-            }
-        }
-
         const coursesData = {
             1: [ // BME courses
                 {
@@ -646,6 +495,122 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 }
             ]
         };
+
+        async function fetchProgramCurriculum(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch curriculum.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-program-curriculum', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch courses:", error);
+            }
+        }
+
+        async function fetchProgramClasses(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch classes.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-program-classes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch program classes:", error);
+            }
+        }
+
+        async function fetchProgramStudents(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch students.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-program-students', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch program students:", error);
+            }
+        }
+
+        async function fetchProgramCourses(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch courses.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-program-courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch program courses:", error);
+            }
+        }
 
         let filteredPrograms = [...programsData];
 
@@ -788,30 +753,98 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         // Modal functions
         function openCurriculumModal(programId) {
             const program = programsData.find(p => p.id === programId);
-            document.getElementById('curriculumModalTitle').textContent = `${program.title} - Curriculum`;
-            renderCurriculumList(programId);
-            document.getElementById('curriculumModal').classList.add('active');
+            fetchProgramCurriculum(programId)
+                .then(courses => {
+                    if (courses.data && Array.isArray(courses.data)) {
+                        curriculumData[programId] = courses.data.map(course => ({
+                            id: course.id,
+                            code: course.code,
+                            title: course.name,
+                            year: course.level,
+                            semester: course.semester,
+                            credits: course.credit_hours,
+                            type: course.category
+                        }));
+                    }
+                    document.getElementById('curriculumModalTitle').textContent = `${program.title} - Curriculum`;
+                    renderCurriculumList(programId);
+                    document.getElementById('curriculumModal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error("Error fetching program curriculum: ", error);
+                });
         }
 
         function openClassesModal(programId) {
             const program = programsData.find(p => p.id === programId);
-            document.getElementById('classesModalTitle').textContent = `${program.title} - Classes`;
-            renderClassesList(programId);
-            document.getElementById('classesModal').classList.add('active');
+            fetchProgramClasses(programId)
+                .then(classes => {
+                    console.log("Classes Data:", classes.data);
+                    if (classes.data && Array.isArray(classes.data)) {
+                        classesData[programId] = classes.data.map(classItem => ({
+                            id: classItem.id,
+                            name: classItem.name || classItem.code || `Class ${classItem.id}`,
+                            year: classItem.year || classItem.level || 1,
+                            students: classItem.total_students || classItem.students || 0,
+                            status: classItem.status || "N/A",
+                            lecturer: classItem.lecturer || "N/A"
+                        }));
+                    }
+                    document.getElementById('classesModalTitle').textContent = `${program.title} - Classes`;
+                    renderClassesList(programId);
+                    document.getElementById('classesModal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error("Error fetching program curriculum: ", error);
+                });
         }
 
         function openStudentsModal(programId) {
             const program = programsData.find(p => p.id === programId);
-            document.getElementById('studentsModalTitle').textContent = `${program.title} - Students`;
-            renderStudentsList(programId);
-            document.getElementById('studentsModal').classList.add('active');
+            fetchProgramStudents(programId)
+                .then(students => {
+                    console.log("Students Data:", students.data);
+                    if (students.data && Array.isArray(students.data)) {
+                        studentsData[programId] = students.data.map(student => ({
+                            id: student.id,
+                            name: student.name || student.full_name || `Student ${student.id}`,
+                            studentId: student.id || 'N/A',
+                            year: student.year || student.level || 1,
+                            status: student.status || "N/A",
+                            gpa: student.gpa || 0.0
+                        }));
+                    }
+                    document.getElementById('studentsModalTitle').textContent = `${program.title} - Students`;
+                    renderStudentsList(programId);
+                    document.getElementById('studentsModal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error("Error fetching program curriculum: ", error);
+                });
         }
 
         function openCoursesModal(programId) {
             const program = programsData.find(p => p.id === programId);
-            document.getElementById('coursesModalTitle').textContent = `${program.title} - Courses`;
-            renderCoursesList(programId);
-            document.getElementById('coursesModal').classList.add('active');
+            fetchProgramCourses(programId)
+                .then(courses => {
+                    console.log("Courses Data:", courses.data);
+                    if (courses.data && Array.isArray(courses.data)) {
+                        coursesData[programId] = courses.data.map(course => ({
+                            id: course.id,
+                            code: course.code || `Course ${course.id}`,
+                            title: course.name || `Course Name ${course.id}`,
+                            credits: course.credit_hours || 3,
+                            type: course.category || "N/A",
+                            status: course.status || "N/A"
+                        }));
+                    }
+                    document.getElementById('coursesModalTitle').textContent = `${program.title} - Courses`;
+                    renderCoursesList(programId);
+                    document.getElementById('coursesModal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error("Error fetching program courses: ", error);
+                });
         }
 
         function closeAllModals() {
@@ -840,7 +873,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 <div class="list-item" data-year="${course.year}" data-semester="${course.semester}">
                     <div class="list-item-info">
                         <div class="list-item-title">${course.code} - ${course.title}</div>
-                        <div class="list-item-subtitle">Year ${course.year}, Semester ${course.semester} • ${course.credits} Credits • ${course.type}</div>
+                        <div class="list-item-subtitle">Level ${course.year}, Semester ${course.semester} • ${course.credits} Credits • ${course.type}</div>
                     </div>
                     <div class="list-item-actions">
                         <button class="list-item-btn view" onclick="viewCourseDetails(${course.id})">
