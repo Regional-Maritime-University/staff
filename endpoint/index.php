@@ -275,7 +275,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     //courses
-    elseif ($_GET["url"] == "fetch-course") {
+    elseif ($_GET["url"] == "fetch-program-courses") {
+        die(json_encode($_POST));
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchCurriculumCourses($_POST["program"])]));
+    } elseif ($_GET["url"] == "fetch-course") {
         if (isset($_POST["course"]) && ! empty($_POST["course"])) {
             $_POST["key"]   = "code";
             $_POST["value"] = $_POST["course"];

@@ -61,6 +61,9 @@ $activeCummulativePrograms = $secretary->fetchAllCummulativeProgramsDetails(depa
 $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
 
+$activeCoursesData = $course->fetch(key: "department", value: $departmentId, archived: $archived);
+$totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count($activeCoursesData) : 0;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -1009,13 +1012,6 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
                         <option value="masters">Masters</option>
                         <option value="diploma">Diploma</option>
                     </select>
-                    <select class="filter-select" id="departmentFilter">
-                        <option value="all">All Departments</option>
-                        <option value="marine-engineering">Marine Engineering</option>
-                        <option value="nautical-science">Nautical Science</option>
-                        <option value="port-management">Port Management</option>
-                        <option value="maritime-law">Maritime Law</option>
-                    </select>
                     <select class="filter-select" id="statusFilter">
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -1209,91 +1205,6 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
             classes: program.total_classes,
             status: program.status
         }));
-        // const programsData = [{
-        //         id: 1,
-        //         title: "Bachelor of Marine Engineering",
-        //         code: "BME",
-        //         level: "undergraduate",
-        //         department: "marine-engineering",
-        //         description: "A comprehensive program covering marine propulsion systems, ship design, and maritime technology.",
-        //         duration: "4 Years",
-        //         credits: 120,
-        //         students: 145,
-        //         courses: 32,
-        //         classes: 8,
-        //         status: "active"
-        //     },
-        //     {
-        //         id: 2,
-        //         title: "Master of Nautical Science",
-        //         code: "MNS",
-        //         level: "postgraduate",
-        //         department: "nautical-science",
-        //         description: "Advanced studies in navigation, ship handling, and maritime operations management.",
-        //         duration: "2 Years",
-        //         credits: 60,
-        //         students: 78,
-        //         courses: 18,
-        //         classes: 4,
-        //         status: "active"
-        //     },
-        //     {
-        //         id: 3,
-        //         title: "Diploma in Port Management",
-        //         code: "DPM",
-        //         level: "diploma",
-        //         department: "port-management",
-        //         description: "Specialized training in port operations, logistics, and terminal management.",
-        //         duration: "18 Months",
-        //         credits: 45,
-        //         students: 92,
-        //         courses: 15,
-        //         classes: 6,
-        //         status: "active"
-        //     },
-        //     {
-        //         id: 4,
-        //         title: "Bachelor of Maritime Law",
-        //         code: "BML",
-        //         level: "undergraduate",
-        //         department: "maritime-law",
-        //         description: "Comprehensive study of maritime law, international shipping regulations, and marine insurance.",
-        //         duration: "4 Years",
-        //         credits: 120,
-        //         students: 67,
-        //         courses: 28,
-        //         classes: 5,
-        //         status: "active"
-        //     },
-        //     {
-        //         id: 5,
-        //         title: "Master of Marine Engineering",
-        //         code: "MME",
-        //         level: "postgraduate",
-        //         department: "marine-engineering",
-        //         description: "Advanced research and development in marine engineering technologies and systems.",
-        //         duration: "2 Years",
-        //         credits: 60,
-        //         students: 34,
-        //         courses: 16,
-        //         classes: 3,
-        //         status: "active"
-        //     },
-        //     {
-        //         id: 6,
-        //         title: "Certificate in Maritime Safety",
-        //         code: "CMS",
-        //         level: "diploma",
-        //         department: "nautical-science",
-        //         description: "Essential training in maritime safety protocols and emergency response procedures.",
-        //         duration: "6 Months",
-        //         credits: 20,
-        //         students: 156,
-        //         courses: 8,
-        //         classes: 12,
-        //         status: "inactive"
-        //     }
-        // ];
 
         const curriculumData = {
             1: [ // BME curriculum
@@ -1553,6 +1464,39 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
             ]
         };
 
+        async function fetchCoursesByProgram(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch courses.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-program-courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch courses:", error);
+            }
+        }
+
+        // Example usage
+        fetchCoursesByProgram(9);
+
+
         const coursesData = {
             1: [ // BME courses
                 {
@@ -1721,14 +1665,12 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
 
             // Filter dropdowns
             document.getElementById('levelFilter').addEventListener('change', filterPrograms);
-            document.getElementById('departmentFilter').addEventListener('change', filterPrograms);
             document.getElementById('statusFilter').addEventListener('change', filterPrograms);
 
             // Reset filters
             document.getElementById('resetFiltersBtn').addEventListener('click', function() {
                 document.getElementById('globalSearch').value = '';
                 document.getElementById('levelFilter').value = 'all';
-                document.getElementById('departmentFilter').value = 'all';
                 document.getElementById('statusFilter').value = 'all';
                 filterPrograms();
             });
@@ -1748,7 +1690,6 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
         function filterPrograms() {
             const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
             const levelFilter = document.getElementById('levelFilter').value;
-            const departmentFilter = document.getElementById('departmentFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
 
             filteredPrograms = programsData.filter(program => {
@@ -1757,10 +1698,9 @@ $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($act
                     program.description.toLowerCase().includes(searchTerm);
 
                 const matchesLevel = levelFilter === 'all' || program.level === levelFilter;
-                const matchesDepartment = departmentFilter === 'all' || program.department === departmentFilter;
                 const matchesStatus = statusFilter === 'all' || program.status === statusFilter;
 
-                return matchesSearch && matchesLevel && matchesDepartment && matchesStatus;
+                return matchesSearch && matchesLevel && matchesStatus;
             });
 
             renderPrograms();

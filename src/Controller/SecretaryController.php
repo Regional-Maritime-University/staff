@@ -663,18 +663,18 @@ class SecretaryController
                         ELSE 'active'
                     END AS status,
                     
-                    COUNT(DISTINCT s.index_number) AS total_students, 
-                    COUNT(DISTINCT sec.fk_course) AS total_courses, 
-                    COUNT(DISTINCT c.code) AS total_classes, 
-                    SUM(DISTINCT cr.credit_hours) AS total_credits 
+                    COUNT(DISTINCT s.index_number) AS total_students,
+                    COUNT(DISTINCT cls.code) AS total_classes,
+                    COUNT(DISTINCT cur.fk_course) AS total_courses,
+                    SUM(DISTINCT cr.credit_hours) AS total_credit_hours
 
                 FROM programs p
                 INNER JOIN department d ON d.id = p.department
                 LEFT JOIN student s ON s.fk_program = p.id
-                LEFT JOIN class c ON c.fk_program = p.id
-                LEFT JOIN section sec ON sec.fk_class = c.code
+                LEFT JOIN class cls ON cls.fk_program = p.id
+                LEFT JOIN curriculum cur ON cur.fk_program = p.id
+                LEFT JOIN course cr ON cr.code = cur.fk_course 
                 LEFT JOIN forms f ON f.id = p.type 
-                LEFT JOIN course cr ON cr.code = sec.fk_course 
 
                 WHERE d.id = :d AND p.archived = :a  -- Replace ? with the desired department ID
 
@@ -682,5 +682,14 @@ class SecretaryController
                     p.id, p.name, p.code, p.type, d.name, p.duration, p.num_of_semesters, p.archived;";
         $params = array(":d" => $departmentId, ":a" => $archived);
         return $this->dm->getData($query, $params);
+    }
+
+    public function fetchCurriculumCourses($programId, $departmentId = null, $archived = false)
+    {
+        $query = "SELECT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
+                `fk_category` AS category_id, cg.`name` AS category, `fk_department` AS `fk_department`, d.`name` AS `department_name` 
+                FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
+                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = :ar";
+        return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId, ":p" => $programId));
     }
 }
