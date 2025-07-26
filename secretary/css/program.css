@@ -229,6 +229,70 @@ body {
 	width: 0;
 }
 
+/* Form Styles */
+.form-group {
+	margin-bottom: 20px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 8px;
+	color: var(--primary-color);
+	font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	font-size: 1rem;
+	transition: border-color var(--transition-speed);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+	border-color: var(--accent-color);
+	outline: none;
+}
+
+.form-group textarea {
+	resize: vertical;
+	min-height: 100px;
+}
+
+.cancel-btn,
+.submit-btn {
+	padding: 12px 24px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 500;
+	transition: background-color var(--transition-speed);
+}
+
+.cancel-btn {
+	background-color: #f8f9fa;
+	color: var(--primary-color);
+}
+
+.submit-btn {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.cancel-btn:hover {
+	background-color: #e9ecef;
+}
+
+.submit-btn:hover {
+	background-color: var(--primary-color);
+}
+
 /* Main Content Styles */
 .main-content {
 	flex: 1;

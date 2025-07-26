@@ -267,7 +267,93 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         </div>
     </div>
 
+    <!-- Programs Modal -->
+    <div class="modal" id="addProgramModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-book"></i> <span id="addProgramModalTitle">Add Program</span></h2>
+                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProgramForm">
+                        <div class="form-group">
+                            <label for="programCategory">Category</label>
+                            <select id="programCategory" required>
+                                <option value="">-- Select Category --</option>
+                                <option value="BSC">BSC</option>
+                                <option value="DIPLOMA">DIPLOMA</option>
+                                <option value="MA">MA</option>
+                                <option value="MSC">MSC</option>
+                                <option value="UPGRADE">UPGRADE</option>
+                                <option value="SHORT">PROFESSIONAL/VOCATIONAL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="programName">Program Name</label>
+                            <input type="text" id="programName" placeholder="e.g. Maritime Law" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="indexPrefix">Index Prefix</label>
+                            <input type="text" id="indexPrefix" min="1" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">Duration</label>
+                            <input type="number" id="duration" min="1" max="8" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="durationFormat">Duration Format</label>
+                            <input type="number" id="durationFormat" min="1" max="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="numberOfSemesters">Program Code</label>
+                            <input type="text" id="numberOfSemesters" placeholder="e.g. ML201" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="formSaleCategory">Form Sale Category</label>
+                            <select id="formSaleCategory" name="formSaleCategory" required>
+                                <option value="">-- Select Form Sale Category --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">-- Select Category --</option>
+                                <option value="regular">Regular</option>
+                                <option value="weekend">Weekend</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="group">Group</label>
+                            <select id="group" required>
+                                <option value="">-- Select Group --</option>
+                                <option value="M">First Semester</option>
+                                <option value="A">Second Semester</option>
+                                <option value="B">Second Semester</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="department" id="programDepartment" value="<?= $departmentId ?>">
+                        <input type="hidden" name="action" id="programAction" value="add">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove("active");
+            document.body.style.overflow = "auto";
+        }
+
+        document.getElementById('addProgramBtn').addEventListener('click', () => openModal('addProgramModal'));
+
         function capitalizeWords(str) {
             return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         }
@@ -289,212 +375,13 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             status: program.status
         }));
 
-        var curriculumData = {};
+        let curriculumData = {};
 
-        var classesData = {
-            1: [ // BME classes
-                {
-                    id: 1,
-                    name: "BME Class A - Year 1",
-                    year: 1,
-                    students: 35,
-                    status: "active",
-                    lecturer: "Dr. Smith"
-                },
-                {
-                    id: 2,
-                    name: "BME Class B - Year 1",
-                    year: 1,
-                    students: 32,
-                    status: "active",
-                    lecturer: "Prof. Johnson"
-                },
-                {
-                    id: 3,
-                    name: "BME Class A - Year 2",
-                    year: 2,
-                    students: 28,
-                    status: "active",
-                    lecturer: "Dr. Brown"
-                },
-                {
-                    id: 4,
-                    name: "BME Class A - Year 3",
-                    year: 3,
-                    students: 25,
-                    status: "active",
-                    lecturer: "Dr. Wilson"
-                },
-                {
-                    id: 5,
-                    name: "BME Class A - Year 4",
-                    year: 4,
-                    students: 25,
-                    status: "active",
-                    lecturer: "Prof. Davis"
-                }
-            ],
-            2: [ // MNS classes
-                {
-                    id: 6,
-                    name: "MNS Class A - Year 1",
-                    year: 1,
-                    students: 40,
-                    status: "active",
-                    lecturer: "Capt. Anderson"
-                },
-                {
-                    id: 7,
-                    name: "MNS Class A - Year 2",
-                    year: 2,
-                    students: 38,
-                    status: "active",
-                    lecturer: "Capt. Thompson"
-                }
-            ]
-        };
+        let classesData = {};
 
-        const studentsData = {
-            1: [ // BME students
-                {
-                    id: 1,
-                    name: "John Smith",
-                    studentId: "BME2021001",
-                    year: 3,
-                    status: "active",
-                    gpa: 3.45
-                },
-                {
-                    id: 2,
-                    name: "Sarah Johnson",
-                    studentId: "BME2021002",
-                    year: 3,
-                    status: "active",
-                    gpa: 3.78
-                },
-                {
-                    id: 3,
-                    name: "Michael Brown",
-                    studentId: "BME2020001",
-                    year: 4,
-                    status: "active",
-                    gpa: 3.23
-                },
-                {
-                    id: 4,
-                    name: "Emily Davis",
-                    studentId: "BME2022001",
-                    year: 2,
-                    status: "active",
-                    gpa: 3.89
-                },
-                {
-                    id: 5,
-                    name: "Robert Wilson",
-                    studentId: "BME2019001",
-                    year: 4,
-                    status: "graduated",
-                    gpa: 3.56
-                }
-            ],
-            2: [ // MNS students
-                {
-                    id: 6,
-                    name: "James Anderson",
-                    studentId: "MNS2022001",
-                    year: 2,
-                    status: "active",
-                    gpa: 3.67
-                },
-                {
-                    id: 7,
-                    name: "Lisa Thompson",
-                    studentId: "MNS2023001",
-                    year: 1,
-                    status: "active",
-                    gpa: 3.45
-                },
-                {
-                    id: 8,
-                    name: "David Miller",
-                    studentId: "MNS2022002",
-                    year: 2,
-                    status: "suspended",
-                    gpa: 2.34
-                }
-            ]
-        };
+        let studentsData = {};
 
-        const coursesData = {
-            1: [ // BME courses
-                {
-                    id: 1,
-                    code: "ME101",
-                    title: "Introduction to Marine Engineering",
-                    credits: 3,
-                    type: "core",
-                    status: "active"
-                },
-                {
-                    id: 2,
-                    code: "ME201",
-                    title: "Marine Propulsion Systems",
-                    credits: 4,
-                    type: "core",
-                    status: "active"
-                },
-                {
-                    id: 3,
-                    code: "ME301",
-                    title: "Advanced Marine Engineering",
-                    credits: 4,
-                    type: "core",
-                    status: "active"
-                },
-                {
-                    id: 4,
-                    code: "ME302",
-                    title: "Marine Electrical Systems",
-                    credits: 3,
-                    type: "elective",
-                    status: "active"
-                },
-                {
-                    id: 5,
-                    code: "ME401",
-                    title: "Ship Design Project",
-                    credits: 6,
-                    type: "practical",
-                    status: "active"
-                }
-            ],
-            2: [ // MNS courses
-                {
-                    id: 6,
-                    code: "NS201",
-                    title: "Advanced Navigation",
-                    credits: 4,
-                    type: "core",
-                    status: "active"
-                },
-                {
-                    id: 7,
-                    code: "NS202",
-                    title: "Ship Handling",
-                    credits: 3,
-                    type: "core",
-                    status: "active"
-                },
-                {
-                    id: 8,
-                    code: "NS301",
-                    title: "Port Management",
-                    credits: 3,
-                    type: "elective",
-                    status: "active"
-                }
-            ]
-        };
+        let coursesData = {};
 
         async function fetchProgramCurriculum(programId) {
             if (!programId) {
