@@ -1,3 +1,47 @@
+<?php
+session_start();
+
+if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
+    header("Location: ../index.php");
+}
+
+$isUser = false;
+if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "lecturer") $isUser = true;
+
+if (isset($_GET['logout']) || !$isUser) {
+    session_destroy();
+    $_SESSION = array();
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+
+    header('Location: ../index.php');
+}
+
+$_SESSION["lastAccessed"] = time();
+
+require_once('../bootstrap.php');
+
+use Src\Controller\SecretaryController;
+
+require_once('../inc/admin-database-con.php');
+
+$admin = new SecretaryController($db, $user, $pass);
+
+$pageTitle = "Course Details - RMU Lecturer Portal";
+$activePage = "course details";
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,19 +74,19 @@
             <div class="menu-group">
                 <h3>Main Menu</h3>
                 <div class="menu-items">
-                    <a href="dashboard.html" class="menu-item">
+                    <a href="index.php" class="menu-item">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="courses.html" class="menu-item active">
+                    <a href="courses.php" class="menu-item active">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="results.html" class="menu-item">
+                    <a href="results.php" class="menu-item">
                         <i class="fas fa-chart-bar"></i>
                         <span>Exam Results</span>
                     </a>
-                    <a href="students.html" class="menu-item">
+                    <a href="students.php" class="menu-item">
                         <i class="fas fa-user-graduate"></i>
                         <span>Students</span>
                     </a>
@@ -51,12 +95,12 @@
             <div class="menu-group">
                 <h3>Communication</h3>
                 <div class="menu-items">
-                    <a href="messages.html" class="menu-item">
+                    <a href="messages.php" class="menu-item">
                         <i class="fas fa-envelope"></i>
                         <span>Messages</span>
                         <span class="badge">3</span>
                     </a>
-                    <a href="notifications.html" class="menu-item">
+                    <a href="notifications.php" class="menu-item">
                         <i class="fas fa-bell"></i>
                         <span>Notifications</span>
                         <span class="badge">7</span>
@@ -66,15 +110,15 @@
             <div class="menu-group">
                 <h3>Settings</h3>
                 <div class="menu-items">
-                    <a href="profile.html" class="menu-item">
+                    <a href="profile.php" class="menu-item">
                         <i class="fas fa-user-cog"></i>
                         <span>Profile</span>
                     </a>
-                    <a href="change-password.html" class="menu-item">
+                    <a href="change-password.php" class="menu-item">
                         <i class="fas fa-key"></i>
                         <span>Change Password</span>
                     </a>
-                    <a href="login.html" class="menu-item">
+                    <a href="login.php" class="menu-item">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>

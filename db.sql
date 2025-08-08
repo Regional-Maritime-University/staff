@@ -447,6 +447,28 @@ ALTER TABLE `class` ADD COLUMN `year` TEXT DEFAULT NULL AFTER `fk_staff`;
 ALTER TABLE `class` ADD INDEX `class_archived_idx1` (`archived`);
 ALTER TABLE `class` ADD INDEX `class_year_idx1` (`year`);
 
+CREATE TABLE IF NOT EXISTS `faculty` (
+    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `archived` TINYINT(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE INDEX `faculty_name_idx1` ON `faculty` (`name`);
+CREATE INDEX `faculty_created_at_idx1` ON `faculty` (`created_at`);
+CREATE INDEX `faculty_updated_at_idx1` ON `faculty` (`updated_at`);
+CREATE INDEX `faculty_archived_idx1` ON `faculty` (`archived`);
+
+ALTER TABLE `department` ADD COLUMN `fk_faculty` INT(11) AFTER `name`;
+ALTER TABLE `department` ADD CONSTRAINT `fk_department_faculty` FOREIGN KEY (`fk_faculty`) REFERENCES `faculty` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `department` ADD INDEX `department_fk_faculty_idx1` (`fk_faculty`);
+
+INSERT INTO `faculty` (`name`, `description`, `created_at`, `updated_at`, `archived`) VALUES
+('Faculty of Maritime Studies', 'Faculty of Science description', NOW(), NOW(), 0),
+('Faculty of Engineering and Applied Sciences', 'Faculty of Engineering description', NOW(), NOW(), 0);
+
 
 
 

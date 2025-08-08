@@ -1,3 +1,47 @@
+<?php
+session_start();
+
+if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
+    header("Location: ../index.php");
+}
+
+$isUser = false;
+if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "lecturer") $isUser = true;
+
+if (isset($_GET['logout']) || !$isUser) {
+    session_destroy();
+    $_SESSION = array();
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+
+    header('Location: ../index.php');
+}
+
+$_SESSION["lastAccessed"] = time();
+
+require_once('../bootstrap.php');
+
+use Src\Controller\SecretaryController;
+
+require_once('../inc/admin-database-con.php');
+
+$admin = new SecretaryController($db, $user, $pass);
+
+$pageTitle = "Results";
+$activePage = "results";
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,99 +56,12 @@
 
 <body>
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <img src="logo.png" alt="RMU Logo" class="logo-img">
-            <h2>RMU Portal</h2>
-        </div>
-        <div class="user-profile">
-            <div class="avatar">
-                <img src="avatar.jpg" alt="User Avatar">
-            </div>
-            <div class="user-info">
-                <h3>Dr. John Doe</h3>
-                <p>Lecturer</p>
-            </div>
-        </div>
-        <div class="menu-groups">
-            <div class="menu-group">
-                <h3>Main Menu</h3>
-                <div class="menu-items">
-                    <a href="dashboard.html" class="menu-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="courses.html" class="menu-item">
-                        <i class="fas fa-book"></i>
-                        <span>My Courses</span>
-                    </a>
-                    <a href="results.html" class="menu-item active">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Exam Results</span>
-                    </a>
-                    <a href="students.html" class="menu-item">
-                        <i class="fas fa-user-graduate"></i>
-                        <span>Students</span>
-                    </a>
-                </div>
-            </div>
-            <div class="menu-group">
-                <h3>Communication</h3>
-                <div class="menu-items">
-                    <a href="messages.html" class="menu-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>Messages</span>
-                        <span class="badge">3</span>
-                    </a>
-                    <a href="notifications.html" class="menu-item">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
-                        <span class="badge">7</span>
-                    </a>
-                </div>
-            </div>
-            <div class="menu-group">
-                <h3>Settings</h3>
-                <div class="menu-items">
-                    <a href="profile.html" class="menu-item">
-                        <i class="fas fa-user-cog"></i>
-                        <span>Profile</span>
-                    </a>
-                    <a href="change-password.html" class="menu-item">
-                        <i class="fas fa-key"></i>
-                        <span>Change Password</span>
-                    </a>
-                    <a href="login.html" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <?php require_once '../components/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="header">
-            <div class="header-left">
-                <button class="toggle-sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1>Exam Results</h1>
-            </div>
-            <div class="header-right">
-                <div class="header-actions">
-                    <button class="action-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">7</span>
-                    </button>
-                    <button class="action-btn">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">3</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+
+        <?php require_once '../components/header.php'; ?>
 
         <div class="results-content">
             <!-- Results Filters -->

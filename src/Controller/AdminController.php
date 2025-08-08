@@ -53,9 +53,9 @@ class AdminController
 
     public function verifyStaffLogin($email, $password)
     {
-        $sql = "SELECT s.*, d.`id` AS `department_id`, d.`name` AS `department_name` 
-                FROM `staff` AS s, department AS d 
-                WHERE s.`email` = :u AND s.`fk_department` = d.`id`";
+        $sql = "SELECT s.*, d.`id` AS `department_id`, d.`name` AS `department_name`, d.fk_faculty AS `faculty_id`, f.`name` AS `faculty_name`  
+                FROM `staff` AS s, department AS d, faculty AS f 
+                WHERE s.`email` = :u AND s.`fk_department` = d.`id` AND d.fk_faculty = f.id";
         $data = $this->dm->getData($sql, array(':u' => $email));
 
         if (empty($data)) {
@@ -580,7 +580,7 @@ class AdminController
         if (!$action1) return array("success" => false, "message" => "Failed to create user account!");
 
         // verify and get user account info
-        $sys_user = $this->verifyAdminLogin($user_data["user_name"], $password);
+        $sys_user = $this->verifyStaffLogin($user_data["user_name"], $password);
         if (empty($sys_user)) return array("success" => false, "message" => "Created user account, but failed to verify user account!");
 
         // Create insert query for user privileges

@@ -48,6 +48,7 @@ $pageTitle = "Programs";
 $activePage = "programs";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$facultyId = $_SESSION["staff"]["faculty_id"] ?? null;
 $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
@@ -276,64 +277,94 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="addProgramForm">
+                    <form id="saveProgramForm" method="POST">
                         <div class="form-group">
-                            <label for="programCategory">Category</label>
-                            <select id="programCategory" required>
-                                <option value="">-- Select Category --</option>
-                                <option value="BSC">BSC</option>
-                                <option value="DIPLOMA">DIPLOMA</option>
-                                <option value="MA">MA</option>
-                                <option value="MSC">MSC</option>
-                                <option value="UPGRADE">UPGRADE</option>
-                                <option value="SHORT">PROFESSIONAL/VOCATIONAL</option>
-                            </select>
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
                         </div>
-                        <div class="form-group">
-                            <label for="programName">Program Name</label>
-                            <input type="text" id="programName" placeholder="e.g. Maritime Law" required>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" name="category" required>
+                                    <option value="" hidden>Select</option>
+                                    <option value="DEGREE">Degree</option>
+                                    <option value="DIPLOMA">Diploma</option>
+                                    <option value="MASTERS">Masters</option>
+                                    <option value="SHORT">Vocational/Professional</option>
+                                    <option value="UPGRADE">Upgrade</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="code">Code</label>
+                                <select id="code" name="code" required>
+                                    <option value="" hidden>Select</option>
+                                    <option value="BSC">BSc</option>
+                                    <option value="DIPLOMA">Diploma</option>
+                                    <option value="MSC">MSc</option>
+                                    <option value="MA">MA</option>
+                                    <option value="SHORT">Short</option>
+                                    <option value="UPGRADE">Upgrade</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="group">Group</label>
+                                <select id="group" name="group" required>
+                                    <option value="" hidden>Select</option>
+                                    <option value="M">Masters based</option>
+                                    <option value="A">Science based</option>
+                                    <option value="B">None Science based</option>
+                                    <option value="N">Nothing Applicable</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="index_code">Index Code</label>
+                                <input type="text" id="index_code" name="index_code" minlength="3" maxlength="3" class="form-control" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="indexPrefix">Index Prefix</label>
-                            <input type="text" id="indexPrefix" min="1" max="4" required>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group">
+                                <label for="duration">Duration</label>
+                                <input type="number" id="duration" name="duration" min="1" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dur_format">Format</label>
+                                <select id="dur_format" name="dur_format" required>
+                                    <option value="" hidden>Select</option>
+                                    <option value="semester">semester</option>
+                                    <option value="year">year</option>
+                                    <option value="month">month</option>
+                                    <option value="week">week</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="num_of_semesters">No. of Semesters</label>
+                                <input type="number" id="num_of_semesters" min="0" name="num_of_semesters" value="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="regulation">Regulation</label>
+                                <input type="text" id="regulation" name="regulation" class="form-control">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="duration">Duration</label>
-                            <input type="number" id="duration" min="1" max="8" required>
+                        <div class="form-check">
+                            <input class="form-check-input" name="regular" type="checkbox" id="regular_available">
+                            <label class="form-check-label" for="regular_available">
+                                Is this program available for regular?
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label for="durationFormat">Duration Format</label>
-                            <input type="number" id="durationFormat" min="1" max="6" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="numberOfSemesters">Program Code</label>
-                            <input type="text" id="numberOfSemesters" placeholder="e.g. ML201" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="formSaleCategory">Form Sale Category</label>
-                            <select id="formSaleCategory" name="formSaleCategory" required>
-                                <option value="">-- Select Form Sale Category --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <select id="category" required>
-                                <option value="">-- Select Category --</option>
-                                <option value="regular">Regular</option>
-                                <option value="weekend">Weekend</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="group">Group</label>
-                            <select id="group" required>
-                                <option value="">-- Select Group --</option>
-                                <option value="M">First Semester</option>
-                                <option value="A">Second Semester</option>
-                                <option value="B">Second Semester</option>
-                            </select>
+                        <div class="form-check">
+                            <input class="form-check-input" name="weekend" type="checkbox" id="weekend_available">
+                            <label class="form-check-label" for="weekend_available">
+                                Is this program available for weekend?
+                            </label>
                         </div>
                         <input type="hidden" name="department" id="programDepartment" value="<?= $departmentId ?>">
+                        <input type="hidden" name="faculty" id="programFaculty" value="<?= $facultyId ?>">
                         <input type="hidden" name="action" id="programAction" value="add">
+                        <div class="modal-footer" style="width: 100%; display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button type="submit" class="filter-btn primary" id="saveProgramBtn">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1041,6 +1072,56 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAllModals();
+            }
+        });
+
+        document.getElementById('saveProgramForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const action = formData.get('action');
+
+            if (action === 'add') {
+                // Perform AJAX request to add program
+                fetch('../endpoint/add-program', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Program added successfully!");
+                            closeAllModals();
+                            // Optionally, refresh the programs list
+                            renderPrograms();
+                        } else {
+                            alert("Error adding program: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error adding program:", error);
+                        alert("An error occurred while adding the program.");
+                    });
+            } else if (action === 'update') {
+                // Perform AJAX request to update program
+                fetch('../endpoint/update-program', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Program updated successfully!");
+                            closeAllModals();
+                            // Optionally, refresh the programs list
+                            renderPrograms();
+                        } else {
+                            alert("Error updating program: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error updating program:", error);
+                        alert("An error occurred while updating the program.");
+                    });
             }
         });
     </script>

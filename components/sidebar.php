@@ -17,40 +17,64 @@
     <div class="menu-groups">
         <div class="menu-group">
             <h3>Main Menu</h3>
-            <div class="menu-items">
-                <a href="index.php" class="menu-item <?= $activePage == 'dashboard' ? 'active' : '' ?>">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="programs.php" class="menu-item  <?= $activePage == 'programs' ? 'active' : '' ?>">
-                    <i class="fas fa-th-list"></i>
-                    <span>Programs</span>
-                </a>
-                <a href="classes.php" class="menu-item  <?= $activePage == 'classes' ? 'active' : '' ?>">
-                    <i class="fas fa-th-large"></i>
-                    <span>Classes</span>
-                </a>
-                <a href="courses.php" class="menu-item  <?= $activePage == 'courses' ? 'active' : '' ?>">
-                    <i class="fas fa-book"></i>
-                    <span>Courses</span>
-                </a>
-                <a href="students.php" class="menu-item  <?= $activePage == 'students' ? 'active' : '' ?>">
-                    <i class="fas fa-users"></i>
-                    <span>Students</span>
-                </a>
-                <a href="lecturers.php" class="menu-item <?= $activePage == 'lecturers' ? 'active' : '' ?>">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>Lecturers</span>
-                </a>
-                <a href="results.php" class="menu-item <?= $activePage == 'results' ? 'active' : '' ?>">
-                    <i class="fas fa-clipboard-check"></i>
-                    <span>Exam Results</span>
-                </a>
-                <a href="deadlines.php" class="menu-item <?= $activePage == 'deadlines' ? 'active' : '' ?>">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Deadlines</span>
-                </a>
-            </div>
+            <?php
+            if ($_SESSION["staff"]["role"] == "secretary" || $_SESSION["staff"]["role"] == "hod") {
+            ?>
+                <div class="menu-items">
+                    <a href="index.php" class="menu-item <?= $activePage == 'dashboard' ? 'active' : '' ?>">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="programs.php" class="menu-item  <?= $activePage == 'programs' ? 'active' : '' ?>">
+                        <i class="fas fa-th-list"></i>
+                        <span>Programs</span>
+                    </a>
+                    <a href="classes.php" class="menu-item  <?= $activePage == 'classes' ? 'active' : '' ?>">
+                        <i class="fas fa-th-large"></i>
+                        <span>Classes</span>
+                    </a>
+                    <a href="courses.php" class="menu-item  <?= $activePage == 'courses' ? 'active' : '' ?>">
+                        <i class="fas fa-book"></i>
+                        <span>Courses</span>
+                    </a>
+                    <a href="students.php" class="menu-item  <?= $activePage == 'students' ? 'active' : '' ?>">
+                        <i class="fas fa-users"></i>
+                        <span>Students</span>
+                    </a>
+                    <a href="lecturers.php" class="menu-item <?= $activePage == 'lecturers' ? 'active' : '' ?>">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Lecturers</span>
+                    </a>
+                    <a href="results.php" class="menu-item <?= $activePage == 'results' ? 'active' : '' ?>">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Exam Results</span>
+                    </a>
+                    <a href="deadlines.php" class="menu-item <?= $activePage == 'deadlines' ? 'active' : '' ?>">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Deadlines</span>
+                    </a>
+                </div>
+            <?php
+            } else if ($_SESSION["staff"]["role"] == "lecturer") { ?>
+                <div class="menu-items">
+                    <a href="index.php" class="menu-item <?= $activePage == 'dashboard' ? 'active' : '' ?>">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="courses.php" class="menu-item <?= $activePage == 'courses' ? 'active' : '' ?>">
+                        <i class="fas fa-book"></i>
+                        <span>My Courses</span>
+                    </a>
+                    <a href="results.php" class="menu-item <?= $activePage == 'results' ? 'active' : '' ?>">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Exam Results</span>
+                    </a>
+                    <a href="students.php" class="menu-item <?= $activePage == 'students' ? 'active' : '' ?>">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Students</span>
+                    </a>
+                </div>
+            <?php } ?>
         </div>
 
         <div class="menu-group">
