@@ -648,15 +648,21 @@ class SecretaryController
     public function fetchAllCummulativeProgramsDetails($departmentId = null, $archived = false)
     {
         $query = "SELECT 
-                    p.id AS program_id,
-                    p.name AS program_name,
-                    p.code AS program_code,
-                    f.name AS program_type,
-                    d.name AS department_name,
-                    p.duration,
-                    p.dur_format, 
-                    p.num_of_semesters,
-                    p.archived AS status,
+                    p.`id` AS `id`,
+                    p.`name` AS `name`,
+                    p.`category` AS `category`,
+                    p.`group` AS `group`,
+                    p.`code` AS `code`,
+                    p.`index_code` AS `index_code`,
+                    f.`name` AS `type`,
+                    d.`id` AS `department_id`,
+                    d.`name` AS `department_name`,
+                    p.`duration`,
+                    p.`dur_format`, 
+                    p.`num_of_semesters`,
+                    p.regular AS `regular`,
+                    p.weekend AS `weekend`,
+                    p.`archived` AS `status`,
 
                     CASE 
                         WHEN p.archived = 1 THEN 'archived'
@@ -742,5 +748,74 @@ class SecretaryController
                 FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
                 WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = 0";
         return $this->dm->getData($query, array(":p" => $programId, ":d" => $departmentId));
+    }
+
+    // Create functions for to perform CRUD operations on lecturers. The adding of a lecturer should send an SMS and also email use the sms and email functions
+    // CRUD operations for lecturers
+
+    public function addLecturer($data)
+    {
+        // Insert lecturer into staff table
+        $query = "INSERT INTO `staff` (`number`, `prefix`, `gender`, `first_name`, `middle_name`, `last_name`, `designation`, `role`, `fk_department`, `email`, `phone_number`, `archived`)
+                  VALUES (:number, :prefix, :gender, :first_name, :middle_name, :last_name, :designation, 'lecturer', :fk_department, :email, :phone_number, 0)";
+        $params = [
+            ":number" => $data["number"],
+            ":prefix" => $data["prefix"],
+            ":gender" => $data["gender"],
+            ":first_name" => $data["first_name"],
+            ":middle_name" => $data["middle_name"],
+            ":last_name" => $data["last_name"],
+            ":designation" => $data["designation"],
+            ":fk_department" => $data["fk_department"],
+            ":email" => $data["email"],
+            ":phone_number" => $data["phone_number"]
+        ];
+        $result = $this->dm->inputData($query, $params);
+
+        if ($result) {
+            // Create a user accound for the lecturer using email and a default password 123@Lecturer
+            $userQuery = "INSERT INTO `sys_users` (`first_name`, `last_name`, `username`, `password`, `role`, `type`)
+                          VALUES (:first_name, :last_name, :username, :password, 'lecturer', 'staff')";
+
+            $userParams = [
+                ":first_name" => $data["first_name"],
+                ":last_name" => $data["last_name"],
+                ":username" => $data["email"],
+                ":password" => password_hash("123@Lecturer", PASSWORD_DEFAULT), // Default password
+                ":role" => "lecturer",
+                ":user" => "staff"
+            ];
+
+            $userResult = $this->dm->inputData($userQuery, $userParams);
+
+            if (!$userResult) {
+                // If user creation fails, rollback the staff insertion
+                $this->dm->inputData("DELETE FROM `staff` WHERE `number` = :number", [":number" => $data["number"]]);
+                return ["success" => false, "message" => "Failed to create user account for lecturer."];
+            }
+
+            // Send SMS and Email
+            $smsMessage = "Dear {$data["prefix"]} {$data["first_name"]}, you have been added to the RMU's staff portal. kindly visit your mailbox for your login credentials.";
+            $emailSubject = "Lecturer Registration";
+            $emailBody = "Hello {$data["prefix"]} {$data["first_name"]} {$data["last_name"]},<br><br>You have been successfully registered as a lecturer.<br><br>";
+            $emailBody .= "Your login credentials are:<br>";
+            $emailBody .= "Username: {$data["email"]}<br>";
+            $emailBody .= "Password: 123@Lecturer<br><br>";
+            $emailBody .= "Please log in to the staff portal to change your password and complete your profile.<br><br>";
+            $emailBody .= "Thank you,<br>RMU Staff Portal";
+
+            if (method_exists($this->expose, 'sendSMS')) {
+                $this->expose->sendSMS($data["phone_number"], $smsMessage);
+            }
+
+            if (method_exists($this->expose, 'sendEmail')) {
+                $this->expose->sendEmail($data["email"], $emailSubject, $emailBody);
+            }
+
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Lecturer", "Added lecturer {$data["number"]}");
+            return ["success" => true, "message" => "Lecturer added successfully."];
+        }
+
+        return ["success" => false, "message" => "Failed to add lecturer."];
     }
 }

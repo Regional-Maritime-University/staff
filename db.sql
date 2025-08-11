@@ -469,6 +469,21 @@ INSERT INTO `faculty` (`name`, `description`, `created_at`, `updated_at`, `archi
 ('Faculty of Maritime Studies', 'Faculty of Science description', NOW(), NOW(), 0),
 ('Faculty of Engineering and Applied Sciences', 'Faculty of Engineering description', NOW(), NOW(), 0);
 
+CREATE TABLE IF NOT EXISTS `class_advisor` (
+    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+    `fk_class` VARCHAR(10),
+    `fk_staff` VARCHAR(10),
+    `archived` TINYINT(1) DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_class_advisor_class` FOREIGN KEY (`fk_class`) REFERENCES `class` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_class_advisor_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE INDEX `class_advisor_created_at_idx1` ON `class_advisor` (`created_at`);
+CREATE INDEX `class_advisor_updated_at_idx1` ON `class_advisor` (`updated_at`);
+ALTER TABLE `class_advisor` ADD INDEX `class_advisor_archived_idx1` (`archived`);
+
 
 
 

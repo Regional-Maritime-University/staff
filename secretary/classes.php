@@ -60,7 +60,7 @@ $activeClass = $secretary->fetchAllActiveClasses($departmentId, $archived);
 $totalActiveClass = count($activeClass);
 // /dd($activeClass);
 
-$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId)["data"] ?? [];
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
 
 $activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
@@ -286,16 +286,16 @@ $years = range($current_year, ($current_year + 5));
                         <div class="form-group">
                             <div class="course-selection-header">
                                 <label>Selected Student</label>
-                                <button type="button" id="selectStudentBtn">
+                                <button type="button" id="departmentSelectStudentsBtn" class="submit-btn">
                                     <i class="fas fa-search"></i> Find Student
                                 </button>
                             </div>
-                            <div class="department-selected-classes-container">
-                                <div id="selectedStudentList">
-                                    <!-- Selected classes will be added here dynamically -->
+                            <div class="department-selected-students-container">
+                                <div id="selectedStudentsList">
+                                    <!-- Selected students will be added here dynamically -->
                                 </div>
-                                <div class="department-selected-classes-empty" id="departmentNoStudentMessage">
-                                    No classes selected. Click "Find Student" to add classes.
+                                <div class="department-selected-students-empty" id="departmentNoStudentMessage">
+                                    No students selected. Click "Find Student" to add students.
                                 </div>
                             </div>
                         </div>
@@ -316,27 +316,27 @@ $years = range($current_year, ($current_year + 5));
     </div>
 
     <!-- Student Selection Modal -->
-    <div class="modal" id="classSelectionModal">
+    <div class="modal" id="departmenStudentSelectionModal">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Select Student</h2>
-                    <button class="close-btn" id="closeStudentSelectionModal">
+                    <h2>Select Students</h2>
+                    <button class="close-btn" id="closeDepartmentStudentSelectionModal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="class-search">
-                        <input type="text" id="studentSearchInput" placeholder="Search by class code or name">
+                    <div class="department-student-search">
+                        <input type="text" id="departmentStudentSearchInput" placeholder="Search by student code or name">
                         <i class="fas fa-search"></i>
                     </div>
-                    <div class="class-list" id="classList">
-                        <!-- Student items will be added here dynamically -->
+                    <div class="department-student-list" id="departmentStudentList">
+                        <!-- Student will be added here dynamically -->
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="cancel-btn" id="closeStudentSelectionModal">Cancel</button>
-                    <button class="submit-btn" id="confirmStudentSelectionBtn">Confirm Selection</button>
+                    <button class="cancel-btn" id="closeDepartmentStudentSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmDepartmentStudentSelectionBtn">Confirm Selection</button>
                 </div>
             </div>
         </div>
@@ -554,25 +554,100 @@ $years = range($current_year, ($current_year + 5));
                 });
             });
 
-            let semesterClass = assignedStudent = null;
+            let semesterClass = null;
             let activeClass = <?= json_encode($activeClass) ?>;
             const user = <?= json_encode($staffData); ?>;
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
-
+            let departmentStudents = <?= isset($activeStudents) && !empty($activeStudents) ? json_encode($activeStudents) : '[]' ?>;
 
             // Open modals
             document.getElementById('addClassBtn').addEventListener('click', () => openModal('addClassModal'));
             // document.getElementById('assignClassBtn').addEventListener('click', () => openModal('assignClassModal'));
+            const departmentSelectStudentsBtn = document.getElementById("departmentSelectStudentsBtn");
 
             // Set the class code in the
             //document.getElementById('departmentSelectClassBtn').addEventListener('click', () => openModal('departmentClassSelectionModal'));
-            document.getElementById('selectStudentBtn').addEventListener('click', () => openModal('courseSelectionModal'));
+            // document.getElementById('departmentSelectStudentsBtn').addEventListener('click', () => openModal('courseSelectionModal'));
 
             $(document).on("click", ".assign", function() {
                 $("#singleClassCode").val($(this).attr("id"));
                 openModal('assignClassModal')
             });
+
+            if (departmentSelectStudentsBtn) {
+                departmentSelectStudentsBtn.addEventListener("click", () => {
+                    openModal("departmenStudentSelectionModal");
+                });
+            }
+
+            // Initialize course list when modal opens
+            if (departmentSelectStudentsBtn) {
+                departmentSelectStudentsBtn.addEventListener("click", () => {
+                    setTimeout(() => {
+                        departmentSearchStudents();
+                    }, 100);
+                });
+            }
+
+            function departmentSearchStudents() {
+                const searchTerm = document.getElementById("departmentStudentSearchInput").value.toLowerCase();
+                const studentList = document.getElementById("departmentStudentList");
+                studentList.innerHTML = "";
+
+                // Check if assignedCourses has data
+                if (!departmentStudents || departmentStudents.length === 0) {
+                    studentList.innerHTML = `
+                        <div class="department-no-students-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No students available.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                departmentStudents.forEach((student) => {
+                    if (student.index_number.toLowerCase().includes(searchTerm) || student.name.toLowerCase().includes(searchTerm)) {
+                        full_name = !student.middle_name ? `${student.first_name} ${student.last_name}` : `${student.first_name} ${student.middle_name} ${student.last_name}`;
+                        student.name = full_name;
+                        // Check if student is already selected
+                        const isSelected = document.querySelector(`.department-selected-student[data-index="${student.index_number}"]`) !== null;
+                        const StudentItem = document.createElement("div");
+                        StudentItem.className = "department-student-item";
+
+                        // Add a class if the student is selected
+                        if (isSelected) {
+                            StudentItem.classList.add("department-student-selected");
+                        }
+
+                        StudentItem.innerHTML = `
+                                <div class="department-student-info">
+                                    <strong>${student.index_number}</strong> - ${student.name}
+                                </div>
+                                <button class="department-add-student-btn ${isSelected ? "selected" : ""}" data-index="${student.index_number}" data-name="${student.name}" ${isSelected ? "disabled" : ""}>
+                                    <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                                </button>
+                            `;
+                        studentList.appendChild(StudentItem);
+                    }
+                });
+
+                // Add event listeners to the add buttons
+                document.querySelectorAll(".department-add-student-btn:not(.selected)").forEach((btn) => {
+                    btn.addEventListener("click", function() {
+                        const code = this.getAttribute("data-index");
+                        const name = this.getAttribute("data-name");
+                        addStudentToSelection(code, name);
+
+                        // Update the button to show it's selected
+                        this.classList.add("selected");
+                        this.disabled = true;
+                        this.querySelector("i").classList.remove("fa-plus");
+                        this.querySelector("i").classList.add("fa-check");
+                        this.closest(".department-student-item").classList.add("department-student-selected");
+                    });
+                });
+            }
 
             // File input handling
             // const fileInput = document.getElementById('courseFileInput');
@@ -675,36 +750,24 @@ $years = range($current_year, ($current_year + 5));
 
             saveAssignmentsBtn.addEventListener("click", function() {
                 // Validate form
-                const semesterSelect = document.getElementById("semesterSelect");
+                const classCodeSelect = document.getElementById("singleClassCode");
                 const assignmentNotes = document.getElementById("assignmentNotes");
                 const departmentSelect = document.getElementById("departmentSelect");
 
-                if (!semesterSelect.value) {
+                if (!classCodeSelect.value) {
                     alert("Please fill in all required fields");
                     return;
                 }
-
-                const selectedStudentElements = document.querySelectorAll('#selectedStudentList .selected-student');
-                if (selectedStudentElements.length === 0) {
-                    alert("Please select at least one course");
-                    return;
-                }
-
-                const selectedStudents = [];
-                selectedStudentElements.forEach((element) => {
-                    selectedStudents.push(element.getAttribute("data-code"));
-                });
 
                 const form = document.getElementById("assignClassForm");
                 const action = document.getElementById("assignClassActionSelect").value;
 
                 // Simulate API call
                 let formData = {
-                    semester: semesterSelect.value,
-                    classes: selectedStudents,
+                    code: classCodeSelect.value,
                     notes: assignmentNotes.value,
                     department: departmentSelect.value,
-                }
+                };
 
                 switch (action) {
                     case 'toLecturer':
@@ -719,18 +782,6 @@ $years = range($current_year, ($current_year + 5));
                         formData.lecturer = lecturerSelect.value;
                         break;
 
-                    case 'toClass':
-                        const classSelect = document.getElementById("classSelect");
-
-                        if (!classSelect.value) {
-                            alert("Please fill in all required fields");
-                            return;
-                        }
-
-                        formData.action = "class";
-                        formData.class = classSelect.value;
-                        break;
-
                     case 'toStudent':
                         const studentSelect = document.getElementById("studentSelect");
 
@@ -739,6 +790,18 @@ $years = range($current_year, ($current_year + 5));
                             return;
                         }
 
+                        const selectedStudentElements = document.querySelectorAll('#selectedStudentsList .department-selected-student');
+                        if (selectedStudentElements.length === 0) {
+                            alert("Please select at least one course");
+                            return;
+                        }
+
+                        const selectedStudents = [];
+                        selectedStudentElements.forEach((element) => {
+                            selectedStudents.push(element.getAttribute("data-index"));
+                        });
+
+                        formData.students = selectedStudents;
                         formData.action = "student";
                         formData.student = studentSelect.value;
                         break;
@@ -749,6 +812,8 @@ $years = range($current_year, ($current_year + 5));
                 }
 
                 console.log(formData);
+
+                return;
 
                 $.ajax({
                     type: "POST",
@@ -773,168 +838,85 @@ $years = range($current_year, ($current_year + 5));
             // Set Deadline Modal
             const submitSetDeadline = document.getElementById("submitSetDeadline");
 
-            function searchClass() {
-                const searchTerm = document.getElementById("studentSearchInput").value.toLowerCase();
-                const courseList = document.getElementById("courseList");
-                courseList.innerHTML = "";
-
-                // Check if assignedStudent has data
-                if (!assignedStudent || assignedStudent.length === 0) {
-                    courseList.innerHTML = `
-                        <div class="no-classes-message">
-                            <i class="fas fa-info-circle"></i>
-                            <p>No classes are available.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                assignedStudent.forEach((course) => {
-                    if (course.course_code.toLowerCase().includes(searchTerm) || course.course_name.toLowerCase().includes(searchTerm)) {
-                        // Check if course is already selected
-                        const isSelected = document.querySelector(`.selected-course[data-code="${course.course_code}"]`) !== null;
-                        const courseItem = document.createElement("div");
-                        courseItem.className = "course-item";
-
-                        // Add a class if the course is selected
-                        if (isSelected) {
-                            courseItem.classList.add("course-selected");
-                        }
-
-                        courseItem.innerHTML = `
-                            <div class="course-info">
-                                <strong>${course.course_code}</strong> - ${course.course_name}
-                            </div>
-                            <button class="add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.course_code}" data-name="${course.course_name}" ${isSelected ? "disabled" : ""}>
-                                <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
-                            </button>
-                        `;
-                        courseList.appendChild(courseItem);
-                    }
-                });
-
-                // Add event listeners to the add buttons
-                document.querySelectorAll(".add-course-btn:not(.selected)").forEach((btn) => {
-                    btn.addEventListener("click", function() {
-                        const code = this.getAttribute("data-code");
-                        const name = this.getAttribute("data-name");
-                        addStudentToSelection(code, name);
-
-                        // Update the button to show it's selected
-                        this.classList.add("selected");
-                        this.disabled = true;
-                        this.querySelector("i").classList.remove("fa-plus");
-                        this.querySelector("i").classList.add("fa-check");
-                        this.closest(".course-item").classList.add("course-selected");
-                    });
-                });
-            }
-
-            function addStudentToSelection(code, name) {
+            function addStudentToSelection(index, name) {
                 const selectedStudentsList = document.getElementById("selectedStudentsList");
 
-                // Check if course is already added
-                if (document.querySelector(`.selected-course[data-code="${code}"]`)) {
+                // Check if student is already added
+                if (document.querySelector(`.department-selected-student[data-index="${index}"]`)) {
                     return;
                 }
 
-                const courseItem = document.createElement("div");
-                courseItem.className = "selected-course";
-                courseItem.setAttribute("data-code", code);
-                courseItem.innerHTML = `
-                    <div class="course-info">
-                    <strong>${code}</strong> - ${name}
+                const studentItem = document.createElement("div");
+                studentItem.className = "department-selected-student";
+                studentItem.setAttribute("data-index", index);
+                studentItem.innerHTML = `
+                    <div class="department-student-info">
+                    <strong>${index}</strong> - ${name}
                     </div>
-                    <button class="remove-course-btn" data-code="${code}">
+                    <button class="department-remove-student-btn" data-index="${index}">
                     <i class="fas fa-times"></i>
                     </button>
-                    <input type="hidden" name="selectedStudents[]" value="${code}">
+                    <input type="hidden" name="selectedCourses[]" value="${index}">
                 `;
-                selectedStudentsList.appendChild(courseItem);
+                selectedStudentsList.appendChild(studentItem);
 
                 // Add event listener to the remove button
-                courseItem.querySelector(".remove-course-btn").addEventListener("click", function() {
-                    const code = this.getAttribute("data-code");
-                    removeFromSelection(code);
+                studentItem.querySelector(".department-remove-student-btn").addEventListener("click", function() {
+                    const index = this.getAttribute("data-index");
+                    removeStudentFromSelection(index);
                 });
             }
 
-            function removeFromSelection(code) {
-                const courseItem = document.querySelector(`.selected-course[data-code="${code}"]`)
-                if (courseItem) {
-                    courseItem.remove()
+            function removeStudentFromSelection(index) {
+                const studentItem = document.querySelector(`.department-selected-student[data-index="${index}"]`)
+                if (studentItem) {
+                    studentItem.remove()
 
-                    // Update the course in the search list if it's visible
-                    const courseInList = document.querySelector(`.course-item .add-course-btn[data-code="${code}"]`)
-                    if (courseInList) {
-                        courseInList.classList.remove("selected")
-                        courseInList.disabled = false
-                        courseInList.querySelector("i").classList.remove("fa-check")
-                        courseInList.querySelector("i").classList.add("fa-plus")
-                        courseInList.closest(".course-item").classList.remove("course-selected")
+                    // Update the student in the search list if it's visible
+                    const studentInList = document.querySelector(`.department-student-item .add-department-student-btn[data-index="${index}"]`)
+                    if (studentInList) {
+                        studentInList.classList.remove("selected")
+                        studentInList.disabled = false
+                        studentInList.querySelector("i").classList.remove("fa-check")
+                        studentInList.querySelector("i").classList.add("fa-plus")
+                        studentInList.closest(".department-student-item").classList.remove("department-student-selected")
 
                         // Re-add the click event listener
-                        courseInList.addEventListener("click", function() {
+                        studentInList.addEventListener("click", function() {
                             const name = this.getAttribute("data-name")
-                            addStudentToSelection(code, name)
+                            addCourseToSelection(index, name)
 
                             // Update the button to show it's selected
                             this.classList.add("selected")
                             this.disabled = true
                             this.querySelector("i").classList.remove("fa-plus")
                             this.querySelector("i").classList.add("fa-check")
-                            this.closest(".course-item").classList.add("course-selected")
+                            this.closest(".department-student-item").classList.add("department-student-selected")
                         });
                     }
                 }
             }
 
             // Student Selection Modal
-            const confirmStudentSelectionBtn = document.getElementById("confirmStudentSelectionBtn");
-            const studentSearchInput = document.getElementById("studentSearchInput");
+            const confirmDepartmentStudentSelectionBtn = document.getElementById("confirmDepartmentStudentSelectionBtn");
+            const departmentStudentSearchInput = document.getElementById("departmentStudentSearchInput");
 
-            confirmStudentSelectionBtn.addEventListener("click", () => {
-                closeModal("courseSelectionModal");
+            confirmDepartmentStudentSelectionBtn.addEventListener("click", () => {
+                closeModal("studentSelectionModal");
             });
 
-            studentSearchInput.addEventListener("input", () => {
-                searchStudent();
+            departmentStudentSearchInput.addEventListener("input", () => {
+                departmentSearchStudent();
             });
 
-            // Initialize course list on modal open
-            studentSearchInput.addEventListener("focus", () => {
-                if (studentSearchInput.value === "") {
-                    searchStudent();
+            // Initialize student list on modal open
+            departmentStudentSearchInput.addEventListener("focus", () => {
+                if (departmentStudentSearchInput.value === "") {
+                    departmentSearchStudent();
                 }
             });
 
-            // Initialize course list when modal opens
-            selectStudentBtn.addEventListener("click", () => {
-                if (assignedStudent == null) {
-                    fetch(`../endpoint/fetch-assigned-students`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: new URLSearchParams({
-                                department: departmentId,
-                            }).toString()
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                assignedStudent = data.data;
-                                console.log("Assigned Class", assignedStudent);
-                                setTimeout(() => {
-                                    searchStudent();
-                                }, 100);
-                            } else alert("Failed to fetch students for selected semester: ", data.message);
-                        })
-                        .catch(error => console.error("Error fetching students for selected semester:", error));
-                }
-            });
-
-            // Edit and archive course buttons
+            // Edit and archive student buttons
             document.querySelectorAll('.edit-course').forEach(button => {
                 button.addEventListener('click', function() {
                     const courseCard = this.closest('.course-card');

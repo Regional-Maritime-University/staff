@@ -155,7 +155,7 @@ class Program
         );
         $query_result = $this->dm->inputData($query, $params);
         if ($query_result) {
-            $this->log->activity($_SESSION["user"], "UPDATE", "secretary", "Created Program", "Updated program {$data["name"]} of program type {$data["type"]}");
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Created Program", "Updated program {$data["name"]} of program type {$data["type"]}");
             return array("success" => true, "message" => "Program updated!");
         } else {
             return array("success" => false, "message" => "Encountered a server error while updating program {$data["name"]} in database!");
@@ -167,7 +167,7 @@ class Program
         $query = "UPDATE `programs` SET `archived` = 1 WHERE `id` = :i";
         $query_result = $this->dm->inputData($query, array(":i" => $id));
         if ($query_result) {
-            $this->log->activity($_SESSION["user"], "UPDATE", "secretary", "Program Archive", "Archived program {$id}");
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Program Archive", "Archived program {$id}");
             return array("success" => true, "message" => "Program successfully archived!");
         } else {
             return array("success" => false, "message" => "Failed to archive program {$id}!");
@@ -181,7 +181,7 @@ class Program
             $query = "UPDATE `programs` SET `archived` = 0 WHERE `id` = :i";
             $query_result = $this->dm->inputData($query, array(":i" => $program));
             if ($query_result) {
-                $this->log->activity($_SESSION["user"], "UPDATE", "secretary", "Program Unarchive", "Unarchived program {$program}");
+                $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Program Unarchive", "Unarchived program {$program}");
                 $unarchived += 1;
             }
         }

@@ -65,22 +65,26 @@ class DatabaseMethods
     private function query($str, $params = array())
     {
         try {
+            $this->beginTransaction();
+
             $stmt = $this->conn->prepare($str);
             if (empty($params) || !is_array($params)) $stmt->execute();
             else $stmt->execute($params);
 
             if (explode(' ', $str)[0] == 'SELECT' || explode(' ', $str)[0] == 'CALL') {
-                return $stmt->fetchAll();
+                $result = $stmt->fetchAll();
             } elseif (explode(' ', $str)[0] == 'INSERT') {
-                return 1;
+                $result = 1;
             } elseif (explode(' ', $str)[0] == 'UPDATE' || explode(' ', $str)[0] == 'DELETE') {
                 $result = $stmt->rowCount();
-                return $result > 0 ? $result : 1;
+                $result = $result > 0 ? $result : 1;
             } elseif (explode(' ', $str)[0] == 'CREATE' || explode(' ', $str)[0] == 'DROP') {
-                return 1;
+                $result = 1;
             } else {
-                return 0;
+                $result = 0;
             }
+            $this->commit();
+            return $result;
         } catch (PDOException $e) {
             $this->logError($e);
             if ($this->inTransaction) {

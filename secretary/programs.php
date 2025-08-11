@@ -392,10 +392,16 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         // Sample data
         const staticProgramData = <?= json_encode($activeCummulativePrograms) ?>;
         const programsData = staticProgramData.map(program => ({
-            id: program.program_id,
-            title: capitalizeWords(program.program_name),
-            code: program.program_code,
-            level: program.program_type.toLowerCase(),
+            id: program.id,
+            title: capitalizeWords(program.name),
+            code: program.code,
+            index_code: program.index_code,
+            code: program.category,
+            level: program.type.toLowerCase(),
+            group: program.group,
+            regular_available: program.regular ? true : false,
+            weekend_available: program.weekend ? true : false,
+            department: program.department_id,
             department: program.department_name,
             description: program.description ?? '',
             duration: program.duration + " " + program.dur_format,
@@ -558,7 +564,15 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     <div class="program-header">
                         <div>
                             <div class="program-title">${program.title}</div>
-                            <div class="program-code">${program.code}</div>
+                            <div class="program-code">
+                                <span>${program.code}</span>
+                                <span class="btn program-edit-btn"  style="color: #007bff; cursor: pointer;" onclick="editProgram(${program.id})">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                                <span class="program-archive-btn">
+                                    <i class="fas fa-archive" style="color: #dc3545; cursor: pointer;" onclick="archiveProgram(${program.id})"></i>
+                                </span>
+                            </div>
                         </div>
                         <span class="program-level ${program.level}">${program.level}</span>
                     </div>
@@ -1059,6 +1073,59 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         function editCourse(courseId) {
             alert(`Editing course with ID: ${courseId}`);
             // In a real application, this would open an edit modal or navigate to an edit page
+        }
+
+        function editProgram(programId) {
+            const program = programsData.find(p => p.id === programId);
+            console.log("Editing program:", program);
+            if (program) {
+                openModal('addProgramModal');
+                document.getElementById('programAction').value = 'edit';
+                document.getElementById('name').value = program.title;
+                document.getElementById('category').value = program.category;
+                document.getElementById('code').value = program.code;
+                document.getElementById('index_code').value = program.index_code;
+                document.getElementById("group").value = program.group;
+                document.getElementById('duration').value = program.duration.split(" ")[0];
+                document.getElementById('dur_format').value = program.duration.split(" ")[1];
+                document.getElementById('programDepartment').value = program.department_name;
+                document.getElementById('programFaculty').value = program.faculty;
+                document.getElementById('regular_available').checked = program.regular_available;
+                document.getElementById('weekend_available').checked = program.weekend_available;
+            } else {
+                alert("Program not found.");
+            }
+        }
+
+        function archiveProgram(programId) {
+            if (confirm("Are you sure you want to archive this program?")) {
+                // Perform AJAX request to archive program
+                fetch('../endpoint/archive-program', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'program': programId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Program archived successfully!");
+                            // Optionally, refresh the programs list
+                            //renderPrograms();
+                            // hard reload the page to reflect the changes
+                            window.location.reload();
+                        } else {
+                            alert("Error archiving program: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error archiving program:", error);
+                        alert("An error occurred while archiving the program.");
+                    });
+            }
         }
 
         // Close modals when clicking outside

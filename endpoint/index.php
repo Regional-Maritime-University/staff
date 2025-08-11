@@ -267,6 +267,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     } elseif ($_GET["url"] == "update-program") {
         die(json_encode($program->update($_POST, $_POST["program"])));
     } elseif ($_GET["url"] == "archive-program") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program id is required!"]));
+        }
         die(json_encode($program->archive($_POST["program"])));
     } elseif ($_GET["url"] == "delete-program") {
         die(json_encode($program->delete($_POST["program"])));
@@ -453,7 +456,23 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
     //students
     elseif ($_GET["url"] == "fetch-student") {
-        die(json_encode($program->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
+        if (isset($_POST["indexNumber"]) && ! empty($_POST["indexNumber"])) {
+            $_POST["key"]   = "index_number";
+            $_POST["value"] = $_POST["indexNumber"];
+        } else if (isset($_POST["class"]) && ! empty($_POST["class"])) {
+            $_POST["key"]   = "class";
+            $_POST["value"] = $_POST["class"];
+        } else if (isset($_POST["department"]) && ! empty($_POST["department"])) {
+            $_POST["key"]   = "department";
+            $_POST["value"] = $_POST["department"];
+        } else if (isset($_POST["program"]) && ! empty($_POST["program"])) {
+            $_POST["key"]   = "program";
+            $_POST["value"] = $_POST["program"];
+        } else {
+            $_POST["key"]   = "";
+            $_POST["value"] = "";
+        }
+        die(json_encode($student->fetch($_POST["key"], $_POST["value"], $_POST["archived"] ?? false)));
     } elseif ($_GET["url"] == "update-student") {
         die(json_encode($student->update($_POST)));
     } elseif ($_GET["url"] == "archive-student") {
