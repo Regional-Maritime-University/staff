@@ -31,14 +31,28 @@ $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
 
-use Src\Controller\SecretaryController;
+use Src\Controller\LecturerController;
+use Src\Core\Base;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$lecturer = new LecturerController($db, $user, $pass);
 
 $pageTitle = "Dashboard";
 $activePage = "dashboard";
+
+$lecturerClasses = $lecturer->getLecturerClasses($_SESSION['staff']['number']);
+$lecturerCourses = $lecturer->getLecturerCourses($_SESSION['staff']['number']);
+$lecturerPrograms = $lecturer->getLecturerPrograms($_SESSION['staff']['number']);
+$lecturerStudents = $lecturer->getLecturerStudents($_SESSION['staff']['number']);
+$activeSemesters = (new Base($db, $user, $pass))->getActiveSemesters();
+$currentSemester = (new Base($db, $user, $pass))->getCurrentSemester();
+$results = $lecturer->getLecturerResults($_SESSION['staff']['number'], $_GET['semester'] ?? null);
+if (!$results) {
+    $results = [];
+}
+$resultsCount = count($results);
+
 
 ?>
 
@@ -73,12 +87,12 @@ $activePage = "dashboard";
                         <button class="welcome-btn primary">
                             <i class="fas fa-book"></i> View My Courses
                         </button>
-                        <button class="welcome-btn secondary">
+                        <button class="welcome-btn secondary" id="uploadResultsBtn">
                             <i class="fas fa-upload"></i> Upload Results
                         </button>
                     </div>
                 </div>
-                <img src="welcome.svg" alt="Welcome" class="welcome-image">
+                <!-- <img src="welcome.svg" alt="Welcome" class="welcome-image"> -->
             </div>
 
             <!-- Stats Grid -->
@@ -255,6 +269,57 @@ $activePage = "dashboard";
         </div>
     </div>
 
+    <!-- Upload Results Modal -->
+    <div class="modal" id="uploadResultsModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Upload Exam Results</h2>
+                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="uploadCourse">Select Course</label>
+                        <select id="uploadCourse" required>
+                            <option value="">Select a course</option>
+                            <option value="ME101">ME101 - Introduction to Marine Engineering</option>
+                            <option value="ME302">ME302 - Marine Propulsion Systems</option>
+                            <option value="ME405">ME405 - Ship Design and Construction</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadSemester">Semester</label>
+                        <select id="uploadSemester" required>
+                            <option value="current">First Semester 2023/2024</option>
+                            <option value="previous">Second Semester 2022/2023</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Results File</label>
+                        <div class="file-upload">
+                            <div class="file-input-wrapper">
+                                <input type="file" id="resultsFile" accept=".xlsx, .csv">
+                                <div class="file-input-btn">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choose File or Drop File Here
+                                </div>
+                            </div>
+                            <div class="file-name" id="fileName">No file chosen</div>
+                            <div class="file-format-info">Accepted formats: Excel (.xlsx) or CSV (.csv)</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadNotes">Additional Notes (Optional)</label>
+                        <textarea id="uploadNotes" rows="3" placeholder="Enter any additional notes or comments"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" data-dismiss="modal">Cancel</button>
+                    <button class="submit-btn" id="submitUploadBtn">Upload Results</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Toggle sidebar
         document.querySelector('.toggle-sidebar').addEventListener('click', function() {
@@ -262,14 +327,29 @@ $activePage = "dashboard";
             document.querySelector('.main-content').classList.toggle('expanded');
         });
 
+        // Modal functionality
+        const uploadResultsModal = document.getElementById('uploadResultsModal');
+
+        // Open modal
+        document.getElementById('uploadResultsBtn').addEventListener('click', function() {
+            uploadResultsModal.classList.add('active');
+        });
+
+        // Close modal
+        document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                uploadResultsModal.classList.remove('active');
+            });
+        });
+
         // Welcome card buttons
         document.querySelector('.welcome-btn.primary').addEventListener('click', function() {
             window.location.href = 'courses.php';
         });
 
-        document.querySelector('.welcome-btn.secondary').addEventListener('click', function() {
-            window.location.href = 'results.php';
-        });
+        // document.querySelector('.welcome-btn.secondary').addEventListener('click', function() {
+        //     window.location.href = 'results.php';
+        // });
 
         // View all buttons
         document.querySelectorAll('.view-all-btn').forEach(button => {

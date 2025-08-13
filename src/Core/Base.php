@@ -32,4 +32,19 @@ class Base
                 WHERE a.`active` = 1 AND s.`active` = 1";
         return $this->dm->getData($query);
     }
+
+    public function getCurrentSemester()
+    {
+        $query = "SELECT 
+                    s.`id`, s.`name`, s.`type`, s.`start_date`, s.`end_date`, s.`exam_registration_start_date`, 
+                    s.`exam_registration_end_date`, s.`exam_start_date`, s.`exam_end_date`, s.`resit_exam_start_date`, 
+                    s.`resit_exam_end_date`, s.`resit_exam_registration_start_date`, s.`resit_exam_registration_end_date`, 
+                    a.`id` AS academic_year, a.`name` AS academic_year_name, a.`start_month` AS academic_year_start_month, 
+                    a.`end_month` AS academic_year_end_month, a.`start_year` AS academic_year_start_year, a.`end_year` AS academic_year_end_year  
+                FROM 
+                `semester` AS s 
+                JOIN `academic_year` AS a ON s.`fk_academic_year` = a.`id` 
+                WHERE a.`active` = 1 AND s.`active` = 1 AND s.`archived` = 0";
+        return $this->dm->getData($query);
+    }
 }
