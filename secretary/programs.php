@@ -110,6 +110,9 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     <button class="filter-btn primary" id="addProgramBtn">
                         <i class="fas fa-plus"></i> Add Program
                     </button>
+                    <button class="filter-btn danger" id="archivedProgramBtn">
+                        <i class="fas fa-list"></i> Archived Programs
+                    </button>
                 </div>
             </div>
 
@@ -566,10 +569,10 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                             <div class="program-title">${program.title}</div>
                             <div class="program-code">
                                 <span>${program.code}</span>
-                                <span class="btn program-edit-btn"  style="color: #007bff; cursor: pointer;" onclick="editProgram(${program.id})">
-                                    <i class="fas fa-edit"></i>
+                                <span class="btn program-edit-btn" title="Edit Program" style="margin-left: 0.5rem; margin-right: 0.5rem;">
+                                    <i class="fas fa-edit" style="color: #007bff; cursor: pointer;" onclick="editProgram(${program.id})"></i>
                                 </span>
-                                <span class="program-archive-btn">
+                                <span class="program-archive-btn" title="Archive Program">
                                     <i class="fas fa-archive" style="color: #dc3545; cursor: pointer;" onclick="archiveProgram(${program.id})"></i>
                                 </span>
                             </div>

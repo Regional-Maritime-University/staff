@@ -37,6 +37,7 @@ use Src\Core\Base;
 use Src\Core\Course;
 use Src\Core\CourseCategory;
 use Src\Core\Program;
+use Src\Core\Classes;
 
 require_once('../inc/admin-database-con.php');
 
@@ -45,6 +46,7 @@ $course_category    = new CourseCategory($db, $user, $pass);
 $course             = new Course($db, $user, $pass);
 $base               = new Base($db, $user, $pass);
 $program            = new Program($db, $user, $pass);
+$class              = new Classes($db, $user, $pass);
 
 $pageTitle = "Classes";
 $activePage = "classes";
@@ -57,8 +59,8 @@ $activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
 $activeClass = $secretary->fetchAllActiveClasses($departmentId, $archived);
-$totalActiveClass = count($activeClass);
 // /dd($activeClass);
+$totalActiveClass = count($activeClass);
 
 $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId)["data"] ?? [];
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
@@ -101,10 +103,10 @@ $years = range($current_year, ($current_year + 5));
                         <i class="fas fa-plus"></i>
                         Add New Class
                     </button>
-                    <!-- <button class="action-btn" id="assignClassBtn">
-                        <i class="fas fa-user-plus"></i>
-                        Assign Class
-                    </button> -->
+                    <button class="action-btn danger" id="archivedClassBtn">
+                        <i class="fas fa-list"></i>
+                        Archived Classes
+                    </button>
                 </div>
             </div>
 
@@ -135,32 +137,56 @@ $years = range($current_year, ($current_year + 5));
             </div>
 
             <!-- Class Grid -->
-            <div class="course-grid">
+            <div class="class-grid">
                 <?php
                 if ($totalActiveClass == 0) {
                     echo "<div class='no-classes'>No classes available.</div>";
                 } else {
                     foreach ($activeClass as $class) {
                 ?>
-                        <div class="course-card">
-                            <div class="course-header">
+                        <div class="class-card">
+                            <div class="class-header">
                                 <div>
-                                    <div class="course-title"><?= $class["code"] ?></div>
-                                    <div class="course-code"><?= $class["program_name"] ?></div>
+                                    <div class="class-title"><?= $class["code"] ?></div>
+                                    <div class="class-code"><?= $class["program_name"] ?></div>
                                 </div>
-                                <div class="course-actions">
-                                    <button class="action-icon edit-course" title="Edit Class" id="<?= $class["code"] ?>">
+                                <div class="class-actions">
+                                    <button class="action-icon edit-class" title="Edit Class" id="<?= $class["code"] ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-icon archive-course" title="Archive Class" id="<?= $class["code"] ?>">
+                                    <button class="action-icon archive-class" title="Archive Class" id="<?= $class["code"] ?>">
                                         <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
                             </div>
-                            <button class="filter-btn assign" title="Assign a lecturer or a student to this class" id="<?= $class["code"] ?>">
-                                <i class="fas fa-user-plus"></i>
-                                Assign
-                            </button>
+                            <div class="class-details">
+                                <div class="class-info">
+                                    <span class="info-label">Year:</span>
+                                    <span class="info-value"><?= $class["year"] ?></span>
+                                </div>
+                                <div class="class-info">
+                                    <span class="info-label">Category:</span>
+                                    <span class="info-value"><?= $class["category"] ?></span>
+                                </div>
+                                <div class="class-info">
+                                    <span class="info-label">Program:</span>
+                                    <span class="info-value"><?= $class["program_name"] ?></span>
+                                </div>
+                                <div class="class-info">
+                                    <span class="info-label">Supervisor:</span>
+                                    <span class="info-value"><?= $class["supervisor_name"] ?: "Not Assigned" ?></span>
+                                </div>
+                            </div>
+                            <div class="class-footer">
+                                <button class="filter-btn view-students" title="View Students in this class" id="<?= $class["code"] ?>">
+                                    <i class="fas fa-users"></i>
+                                    View Students
+                                </button>
+                                <button class="filter-btn assign" title="Assign a lecturer or a student to this class" id="<?= $class["code"] ?>">
+                                    <i class="fas fa-user-plus"></i>
+                                    Assign
+                                </button>
+                            </div>
                         </div>
                 <?php
                     }
@@ -230,9 +256,10 @@ $years = range($current_year, ($current_year + 5));
                         </div>
                         <div class="form-group">
                             <label for="classCode">Class Code</label>
-                            <input type="text" id="classCode" placeholder="eg. BCS28" required readonly>
+                            <input type="text" id="classCode" placeholder="eg. BCS28" required>
                         </div>
                         <input type="hidden" name="department" id="classDepartment" value="<?= $departmentId ?>">
+                        <input type="hidden" name="oldClassCode" id="oldClassCode" value="">
                         <input type="hidden" name="action" id="classAction" value="add">
                     </form>
                 </div>
@@ -254,8 +281,8 @@ $years = range($current_year, ($current_year + 5));
                 </div>
                 <div class="modal-body">
                     <div class="assign-class-tabs">
-                        <button class="tab-btn active" data-tab="classToLecturer">To Lecturer</button>
-                        <button class="tab-btn" data-tab="classToStudent">To Student</button>
+                        <button class="tab-btn active" data-tab="toLecturer">To Lecturer</button>
+                        <button class="tab-btn" data-tab="toStudent">To Student</button>
                     </div>
                     <div class="form-group">
                         <div class="course-selection-header">
@@ -265,7 +292,7 @@ $years = range($current_year, ($current_year + 5));
                             <input type="text" id="singleClassCode" readonly placeholder="Class Code" required>
                         </div>
                     </div>
-                    <div class="tab-content active" id="classToLecturer">
+                    <div class="tab-content active" id="toLecturer">
                         <div class="form-group">
                             <label for="lecturerSelect">Lecturer</label>
                             <select id="lecturerSelect" required>
@@ -282,7 +309,7 @@ $years = range($current_year, ($current_year + 5));
                             </select>
                         </div>
                     </div>
-                    <div class="tab-content" id="classToStudent">
+                    <div class="tab-content" id="toStudent">
                         <div class="form-group">
                             <div class="course-selection-header">
                                 <label>Selected Student</label>
@@ -315,8 +342,29 @@ $years = range($current_year, ($current_year + 5));
         </div>
     </div>
 
+    <!-- View archived classes Modal -->
+    <div class="modal" id="archivedClassesModal">
+        <div class="modal-dialog modal-lg modal-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Archived Classes</h2>
+                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="archived-classes-grid">
+                        <!-- Archived classes will be dynamically added here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" data-dismiss="modal">Close</button>
+                    <button class="submit-btn" id="restoreArchivedClassesBtn">Restore Selected Classes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Student Selection Modal -->
-    <div class="modal" id="departmenStudentSelectionModal">
+    <div class="modal" id="departmentStudentSelectionModal">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
@@ -563,8 +611,184 @@ $years = range($current_year, ($current_year + 5));
 
             // Open modals
             document.getElementById('addClassBtn').addEventListener('click', () => openModal('addClassModal'));
-            // document.getElementById('assignClassBtn').addEventListener('click', () => openModal('assignClassModal'));
+            document.getElementById('archivedClassBtn').addEventListener('click', () => openModal('archivedClassesModal'));
             const departmentSelectStudentsBtn = document.getElementById("departmentSelectStudentsBtn");
+
+            // Async function tot fetch archived classes
+            async function fetchArchivedClasses() {
+                try {
+                    const response = await fetch('../endpoint/fetch-classes?department=' + departmentId + '&archived=true');
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        if (result.message && result.message == "logout") {
+                            window.location.href = "../index.php";
+                            return [];
+                        }
+                        throw new Error(result.message || "Failed to load archived classes");
+                    }
+
+                    return result.data || [];
+                } catch (error) {
+                    console.error("Error fetching archived classes:", error);
+                    return [];
+                }
+            }
+
+            // async function to restore and delete classes
+            async function restoreClass(classCode) {
+                try {
+                    const response = await fetch('../endpoint/unarchive-class', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'code[]': classCode
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert("Class restored successfully!");
+                        document.getElementById('archivedClassBtn').click();
+                    } else {
+                        alert("Failed to restore class: " + data.message);
+                    }
+                } catch (error) {
+                    console.error("Error restoring class:", error);
+                    alert("An error occurred while restoring the class.");
+                }
+            }
+
+            async function deleteClass(classCode) {
+                if (confirm("Are you sure you want to delete this class permanently? This action cannot be undone.")) {
+                    try {
+                        const response = await fetch('../endpoint/delete-class', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                'code[]': classCode
+                            })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            alert("Class deleted successfully!");
+                            document.getElementById('archivedClassBtn').click();
+                        } else {
+                            alert("Failed to delete class: " + data.message);
+                        }
+                    } catch (error) {
+                        console.error("Error deleting class:", error);
+                        alert("An error occurred while deleting the class.");
+                    }
+                }
+            }
+
+            // fetch all archived classes for this department and display them in the modal when archidedClassbtn is clicked
+            document.getElementById('archivedClassBtn').addEventListener('click', () => {
+                const archivedClassesModal = document.getElementById('archivedClassesModal');
+                const archivedClassesGrid = archivedClassesModal.querySelector('.archived-classes-grid');
+                archivedClassesGrid.innerHTML = ''; // Clear previous content
+
+                // fetch data and store it in a variable
+                const data = {
+                    classes: []
+                };
+
+                // fetch data
+                if (!departmentId) {
+                    archivedClassesGrid.innerHTML = `
+                        <div class="no-classes">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error: Department ID is not set. Please select a department.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Show loading message
+                archivedClassesGrid.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading archived classes...</p>
+                    </div>
+                `;
+
+                // Fetch archived classes from the server
+                fetchArchivedClasses()
+                    .then(classes => {
+                        archivedClassesGrid.innerHTML = ''; // Clear loading message
+                        if (classes.length === 0) {
+                            archivedClassesGrid.innerHTML = `
+                                <div class="no-classes">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <p>No archived classes found for this department.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        // Populate the archived classes grid with fetched data
+                        classes.forEach(classItem => {
+                            const classCard = document.createElement('div');
+                            classCard.className = 'class-card';
+                            classCard.innerHTML = `
+                                <div class="class-header">
+                                    <div>
+                                        <div class="class-title">${classItem.code}</div>
+                                        <div class="class-code">${classItem.program_name}</div>
+                                    </div>
+                                    <div class="class-actions">
+                                        <button class="action-icon restore-class" title="Restore Class" id="${classItem.code}">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                        <button class="action-icon delete-class" title="Delete Class" id="${classItem.code}">
+                                            <i class="fas fa-trash-alt" style="color: var(--danger-color);"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="class-details">
+                                    <div class="class-info">
+                                        <span class="info-label">Year:</span>
+                                        <span class="info-value">${classItem.year}</span>
+                                    </div>
+                                    <div class="class-info">
+                                        <span class="info-label">Category:</span>
+                                        <span class="info-value">${classItem.category}</span>
+                                    </div>
+                                    <div class="class-info">
+                                        <span class="info-label">Program:</span>
+                                        <span class="info-value">${classItem.program_name}</span>
+                                    </div>
+                                    <div class="class-info">
+                                        <span class="info-label">Supervisor:</span>
+                                        <span class="info-value">${classItem.supervisor_name || 'Not Assigned'}</span>
+                                    </div>
+                                </div>
+                            `;
+                            archivedClassesGrid.appendChild(classCard);
+                            // Add event listeners for restore and delete buttons
+                            classCard.querySelector('.restore-class').addEventListener('click', function() {
+                                const classCode = this.id;
+                                restoreClass(classCode);
+                            });
+                            classCard.querySelector('.delete-class').addEventListener('click', function() {
+                                const classCode = this.id;
+                                deleteClass(classCode);
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching archived classes:", error);
+                        archivedClassesGrid.innerHTML = `
+                            <div class="no-classes">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading archived classes: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            });
 
             // Set the class code in the
             //document.getElementById('departmentSelectClassBtn').addEventListener('click', () => openModal('departmentClassSelectionModal'));
@@ -577,7 +801,7 @@ $years = range($current_year, ($current_year + 5));
 
             if (departmentSelectStudentsBtn) {
                 departmentSelectStudentsBtn.addEventListener("click", () => {
-                    openModal("departmenStudentSelectionModal");
+                    openModal("departmentStudentSelectionModal");
                 });
             }
 
@@ -635,9 +859,9 @@ $years = range($current_year, ($current_year + 5));
                 // Add event listeners to the add buttons
                 document.querySelectorAll(".department-add-student-btn:not(.selected)").forEach((btn) => {
                     btn.addEventListener("click", function() {
-                        const code = this.getAttribute("data-index");
+                        const index = this.getAttribute("data-index");
                         const name = this.getAttribute("data-name");
-                        addStudentToSelection(code, name);
+                        addStudentToSelection(index, name);
 
                         // Update the button to show it's selected
                         this.classList.add("selected");
@@ -670,8 +894,8 @@ $years = range($current_year, ($current_year + 5));
                 }
 
                 // Single course form validation
-                const programId = document.getElementById("programId");
-                const graduationYear = document.getElementById("graduationYear");
+                const programId = document.getElementById("classProgram");
+                const graduationYear = document.getElementById("classYear");
                 const classType = document.getElementById("classType");
                 const classCode = document.getElementById("classCode");
                 const department = document.getElementById("classDepartment");
@@ -684,26 +908,26 @@ $years = range($current_year, ($current_year + 5));
 
                 let url = null;
 
+                // Simulate API call
+                const formData = {
+                    program: programId.value,
+                    year: graduationYear.value,
+                    category: classType.value,
+                    code: classCode.value
+                };
+
                 switch (classAction.value) {
                     case "add":
                         url = "../endpoint/add-class";
                         break;
                     case "edit":
-                        url = "../endpoint/edit-class";
+                        url = "../endpoint/update-class";
+                        formData.oldCode = document.getElementById("oldClassCode").value;
                         break;
                     default:
                         alert("Invalid action");
                         return;
                 }
-
-                // Simulate API call
-                const formData = {
-                    programId: programId.value,
-                    graduationYear: graduationYear.value,
-                    classType: classType.value,
-                    classCode: classCode.value,
-                    departmentId: department.value,
-                };
 
                 $.ajax({
                     type: "POST",
@@ -759,7 +983,6 @@ $years = range($current_year, ($current_year + 5));
                     return;
                 }
 
-                const form = document.getElementById("assignClassForm");
                 const action = document.getElementById("assignClassActionSelect").value;
 
                 // Simulate API call
@@ -783,12 +1006,6 @@ $years = range($current_year, ($current_year + 5));
                         break;
 
                     case 'toStudent':
-                        const studentSelect = document.getElementById("studentSelect");
-
-                        if (!studentSelect.value) {
-                            alert("Please fill in all required fields");
-                            return;
-                        }
 
                         const selectedStudentElements = document.querySelectorAll('#selectedStudentsList .department-selected-student');
                         if (selectedStudentElements.length === 0) {
@@ -803,17 +1020,12 @@ $years = range($current_year, ($current_year + 5));
 
                         formData.students = selectedStudents;
                         formData.action = "student";
-                        formData.student = studentSelect.value;
                         break;
 
                     default:
                         alert("Class(s) can only be asigned to lecturer(s), student(s) and class(es)!");
                         return;
                 }
-
-                console.log(formData);
-
-                return;
 
                 $.ajax({
                     type: "POST",
@@ -824,7 +1036,18 @@ $years = range($current_year, ($current_year + 5));
                         if (result.success) {
                             alert(result.message);
                             closeModal("assignClassModal");
-                            form.reset();
+                            // Reset modal form data one by one
+                            document.getElementById("singleClassCode").value = "";
+                            document.getElementById("assignmentNotes").value = "";
+                            document.getElementById("lecturerSelect").value = "";
+
+                            // Clear selected students
+                            const selectedStudentsList = document.getElementById("selectedStudentsList");
+                            selectedStudentsList.innerHTML = "";
+                            document.querySelectorAll(".department-selected-student").forEach((student) => {
+                                student.remove();
+                            });
+                            document.getElementById("departmentNoStudentMessage").style.display = "block";
                         } else {
                             alert(result['message']);
                         }
@@ -902,17 +1125,17 @@ $years = range($current_year, ($current_year + 5));
             const departmentStudentSearchInput = document.getElementById("departmentStudentSearchInput");
 
             confirmDepartmentStudentSelectionBtn.addEventListener("click", () => {
-                closeModal("studentSelectionModal");
+                closeModal("departmentStudentSelectionModal");
             });
 
             departmentStudentSearchInput.addEventListener("input", () => {
-                departmentSearchStudent();
+                departmentSearchStudents();
             });
 
             // Initialize student list on modal open
             departmentStudentSearchInput.addEventListener("focus", () => {
                 if (departmentStudentSearchInput.value === "") {
-                    departmentSearchStudent();
+                    departmentSearchStudents();
                 }
             });
 
@@ -926,15 +1149,12 @@ $years = range($current_year, ($current_year + 5));
                     const course = activeClass.find(course => course.code === courseCode);
                     if (course) {
                         // Populate the edit form with course data
-                        document.getElementById("courseAction").value = "edit";
-                        document.getElementById("courseCode").value = course.code;
-                        document.getElementById("courseName").value = course.name;
-                        document.getElementById("creditHours").value = course.credit_hours;
-                        document.getElementById("contactHours").value = course.contact_hours;
-                        document.getElementById("courseLevel").value = course.level;
-                        document.getElementById("courseCategory").value = course.category_id;
-                        document.getElementById("courseSemester").value = course.semester;
-                        document.getElementById("courseDepartment").value = course.department_id;
+                        document.getElementById("classAction").value = "edit";
+                        document.getElementById("classCode").value = course.code;
+                        document.getElementById("classProgram").value = course.program_id;
+                        document.getElementById("classYear").value = course.year;
+                        document.getElementById("classType").value = course.category;
+                        document.getElementById("classDepartment").value = course.department_id;
                         // Open the course modal
                         openModal('addClassModal');
                     } else {
@@ -944,32 +1164,32 @@ $years = range($current_year, ($current_year + 5));
                 });
             });
 
-            document.querySelectorAll('.archive-course').forEach(button => {
+            document.querySelectorAll('.archive-class').forEach(button => {
                 button.addEventListener('click', function() {
-                    const courseCard = this.closest('.course-card');
-                    const courseTitle = courseCard.querySelector('.course-title').textContent;
-                    if (confirm(`Are you sure you want to archive the course: ${courseTitle}?`)) {
-                        const courseCode = this.id;
+                    const classCard = this.closest('.class-card');
+                    const classTitle = classCard.querySelector('.class-title').textContent;
+                    if (confirm(`Are you sure you want to archive the class: ${classTitle}?`)) {
+                        const classCode = this.id;
 
-                        if (!courseCode) {
-                            alert("There was an error archiving the course. Please try again.");
+                        if (!classCode) {
+                            alert("There was an error archiving the class. Please try again.");
                             return;
                         }
 
                         // Simulate API call
                         const formData = {
-                            courseCode: courseCode
+                            code: classCode
                         };
 
                         $.ajax({
                             type: "POST",
-                            url: "../endpoint/archive-course",
+                            url: "../endpoint/archive-class",
                             data: formData,
                             success: function(result) {
                                 console.log(result);
                                 if (result.success) {
                                     alert(result.message);
-                                    courseCard.remove();
+                                    classCard.remove();
                                 } else {
                                     alert(result.message);
                                 }

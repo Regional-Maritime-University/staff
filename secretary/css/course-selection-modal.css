@@ -20,7 +20,7 @@
 
 #selectCoursesBtn,
 #departmentSelectCoursesBtn,
-#departmentSlectStudentsBtn,
+#departmentSelectStudentsBtn,
 #classSelectCoursesBtn {
 	display: flex;
 	align-items: center;
@@ -37,7 +37,7 @@
 
 #selectCoursesBtn:hover,
 #departmentSelectCoursesBtn:hover,
-#departmentSlectStudentsBtn:hover,
+#departmentSelectStudentsBtn:hover,
 #classSelectCoursesBtn:hover {
 	background-color: var(--primary-color);
 }

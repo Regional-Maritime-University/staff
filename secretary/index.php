@@ -1046,21 +1046,21 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     if (activeSemestersData.success) activeSemesters = activeSemestersData.data;
                     if (coursesData.success) courses = coursesData.data;
                     if (assignedCoursesData.success) assignedCourses = assignedCoursesData.data;
-                    if (staffData.success) lecturersAndHods = staffData.data.filter(s => s.role === 'lecturer' || s.role === 'hod');
+                    if (staffData.success) lecturersAndHods = staffData["data"].filter(s => s.role === 'lecturer' || s.role === 'hod');
                     // appData.DEADLINES = deadlinesData.data;
                     // appData.RESULTS = resultsData.data;
                     // appData.STUDENTS = studentsData.data;
                     // appData.MESSAGES = messagesData.data;
                     // appData.NOTIFICATIONS = notificationsData.data;
 
-                    console.log("Courses ready:", courses);
-                    console.log("Assigned Courses ready:", assignedCourses);
-                    console.log("Lecturers and HODs ready:", lecturersAndHods);
-                    console.log("Deadlines ready:", deadlines);
-                    console.log("Results ready:", results);
-                    console.log("Students ready:", students);
-                    console.log("Messages ready:", messages);
-                    console.log("Notifications ready:", notifications);
+                    // console.log("Courses ready:", courses);
+                    // console.log("Assigned Courses ready:", assignedCourses);
+                    // console.log("Lecturers and HODs ready:", lecturersAndHods);
+                    // console.log("Deadlines ready:", deadlines);
+                    // console.log("Results ready:", results);
+                    // console.log("Students ready:", students);
+                    // console.log("Messages ready:", messages);
+                    // console.log("Notifications ready:", notifications);
 
                 } catch (error) {
                     console.error("Error fetching data:", error);

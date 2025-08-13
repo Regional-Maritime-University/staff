@@ -1,5 +1,6 @@
 /* Course Page Specific Styles */
-.course-card {
+.course-card,
+.class-card {
 	background-color: white;
 	border-radius: 10px;
 	box-shadow: var(--card-shadow);
@@ -8,11 +9,13 @@
 	transition: transform var(--transition-speed);
 }
 
-.course-card:hover {
+.course-card:hover,
+.class-card:hover {
 	transform: translateY(-5px);
 }
 
-.course-header {
+.course-header,
+.class-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -21,28 +24,88 @@
 	border-bottom: 1px solid var(--border-color);
 }
 
-.course-title {
+.course-title,
+.class-title {
 	font-size: 1.2rem;
 	color: var(--primary-color);
 	font-weight: 600;
 }
 
-.course-code {
+.course-code,
+.class-code {
 	font-size: 0.9rem;
 	color: var(--accent-color);
 	font-weight: 500;
 }
 
-.course-actions {
+.course-actions,
+.class-actions {
 	display: flex;
 	gap: 10px;
 }
 
-.course-details {
+.course-details,
+.class-details {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	gap: 15px;
 	margin-bottom: 15px;
+}
+
+/*
+This is sample application-specific CSS for the class page
+
+/* Class Card Specific Styles */
+.class-info {
+	display: flex;
+	flex-direction: column;
+	background: var(--light-bg);
+	padding: 10px 12px;
+	border-radius: 6px;
+}
+
+.info-label {
+	font-size: 0.8rem;
+	color: #888;
+	margin-bottom: 2px;
+	font-weight: 500;
+}
+
+.info-value {
+	font-size: 0.95rem;
+	color: var(--primary-color);
+	font-weight: 600;
+}
+
+.class-footer {
+	display: flex;
+	gap: 10px;
+	margin-top: 10px;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.action-icon {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 6px 10px;
+	border-radius: 6px;
+	transition: background-color var(--transition-speed);
+	font-size: 1rem;
+	color: var(--primary-color);
+}
+
+.action-icon:hover {
+	background: var(--light-bg);
+}
+
+.action-icon.edit-class i {
+	color: var(--accent-color);
+}
+
+.action-icon.archive-class i {
+	color: var(--danger-color);
 }
 
 .detail-item {
@@ -190,7 +253,8 @@
 	background-color: #e9ecef;
 }
 
-.course-grid {
+.course-grid,
+.class-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 	gap: 20px;

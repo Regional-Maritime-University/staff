@@ -29,7 +29,11 @@ class Staff
                 break;
 
             case 'role':
-                $concat_stmt = "AND s.`role` = :v";
+                if ($value === "lecturer") {
+                    $concat_stmt = "AND s.`role` IN ('lecturer', 'hod')";
+                } else {
+                    $concat_stmt = "AND s.`role` = :v";
+                }
                 break;
 
             case 'gender':
@@ -49,7 +53,7 @@ class Staff
                 s.`gender`, s.`role`, s.`archived`, s.`fk_department` AS department_id, d.`name` AS department_name, s.`archived` 
                 FROM `staff` AS s, `department` AS d WHERE s.`fk_department` = d.`id` AND s.`archived` = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+        return array("success" => true, "data" => $this->dm->getData($query, $params), "total" => $this->total($key, $value, $archived));
     }
 
     public function add(array $data)

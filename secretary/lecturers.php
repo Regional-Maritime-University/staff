@@ -35,6 +35,7 @@ use Src\Controller\SecretaryController;
 use Src\Core\Base;
 use Src\Core\Course;
 use Src\Core\CourseCategory;
+use Src\Core\Staff;
 
 require_once('../inc/admin-database-con.php');
 
@@ -42,6 +43,8 @@ $secretary          = new SecretaryController($db, $user, $pass);
 $course_category    = new CourseCategory($db, $user, $pass);
 $course             = new Course($db, $user, $pass);
 $base               = new Base($db, $user, $pass);
+$staff           = new Staff($db, $user, $pass);
+
 
 $pageTitle = "Lecturers";
 $activePage = "lecturers";
@@ -51,42 +54,13 @@ $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
 $activeSemesters = $secretary->fetchActiveSemesters();
-$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
-$activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
-$totalActiveCourses = count($activeCourses);
+$departmentStaffs = $staff->fetch("department", $departmentId, $archived);
+$activeLectuers = $departmentStaffs ? array_filter($departmentStaffs["data"], function ($staff) {
+    return in_array($staff['role'], ['lecturer', 'hod']) && !$staff['archived'];
+}) : [];
+$totalActiveLecturers = count($activeLectuers);
 
-$assignedCourses = [];
-foreach ($activeSemesters as $semester) {
-    $semesterId = $semester['id'];
-    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
-}
-$totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
-
-$assignedLecturers = [];
-foreach ($activeSemesters as $semester) {
-    $semesterId = $semester['id'];
-    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
-}
-$totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
-
-$deadlines = $secretary->fetchPendingDeadlines($departmentId);
-$totalPendingDeadlines = 0;
-if ($deadlines && is_array($deadlines)) {
-    foreach ($deadlines as $d) {
-        if ($d['status'] == 'pending') $totalPendingDeadlines++;
-    }
-}
-
-$courseWithNoDeadlines = $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($departmentId);
-
-$recentActivities = $secretary->fetchRecentActivities($departmentId, false);
-
-$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
-$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
-
-$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
-$totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
 
 ?>
 
@@ -174,6 +148,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
 
             <!-- Lecturer Grid -->
             <div class="lecturer-grid">
+
+
                 <!-- Lecturer Card 1 -->
                 <div class="lecturer-card">
                     <div class="lecturer-header">
@@ -234,325 +210,6 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 <span class="course-tag">ME101 - Introduction to Marine Engineering</span>
                                 <span class="course-tag">ME302 - Marine Propulsion Systems</span>
                                 <span class="course-tag">ME405 - Ship Design and Construction</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lecturer Card 2 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer2.jpg" alt="Prof. Jane Smith">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Prof. Jane Smith</h3>
-                                <div class="lecturer-title">Professor</div>
-                                <div class="lecturer-department">Nautical Science</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">jane.smith@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 234 5678</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">2</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status busy">
-                                    <span class="status-dot busy"></span>
-                                    Busy
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Maritime Law</span>
-                                <span class="specialization-tag">Maritime Regulations</span>
-                                <span class="specialization-tag">Marine Insurance</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">ML202 - Maritime Law and Regulations</span>
-                                <span class="course-tag">ML304 - International Maritime Conventions</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lecturer Card 3 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer3.jpg" alt="Dr. Robert Johnson">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Dr. Robert Johnson</h3>
-                                <div class="lecturer-title">Senior Lecturer</div>
-                                <div class="lecturer-department">Nautical Science</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">robert.johnson@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 345 6789</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">1</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status available">
-                                    <span class="status-dot available"></span>
-                                    Available
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Ship Navigation</span>
-                                <span class="specialization-tag">Maritime Safety</span>
-                                <span class="specialization-tag">Navigation Systems</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">NS305 - Ship Navigation Systems</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lecturer Card 4 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer4.jpg" alt="Prof. Emily Brown">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Prof. Emily Brown</h3>
-                                <div class="lecturer-title">Professor</div>
-                                <div class="lecturer-department">Computer Science</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">emily.brown@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 456 7890</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">4</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status unavailable">
-                                    <span class="status-dot unavailable"></span>
-                                    Unavailable
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Database Systems</span>
-                                <span class="specialization-tag">Data Analytics</span>
-                                <span class="specialization-tag">Information Security</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">CS304 - Database Management Systems</span>
-                                <span class="course-tag">CS203 - Data Structures and Algorithms</span>
-                                <span class="course-tag">CS401 - Information Security</span>
-                                <span class="course-tag">CS402 - Data Analytics</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lecturer Card 5 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer5.jpg" alt="Dr. Michael Wilson">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Dr. Michael Wilson</h3>
-                                <div class="lecturer-title">Senior Lecturer</div>
-                                <div class="lecturer-department">Logistics Management</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">michael.wilson@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 567 8901</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">1</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status available">
-                                    <span class="status-dot available"></span>
-                                    Available
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Supply Chain Management</span>
-                                <span class="specialization-tag">Logistics Operations</span>
-                                <span class="specialization-tag">Port Management</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">LM201 - Supply Chain Management</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lecturer Card 6 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer6.jpg" alt="Prof. David Clark">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Prof. David Clark</h3>
-                                <div class="lecturer-title">Professor</div>
-                                <div class="lecturer-department">Marine Engineering</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">david.clark@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 678 9012</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">1</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status busy">
-                                    <span class="status-dot busy"></span>
-                                    Busy
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Marine Propulsion</span>
-                                <span class="specialization-tag">Marine Engineering</span>
-                                <span class="specialization-tag">Engine Design</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">ME302 - Marine Propulsion Systems</span>
                             </div>
                         </div>
                     </div>
@@ -905,6 +562,96 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     </div>
 
     <script>
+        const staticLecturersData = <?php echo json_encode($activeLectuers); ?>;
+        const totalLecturers = <?php echo $totalActiveLecturers; ?>;
+        const departmentId = <?php echo json_encode($departmentId); ?>;
+        const semesterId = <?php echo json_encode($semesterId); ?>;
+        const activeSemesters = <?php echo json_encode($activeSemesters); ?>;
+        const baseUrl = '../endpoint/';
+
+        
+        
+        const lecturersData = staticLecturersData.map(lecturer => ({
+            number: lecturer.number,
+            first_name: lecturer.first_name,
+            middle_name: lecturer.middle_name,
+            last_name: lecturer.last_name,
+            full_name: `${lecturer.first_name} ${lecturer.middle_name} ${lecturer.last_name}`,
+            title: lecturer.prefix || '',
+            position: lecturer.role,
+            email: lecturer.email,
+            phone: lecturer.phone || '',
+            photo: lecturer.avatar || 'placeholder.svg',
+            availability: lecturer.availability,
+            gender: lecturer.gender
+        }));
+
+        // Function to render lecturers in the grid
+        let lecturerGrid = document.querySelector('.lecturer-grid');
+        lecturerGrid.innerHTML = '';
+        lecturersData.forEach(lecturer => {
+            const card = document.createElement('div');
+            card.className = 'lecturer-card';
+            card.innerHTML = `
+                <div class="lecturer-header">
+                    <div class="lecturer-info">
+                        <div class="lecturer-avatar">
+                            <img src="${lecturer.photo || 'placeholder.svg'}" alt="${lecturer.first_name} ${lecturer.last_name}">
+                        </div>
+                        <div class="lecturer-info-text">
+                            <h3>${lecturer.title} ${lecturer.first_name} ${lecturer.middle_name} ${lecturer.last_name}</h3>
+                            <div class="lecturer-title">${lecturer.position}</div>
+                            <div class="lecturer-department">${lecturer.department_name}</div>
+                        </div>
+                    </div>
+                    <div class="lecturer-actions">
+                        <button class="action-icon edit-lecturer" title="Edit Lecturer" data-id="${lecturer.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-icon delete-lecturer" title="Delete Lecturer" data-id="${lecturer.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="lecturer-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">${lecturer.email}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone</div>
+                        <div class="detail-value">${lecturer.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Courses Teaching</div>
+                        <div class="detail-value"><span class="course-count">${(lecturer.courses || []).length}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Availability</div>
+                        <div class="detail-value">
+                            <div class="${'availability-status ' + (lecturer.availability ? 'available' : 'unavailable')}">
+                                <span class="${'status-dot ' + (lecturer.availability ? 'available' : 'unavailable')}"></span>
+                                ${lecturer.availability ? 'Available' : 'Unavailable'} 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Specializations</div>
+                        <div class="lecturer-specializations">
+                            ${(lecturer.specializations || []).map(spec => `<span class="specialization-tag">${spec}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="course-list">
+                        <h4>Assigned Courses:</h4>
+                        <div class="courses">
+                            ${(lecturer.courses || []).map(course => `<span class="course-tag">${course.code} - ${course.name}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            lecturerGrid.appendChild(card);
+        });
+
         // Toggle sidebar
         document.querySelector('.toggle-sidebar').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('collapsed');

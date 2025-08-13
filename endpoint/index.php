@@ -29,6 +29,7 @@ use Src\Controller\ExposeDataController;
 use Src\Controller\SecretaryController;
 use Src\Controller\UploadExcelDataController;
 use Src\Core\Base;
+use Src\Core\Classes;
 use Src\Core\Course;
 use Src\Core\Deadline;
 use Src\Core\Program;
@@ -42,6 +43,7 @@ $admin                  = new AdminController($db, $user, $pass);
 $program                = new Program($db, $user, $pass);
 $course                 = new Course($db, $user, $pass);
 $student                = new Student($db, $user, $pass);
+$class                 = new Classes($db, $user, $pass);
 $staff                  = new Staff($db, $user, $pass);
 $secretary              = new SecretaryController($db, $user, $pass);
 $base                   = new Base($db, $user, $pass);
@@ -60,6 +62,35 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode(["success" => true, "data" => $fee_item->fetch()]));
     } elseif ($_GET["url"] == "active-semesters") {
         die(json_encode(["success" => true, "data" => $base->getActiveSemesters()]));
+    } else if ($_GET["url"] == "fetch-classes") {
+        // must have a department, class code, program, or year 
+        // archived is optional
+        if (isset($_GET["department"]) && ! empty($_GET["department"])) {
+            $data["key"]   = "department";
+            $data["value"] = $_GET["department"];
+        } elseif (isset($_GET["code"]) && ! empty($_GET["code"])) {
+            $data["key"]   = "code";
+            $data["value"] = $_GET["code"];
+        } elseif (isset($_GET["program"]) && ! empty($_GET["program"])) {
+            $data["key"]   = "program";
+            $data["value"] = $_GET["program"];
+        } elseif (isset($_GET["year"]) && ! empty($_GET["year"])) {
+            $data["key"]   = "year";
+            $data["value"] = $_GET["year"];
+        } else {
+            die(json_encode(["success" => false, "message" => "Invalid request!"]));
+        }
+        if (isset($_GET["archived"]) && $_GET["archived"] === "true") {
+            $data["archived"] = true;
+        } else {
+            $data["archived"] = false;
+        }
+        $result = $class->fetch($data["key"], $data["value"], $data["archived"]);
+        if ($result) {
+            die(json_encode(["success" => true, "data" => $result]));
+        } else {
+            die(json_encode(["success" => false, "message" => "Failed to fetch classes!"]));
+        }
     }
 
     // All POST request will be sent here
@@ -225,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $_POST["key"]   = "";
             $_POST["value"] = "";
         }
-        die(json_encode(["success" => true, "data" => $staff->fetch($_POST["key"], $_POST["value"])]));
+        die(json_encode($staff->fetch($_POST["key"], $_POST["value"])));
     } elseif ($_GET["url"] == "add-staff") {
         if (! isset($_POST["name"]) || empty($_POST["name"])) {
             die(json_encode(["success" => false, "message" => "Staff name is required!"]));
@@ -452,6 +483,103 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
 
         die(json_encode($secretary->assignCourses($_POST)));
+    }
+
+    // Class
+    elseif ($_GET["url"] == "fetch-class") {
+        if (isset($_POST["code"]) && ! empty($_POST["code"])) {
+            $_POST["key"]   = "code";
+            $_POST["value"] = $_POST["code"];
+        } else if (isset($_POST["department"]) && ! empty($_POST["department"])) {
+            $_POST["key"]   = "department";
+            $_POST["value"] = $_POST["department"];
+        } else if (isset($_POST["program"]) && ! empty($_POST["program"])) {
+            $_POST["key"]   = "program";
+            $_POST["value"] = $_POST["program"];
+        } else {
+            $_POST["key"]   = "";
+            $_POST["value"] = "";
+        }
+        die(json_encode($class->fetch($_POST["key"], $_POST["value"], $_POST["archived"] ?? false)));
+    } elseif ($_GET["url"] == "assign-class") {
+
+        if (! isset($_POST["action"]) || empty($_POST["action"])) {
+            die(json_encode(["success" => false, "message" => "Action is required!"]));
+        }
+
+        switch ($_POST["action"]) {
+            case 'lecturer':
+                if (! isset($_POST["lecturer"]) || empty($_POST["lecturer"])) {
+                    die(json_encode(["success" => false, "message" => "Lecturer is required!"]));
+                }
+                break;
+
+            case 'student':
+                if (! isset($_POST["students"]) || empty($_POST["students"])) {
+                    die(json_encode(["success" => false, "message" => "Student is required!"]));
+                }
+                break;
+
+            default:
+                die(json_encode(["success" => false, "message" => "Invalid action requested!"]));
+                break;
+        }
+
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Select at least one class!"]));
+        }
+
+        $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
+
+        die(json_encode($class->assign($_POST)));
+    } elseif ($_GET["url"] == "add-class") {
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Class code is required!"]));
+        }
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        if (! isset($_POST["category"]) || empty($_POST["category"])) {
+            die(json_encode(["success" => false, "message" => "Category is required!"]));
+        }
+        if (! isset($_POST["year"]) || empty($_POST["year"])) {
+            die(json_encode(["success" => false, "message" => "Year is required!"]));
+        }
+        die(json_encode($class->add($_POST)));
+    } elseif ($_GET["url"] == "update-class") {
+        if (! isset($_POST["oldCode"]) || empty($_POST["oldCode"])) {
+            die(json_encode(["success" => false, "message" => "Old class code is required!"]));
+        }
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Class code is required!"]));
+        }
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        if (! isset($_POST["category"]) || empty($_POST["category"])) {
+            die(json_encode(["success" => false, "message" => "Category is required!"]));
+        }
+        if (! isset($_POST["year"]) || empty($_POST["year"])) {
+            die(json_encode(["success" => false, "message" => "Year is required!"]));
+        }
+        die(json_encode($class->update($_POST)));
+    } elseif ($_GET["url"] == "archive-class") {
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Class code is required!"]));
+        }
+        die(json_encode($class->archive($_POST["code"])));
+    } elseif ($_GET["url"] == "unarchive-class") {
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Class code is required!"]));
+        }
+        die(json_encode($class->unarchive($_POST["code"])));
+    } elseif ($_GET["url"] == "delete-class") {
+        if (! isset($_POST["code"]) || empty($_POST["code"])) {
+            die(json_encode(["success" => false, "message" => "Class code is required!"]));
+        }
+        die(json_encode($class->delete($_POST["code"])));
+    } elseif ($_GET["url"] == "total-class") {
+        die(json_encode($class->fetch($_POST["key"], $_POST["value"], $_POST["archived"] ?? false)));
     }
 
     //students

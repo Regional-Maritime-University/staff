@@ -484,6 +484,9 @@ CREATE INDEX `class_advisor_created_at_idx1` ON `class_advisor` (`created_at`);
 CREATE INDEX `class_advisor_updated_at_idx1` ON `class_advisor` (`updated_at`);
 ALTER TABLE `class_advisor` ADD INDEX `class_advisor_archived_idx1` (`archived`);
 
+ALTER TABLE `class` ADD COLUMN `category` VARCHAR(50) DEFAULT 'regular' AFTER `year`;
+ALTER TABLE `class` ADD INDEX `class_category_idx1` (`category`);
+
 
 
 

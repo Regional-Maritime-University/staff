@@ -604,8 +604,11 @@ class SecretaryController
 
     public function fetchAllActiveStudentsExamAndAssessment(array $students, $semesterId = null)
     {
-        if (!empty($students)) {
-            foreach ($students as &$student) {  // Use reference to modify the original array
+        if (isset($students["data"]) && !empty($students["data"])) {
+            $studentsData = $students["data"];  // Extract the data array if it exists
+            $responseData = [];
+
+            foreach ($studentsData as $student) {  // Use reference to modify the original array
                 $query = "CALL `calculate_gpa_cgpa`(:s, :m)";
                 $params = array(":s" => $student["index_number"], ":m" => $semesterId);
                 $result = $this->dm->getData($query, $params);
@@ -620,8 +623,9 @@ class SecretaryController
                     $student["total_credit_hours"] = 0;
                     $student["total_courses"] = 0;
                 }
+                $responseData[] = $student;  // Collect the modified student data
             }
-            return $students;
+            return $responseData;
         }
         return false;
     }

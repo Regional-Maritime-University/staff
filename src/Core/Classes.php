@@ -25,7 +25,7 @@ class Classes
                 break;
 
             case 'department':
-                $concat_stmt = "AND p.`department` = :v";
+                $concat_stmt = "AND d.`id` = :v";
                 break;
 
             case 'program':
@@ -38,69 +38,173 @@ class Classes
         }
 
         $query = "SELECT 
-                    c.`code`, c.`fk_program` AS program_id, p.`name` AS program_name, 
-                    p.`index_code` AS program_code, d.`id` AS department_id, d.`name` AS department_name 
-                FROM `class` AS c, `programs` AS p, `department` AS d 
-                WHERE c.`fk_program` = p.`id` AND p.`department` = d.`id` $concat_stmt";
-        $params = $value ? array(":v" => $value) : array();
+                        c.`code`, c.`fk_staff` AS supervisor_id, CONCAT(s.`first_name`, ' ', s.`last_name`) AS supervisor_name, 
+                        c.year, c.`category`, c.`fk_program` AS program_id, p.`name` AS program_name, 
+                        p.`index_code` AS program_code, d.`id` AS department_id, d.`name` AS department_name 
+                    FROM class AS c
+                    JOIN programs AS p ON c.`fk_program` = p.`id`
+                    JOIN department AS d ON p.`department` = d.`id`
+                    LEFT JOIN staff AS s ON c.`fk_staff` = s.`number`
+                    WHERE c.`archived` = :ar $concat_stmt
+                    ORDER BY c.`year` DESC, c.`code` ASC";
+        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
+    }
+
+    public function assign(array $data)
+    {
+        $response = array("success" => false, "message" => "An error occurred while assigning class!");
+        switch ($data["action"]) {
+            case 'lecturer':
+                $query = "UPDATE `class` SET `fk_staff` = :s WHERE `code` = :c";
+                $params = array(
+                    ":c" => $data["code"],
+                    ":s" => $data["lecturer"]
+                );
+                $this->dm->inputData($query, $params);
+                $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Assign Class", "Assigned class {$data["code"]} to lecturer {$data["lecturer"]}");
+                $response = array("success" => true, "message" => "Class {$data["code"]} successfully assigned to lecturer {$data["lecturer"]}!");
+                break;
+            case 'student':
+                $total = 0;
+                $query = "UPDATE `student` SET `fk_class` = :c WHERE `index_number` = :s";
+                foreach ($data["students"] as $student) {
+                    $params = array(
+                        ":c" => $data["code"],
+                        ":s" => $student
+                    );
+                    $this->dm->inputData($query, $params);
+                    $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Assign Class", "Assigned class {$data["code"]} to student {$student}");
+                    $total += 1;
+                }
+                $response = array("success" => true, "message" => "{$total} students successfully assigned to class {$data["code"]}!");
+                break;
+            default:
+                $response = array("success" => false, "message" => "Invalid action specified for class assignment!");
+                break;
+        }
+        return $response;
+    }
+
+    public function add(array $data)
+    {
+        $query1 = "SELECT class.`code`, programs.`name` FROM `class`, `programs` WHERE class.`fk_program` = programs.`id` AND  class.`code` = :c AND class.`category` = :cg";
+        $params1 = array(
+            ":c" => $data["code"],
+            ":cg" => $data["category"]
+        );
+        $result1 = $this->dm->getData($query1, $params1);
+        if ($result1) {
+            return array("success" => false, "message" => "{$data["code"]} already exists!");
+        }
+
+        $query = "INSERT INTO `class` (`code`, `year`, `fk_program`, `category`, `archived`) 
+                VALUES (:c, :y, :p, :cg, 0)";
+
+        $params = array(
+            ":c" => $data["code"],
+            ":y" => $data["year"],
+            ":p" => $data["program"],
+            ":cg" => $data["category"]
+        );
+
+        $query_result = $this->dm->inputData($query, $params);
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Created Class", "Added new class {$data["code"]}");
+            return array("success" => true,  "message" => "Class {$data["code"]} successfully added!");
+        } else {
+            return array("success" => false, "message" => "Encountered a server error while adding class {$data["code"]} to database!");
+        }
     }
 
     public function update(array $data)
     {
-        $query = "UPDATE `student` SET 
-        `index_number`=:n, `email`=:e, `password`=:fn, `first_name`=:mn, 
-        `middle_name`, `last_name`=:ln, `prefix`=:p, `gender`=:g, `role`=:r, 
-        `fk_department`=:d, `archived`=:ar WHERE s.`index_number` = :i";
+        $query = "UPDATE class SET 
+                `year` = :y, `fk_program` = :p, `category` = :cg, code = :c 
+                WHERE `code` = :oc";
         $params = array(
-            ":i" => $data["c_index_number"],
-            ":n" => $data["index_number"],
-            ":e" => $data["email"],
-            ":fn" => $data["first_name"],
-            ":mn" => $data["middle_name"],
-            ":ln" => $data["last_name"],
-            ":p" => $data["prefix"],
-            ":g" => $data["gender"],
-            ":r" => $data["role"],
-            ":d" => $data["fk_department"],
-            ":ar" => 0
+            ":y" => $data["year"],
+            ":p" => $data["program"],
+            ":cg" => $data["category"],
+            ":c" => $data["code"],
+            ":oc" => $data["oldCode"]
         );
+
         $query_result = $this->dm->inputData($query, $params);
-        if ($query_result) $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Staff Details Modification", "Updated information for student {$data["id"]}");
-        return $query_result;
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Update Class", "Updated class {$data["code"]}");
+            return array("success" => true, "message" => "Class updated!");
+        } else {
+            return array("success" => false, "message" => "Encountered a server error while updating class {$data["code"]} in database!");
+        }
+    }
+
+    public function archive($code)
+    {
+        $query = "UPDATE `class` SET `archived` = 1 WHERE `code` = :c";
+        $query_result = $this->dm->inputData($query, array(":c" => $code));
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Archive Class", "Archived class {$code}");
+            return array("success" => true, "message" => "Class successfully archived!");
+        } else {
+            return array("success" => false, "message" => "Failed to archive class {$code}!");
+        }
+    }
+
+    public function unarchive(array $classes)
+    {
+        $unarchived = 0;
+        foreach ($classes as $code) {
+            $query = "UPDATE `class` SET `archived` = 0 WHERE `code` = :i";
+            $query_result = $this->dm->inputData($query, array(":i" => $code));
+            if ($query_result) {
+                $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Class Unarchive", "Unarchived class {$code}");
+                $unarchived += 1;
+            }
+        }
+        return array(
+            "success" => true,
+            "message" => "{$unarchived} successfully unarchived!",
+            "errors" => "Failed to unarchive " . (count($classes) - $unarchived) . " classes"
+        );
+    }
+
+    public function delete(array $classes)
+    {
+        $deleted = 0;
+        foreach ($classes as $code) {
+            $query = "DELETE FROM `class` WHERE `code` = :i";
+            $query_result = $this->dm->inputData($query, array(":i" => $code));
+            if ($query_result) {
+                $this->log->activity($_SESSION["staff"]["number"], "DELETE", "secretary", "Class Deletion", "Deleted class {$code}");
+                $deleted += 1;
+            }
+        }
+        return array(
+            "success" => true,
+            "message" => "{$deleted} successfully deleted!",
+            "errors" => "Failed to delete " . (count($classes) - $deleted) . " classes"
+        );
     }
 
     public function total(string $key = "", string $value = "", bool $archived = false)
     {
         $concat_stmt = "";
         switch ($key) {
-            case 'gender':
-                $concat_stmt = "AND s.`gender` = :v";
-                break;
-
-            case 'academic_year':
-                $concat_stmt = "AND s.`fk_academic_year` = :v";
+            case 'category':
+                $concat_stmt = "AND p.`category` = :v";
                 break;
 
             case 'department':
-                $concat_stmt = "AND s.`fk_department` = :v";
+                $concat_stmt = "AND p.`fk_department` = :v";
                 break;
 
-            case 'program':
-                $concat_stmt = "AND s.`fk_program` = :v";
-                break;
-
-            case 'class':
-                $concat_stmt = "AND s.`fk_class` = :v";
+            default:
+                $concat_stmt = "";
                 break;
         }
-
-        $query = "SELECT COUNT(s.`index_number`) AS total 
-                FROM 
-                `student` AS s, `academic_year` AS ay, `department` AS d, `programs` AS p, `class` AS c 
-                WHERE 
-                s.`fk_academic_year` = ay.`id` AND  s.`fk_department` = d.`id` AND s.`fk_program` = p.`id` AND 
-                s.`fk_class` = c.`code` AND s.`archived` = :ar $concat_stmt";
+        $query = "SELECT COUNT(p.`id`) AS total FROM `class` AS p, `forms` AS f, `department` AS d 
+                WHERE p.`type` = f.`id` AND p.`department` = d.`id` AND p.archived = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }
