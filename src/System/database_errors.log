@@ -1652,3 +1652,166 @@ Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->com
 #3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
 #4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
 #5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS `full_name`, 
+     ...' at line 1
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT s.`numbe...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(56): Src\System\DatabaseMethods->getData('SELECT s.`numbe...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false)
+#4 {main}
+Warning: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rmu_admissions_test.courses' doesn't exist
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT c.*\r\n   ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(72): Src\System\DatabaseMethods->getData('SELECT c.*\r\n   ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false, true, true)
+#4 {main}
+Warning: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rmu_admissions_test.courses' doesn't exist
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT c.*\r\n   ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(72): Src\System\DatabaseMethods->getData('SELECT c.*\r\n   ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false, true, true)
+#4 {main}
+Warning: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rmu_admissions_test.courses' doesn't exist
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT c.*\r\n   ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(72): Src\System\DatabaseMethods->getData('SELECT c.*\r\n   ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false, true, true)
+#4 {main}
+Warning: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rmu_admissions_test.courses' doesn't exist
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT c.*\r\n   ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(72): Src\System\DatabaseMethods->getData('SELECT c.*\r\n   ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false, true, true)
+#4 {main}
+Warning: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rmu_admissions_test.courses' doesn't exist
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(72): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('SELECT c.*\r\n   ...', Array)
+#2 C:\xampp\htdocs\rmu\staff\src\Core\Staff.php(72): Src\System\DatabaseMethods->getData('SELECT c.*\r\n   ...', Array)
+#3 C:\xampp\htdocs\rmu\staff\secretary\lecturers.php(58): Src\Core\Staff->fetch('department', '1', false, true, true)
+#4 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}
+Warning: SQLSTATE[HY000]: General error: 2014 Cannot execute queries while there are pending result sets. Consider unsetting the previous PDOStatement or calling PDOStatement::closeCursor()
+Trace: #0 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(39): PDO->commit()
+#1 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(86): Src\System\DatabaseMethods->commit()
+#2 C:\xampp\htdocs\rmu\staff\src\System\DatabaseMethods.php(115): Src\System\DatabaseMethods->query('CALL `calculate...', Array)
+#3 C:\xampp\htdocs\rmu\staff\src\Controller\SecretaryController.php(614): Src\System\DatabaseMethods->getData('CALL `calculate...', Array)
+#4 C:\xampp\htdocs\rmu\staff\secretary\students.php(64): Src\Controller\SecretaryController->fetchAllActiveStudentsExamAndAssessment(Array, 2)
+#5 {main}

@@ -170,6 +170,10 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         <i class="fas fa-clock"></i>
                         Set Deadlines
                     </button>
+                    <button class="action-btn danger" id="archivedCoursesBtn">
+                        <i class="fas fa-list"></i>
+                        Archived Courses
+                    </button>
                 </div>
             </div>
 

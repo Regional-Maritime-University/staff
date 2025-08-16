@@ -91,6 +91,39 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else {
             die(json_encode(["success" => false, "message" => "Failed to fetch classes!"]));
         }
+    } elseif ($_GET["url"] == "fetch-staff") {
+        if (isset($_GET["staff"]) && ! empty($_GET["staff"])) {
+            $data["key"]   = "number";
+            $data["value"] = $_GET["staff"];
+        } else if (isset($_GET["email"]) && ! empty($_GET["email"])) {
+            $data["key"]   = "email";
+            $data["value"] = $_GET["email"];
+        } else if (isset($_GET["gender"]) && ! empty($_GET["gender"])) {
+            $data["key"]   = "gender";
+            $data["value"] = $_GET["gender"];
+        } else if (isset($_GET["role"]) && ! empty($_GET["role"])) {
+            $data["key"]   = "role";
+            $data["value"] = $_GET["role"];
+        } else if (isset($_GET["department"]) && ! empty($_GET["department"])) {
+            $data["key"]   = "department";
+            $data["value"] = $_GET["department"];
+        } else {
+            die(json_encode(["success" => false, "message" => "Invalid request!"]));
+        }
+
+        if (isset($_GET["archived"]) && $_GET["archived"] === "true") {
+            $data["archived"] = true;
+        } else {
+            $data["archived"] = false;
+        }
+
+        $result = $staff->fetch($data["key"], $data["value"], $data["archived"]);
+
+        if ($result) {
+            die(json_encode(["success" => true, "data" => $result]));
+        } else {
+            die(json_encode(["success" => false, "message" => "Failed to fetch lecturers data!"]));
+        }
     }
 
     // All POST request will be sent here
@@ -266,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
         die(json_encode($staff->add($_POST)));
     } elseif ($_GET["url"] == "update-staff") {
-        if (! isset($_POST["staff"]) || empty($_POST["staff"])) {
+        if (! isset($_POST["number"]) || empty($_POST["number"])) {
             die(json_encode(["success" => false, "message" => "Staff id is required!"]));
         }
         if (! isset($_POST["name"]) || empty($_POST["name"])) {
@@ -275,17 +308,22 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["hod"]) || empty($_POST["hod"])) {
             die(json_encode(["success" => false, "message" => "Staff hod is required!"]));
         }
-        die(json_encode($staff->update($_POST, $_POST["staff"])));
+        die(json_encode($staff->update($_POST, $_POST["number"])));
     } elseif ($_GET["url"] == "archive-staff") {
-        if (! isset($_POST["staff"]) || empty($_POST["staff"])) {
+        if (! isset($_POST["number"]) || empty($_POST["number"])) {
             die(json_encode(["success" => false, "message" => "Staff id is required!"]));
         }
-        die(json_encode($staff->archive($_POST["staff"])));
+        die(json_encode($staff->archive($_POST["number"])));
+    } elseif ($_GET["url"] == "unarchive-staff") {
+        if (! isset($_POST["number"]) || empty($_POST["number"])) {
+            die(json_encode(["success" => false, "message" => "Staff id is required!"]));
+        }
+        die(json_encode($staff->unarchive($_POST["number"])));
     } elseif ($_GET["url"] == "delete-staff") {
-        if (! isset($_POST["staff"]) || empty($_POST["staff"])) {
-            die(json_encode(["success" => false, "message" => "Staff id is required!"]));
+        if (! isset($_POST["number"]) || empty($_POST["number"])) {
+            die(json_encode(["success" => false, "message" => "Staff number(s) required!"]));
         }
-        die(json_encode($staff->delete($_POST["staff"])));
+        die(json_encode($staff->delete($_POST["number"])));
     } elseif ($_GET["url"] == "total-staff") {
         die(json_encode($staff->fetch($_POST["key"], $_POST["value"], $_POST["archived"])));
     }

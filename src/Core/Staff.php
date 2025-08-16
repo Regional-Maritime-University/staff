@@ -17,7 +17,7 @@ class Staff
         $this->log = new Log($db, $user, $pass);
     }
 
-    public function fetch(string $key = "", string $value = "", bool $archived = false)
+    public function fetch(string $key = "", string $value = "", bool $archived = false, bool $includeCourses = false, bool $includeDeadlines = false)
     {
         switch ($key) {
             case 'number':
@@ -49,11 +49,46 @@ class Staff
                 break;
         }
 
-        $query = "SELECT s.`number`, s.`email`, s.`password`, CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS `full_name`, 
-                s.`gender`, s.`role`, s.`archived`, s.`fk_department` AS department_id, d.`name` AS department_name, s.`archived` 
-                FROM `staff` AS s, `department` AS d WHERE s.`fk_department` = d.`id` AND s.`archived` = :ar $concat_stmt";
-        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return array("success" => true, "data" => $this->dm->getData($query, $params), "total" => $this->total($key, $value, $archived));
+        $query = "SELECT s.`number`, s.`email`, s.`phone_number`, s.`availability`, s.`prefix`, s.`first_name`, s.`last_name`, 
+            CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS `full_name`, s.`avatar`, s.`designation`, s.`gender`, 
+            s.`role`, s.`archived`, s.`fk_department` AS department_id, d.`name` AS department_name, s.`archived` 
+            FROM `staff` AS s
+            JOIN `department` AS d ON s.`fk_department` = d.`id`
+            WHERE s.`archived` = :ar $concat_stmt";
+
+        $params = $value ? [":v" => $value, ":ar" => $archived] : [":ar" => $archived];
+        $staffData = $this->dm->getData($query, $params);
+
+        if (($includeCourses || $includeDeadlines) && !empty($staffData)) {
+            foreach ($staffData as &$staff) {
+                if ($includeCourses) {
+                    $courseQuery = "SELECT c.*
+                        FROM `course` c
+                        JOIN `lecturer_course_assignments` lca ON lca.`fk_course` = c.`code`
+                        JOIN `semester` sem ON sem.`id` = lca.`fk_semester`
+                        JOIN `staff` sn ON sn.`number` = lca.`fk_staff`
+                        WHERE lca.`fk_staff` = :sn AND sem.`active` = 1
+                    ";
+                    $staff['courses'] = $this->dm->getData($courseQuery, [":sn" => $staff['number']]);
+                }
+                if ($includeDeadlines) {
+                    $deadlineQuery = "SELECT d.*
+                        FROM `deadlines` d
+                        JOIN `semester` sem ON sem.`id` = d.`fk_semester`
+                        JOIN `staff` sn ON sn.`number` = d.`fk_staff`
+                        WHERE d.`fk_staff` = :sn AND sem.`active` = 1
+                    ";
+                    $staff['deadlines'] = $this->dm->getData($deadlineQuery, [":sn" => $staff['number']]);
+                }
+            }
+            unset($staff);
+        }
+
+        return [
+            "success" => true,
+            "data" => $staffData,
+            "total" => $this->total($key, $value, $archived)
+        ];
     }
 
     public function add(array $data)

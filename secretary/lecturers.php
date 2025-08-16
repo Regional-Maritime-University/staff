@@ -55,7 +55,7 @@ $archived = false;
 
 $activeSemesters = $secretary->fetchActiveSemesters();
 
-$departmentStaffs = $staff->fetch("department", $departmentId, $archived);
+$departmentStaffs = $staff->fetch("department", $departmentId, $archived, true, true);
 $activeLectuers = $departmentStaffs ? array_filter($departmentStaffs["data"], function ($staff) {
     return in_array($staff['role'], ['lecturer', 'hod']) && !$staff['archived'];
 }) : [];
@@ -105,6 +105,10 @@ $totalActiveLecturers = count($activeLectuers);
                         <i class="fas fa-address-book"></i>
                         Lecturer Contacts
                     </button>
+                    <button class="action-btn danger" id="archivedLecturersBtn">
+                        <i class="fas fa-list"></i>
+                        Archived Lecturers
+                    </button>
                 </div>
             </div>
 
@@ -148,72 +152,7 @@ $totalActiveLecturers = count($activeLectuers);
 
             <!-- Lecturer Grid -->
             <div class="lecturer-grid">
-
-
-                <!-- Lecturer Card 1 -->
-                <div class="lecturer-card">
-                    <div class="lecturer-header">
-                        <div class="lecturer-info">
-                            <div class="lecturer-avatar">
-                                <img src="lecturer1.jpg" alt="Dr. John Doe">
-                            </div>
-                            <div class="lecturer-info-text">
-                                <h3>Dr. John Doe</h3>
-                                <div class="lecturer-title">Associate Professor</div>
-                                <div class="lecturer-department">Marine Engineering</div>
-                            </div>
-                        </div>
-                        <div class="lecturer-actions">
-                            <button class="action-icon edit-lecturer" title="Edit Lecturer">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-icon delete-lecturer" title="Delete Lecturer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="lecturer-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Email</div>
-                            <div class="detail-value">john.doe@rmu.edu</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Phone</div>
-                            <div class="detail-value">+233 55 123 4567</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Courses Teaching</div>
-                            <div class="detail-value">
-                                <span class="course-count">3</span>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Availability</div>
-                            <div class="detail-value">
-                                <div class="availability-status available">
-                                    <span class="status-dot available"></span>
-                                    Available
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Specializations</div>
-                            <div class="lecturer-specializations">
-                                <span class="specialization-tag">Marine Propulsion</span>
-                                <span class="specialization-tag">Ship Design</span>
-                                <span class="specialization-tag">Naval Architecture</span>
-                            </div>
-                        </div>
-                        <div class="course-list">
-                            <h4>Assigned Courses:</h4>
-                            <div class="courses">
-                                <span class="course-tag">ME101 - Introduction to Marine Engineering</span>
-                                <span class="course-tag">ME302 - Marine Propulsion Systems</span>
-                                <span class="course-tag">ME405 - Ship Design and Construction</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Lecturer cards will be dynamically added here -->
             </div>
 
             <!-- Pagination -->
@@ -560,31 +499,55 @@ $totalActiveLecturers = count($activeLectuers);
             </div>
         </div>
     </div>
+    <!-- View archived Lecturer Modal -->
+    <div class="modal" id="archivedLecturersModal">
+        <div class="modal-dialog modal-lg modal-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Archived Lecturers</h2>
+                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="archived-lecturers-grid">
+                        <!-- Archived lecturers will be dynamically added here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" data-dismiss="modal">Close</button>
+                    <button class="submit-btn" id="restoreArchivedLecturersBtn">Restore Selected Lecturers</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const staticLecturersData = <?php echo json_encode($activeLectuers); ?>;
-        const totalLecturers = <?php echo $totalActiveLecturers; ?>;
-        const departmentId = <?php echo json_encode($departmentId); ?>;
-        const semesterId = <?php echo json_encode($semesterId); ?>;
-        const activeSemesters = <?php echo json_encode($activeSemesters); ?>;
+        const staticLecturersData = <?= json_encode($activeLectuers); ?>;
+        const totalLecturers = <?= $totalActiveLecturers; ?>;
+        const departmentId = <?= json_encode($departmentId); ?>;
+        const semesterId = <?= json_encode($semesterId); ?>;
+        const activeSemesters = <?= json_encode($activeSemesters); ?>;
         const baseUrl = '../endpoint/';
 
-        
-        
-        const lecturersData = staticLecturersData.map(lecturer => ({
+        const lecturersData = Object.values(staticLecturersData).map(lecturer => ({
             number: lecturer.number,
             first_name: lecturer.first_name,
-            middle_name: lecturer.middle_name,
+            middle_name: lecturer.middle_name || '',
             last_name: lecturer.last_name,
-            full_name: `${lecturer.first_name} ${lecturer.middle_name} ${lecturer.last_name}`,
+            full_name: lecturer.full_name,
             title: lecturer.prefix || '',
-            position: lecturer.role,
+            position: lecturer.designation,
             email: lecturer.email,
-            phone: lecturer.phone || '',
+            phone: lecturer.phone_number || '',
             photo: lecturer.avatar || 'placeholder.svg',
-            availability: lecturer.availability,
-            gender: lecturer.gender
+            availability: (lecturer.availability === 'available' || lecturer.availability === 'busy') ? lecturer.availability : 'unavailable',
+            gender: lecturer.gender,
+            department_id: lecturer.department_id,
+            department_name: lecturer.department_name,
+            specializations: lecturer.specializations || [],
+            courses: lecturer.courses || [],
         }));
+
+        console.log('Lecturers Data:', lecturersData);
 
         // Function to render lecturers in the grid
         let lecturerGrid = document.querySelector('.lecturer-grid');
@@ -596,20 +559,20 @@ $totalActiveLecturers = count($activeLectuers);
                 <div class="lecturer-header">
                     <div class="lecturer-info">
                         <div class="lecturer-avatar">
-                            <img src="${lecturer.photo || 'placeholder.svg'}" alt="${lecturer.first_name} ${lecturer.last_name}">
+                            <img src="../uploads/profiles/${lecturer.photo || 'placeholder.svg'}" alt="${lecturer.full_name}">
                         </div>
                         <div class="lecturer-info-text">
-                            <h3>${lecturer.title} ${lecturer.first_name} ${lecturer.middle_name} ${lecturer.last_name}</h3>
+                            <h3>${lecturer.full_name}</h3>
                             <div class="lecturer-title">${lecturer.position}</div>
                             <div class="lecturer-department">${lecturer.department_name}</div>
                         </div>
                     </div>
                     <div class="lecturer-actions">
-                        <button class="action-icon edit-lecturer" title="Edit Lecturer" data-id="${lecturer.id}">
+                        <button class="action-icon edit-lecturer" title="Edit Lecturer" data-id="${lecturer.number}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="action-icon delete-lecturer" title="Delete Lecturer" data-id="${lecturer.id}">
-                            <i class="fas fa-trash"></i>
+                        <button class="action-icon archive-lecturer" title="Delete Lecturer" data-id="${lecturer.number}">
+                            <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                         </button>
                     </div>
                 </div>
@@ -629,9 +592,9 @@ $totalActiveLecturers = count($activeLectuers);
                     <div class="detail-item">
                         <div class="detail-label">Availability</div>
                         <div class="detail-value">
-                            <div class="${'availability-status ' + (lecturer.availability ? 'available' : 'unavailable')}">
-                                <span class="${'status-dot ' + (lecturer.availability ? 'available' : 'unavailable')}"></span>
-                                ${lecturer.availability ? 'Available' : 'Unavailable'} 
+                            <div class="${'availability-status ' + lecturer.availability}">
+                                <span class="${'status-dot ' + lecturer.availability}"></span>
+                                ${lecturer.availability.charAt(0).toUpperCase() + lecturer.availability.slice(1)} 
                             </div>
                         </div>
                     </div>
@@ -663,7 +626,8 @@ $totalActiveLecturers = count($activeLectuers);
             addLecturerModal: document.getElementById('addLecturerModal'),
             bulkUploadModal: document.getElementById('bulkUploadModal'),
             assignCoursesModal: document.getElementById('assignCoursesModal'),
-            lecturerContactsModal: document.getElementById('lecturerContactsModal')
+            lecturerContactsModal: document.getElementById('lecturerContactsModal'),
+            archivedLecturersModal: document.getElementById('archivedLecturersModal'),
         };
 
         // Open modals
@@ -671,6 +635,7 @@ $totalActiveLecturers = count($activeLectuers);
         document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
         document.getElementById('assignCoursesBtn').addEventListener('click', () => openModal('assignCoursesModal'));
         document.getElementById('lecturerContactsBtn').addEventListener('click', () => openModal('lecturerContactsModal'));
+        document.getElementById('archivedLecturersBtn').addEventListener('click', () => openModal('archivedLecturersModal'));
 
         // Close modals
         document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
@@ -826,7 +791,7 @@ $totalActiveLecturers = count($activeLectuers);
             }
         });
 
-        // Edit and delete lecturer buttons
+        // Edit and archive lecturer buttons
         document.querySelectorAll('.edit-lecturer').forEach(button => {
             button.addEventListener('click', function() {
                 const lecturerCard = this.closest('.lecturer-card');
@@ -837,14 +802,25 @@ $totalActiveLecturers = count($activeLectuers);
             });
         });
 
-        document.querySelectorAll('.delete-lecturer').forEach(button => {
+        document.querySelectorAll('.archive-lecturer').forEach(button => {
             button.addEventListener('click', function() {
                 const lecturerCard = this.closest('.lecturer-card');
                 const lecturerName = lecturerCard.querySelector('h3').textContent;
-                if (confirm(`Are you sure you want to delete the lecturer: ${lecturerName}?`)) {
-                    // Simulate deletion
-                    lecturerCard.remove();
-                    alert('Lecturer deleted successfully!');
+                if (confirm(`Are you sure you want to archive the lecturer: ${lecturerName}?`)) {
+                    // Simulate archiving lecturer
+                    const lecturerNumber = this.getAttribute('data-id');
+                    // Call the async function to archive the lecturer
+                    archiveLecturer(lecturerNumber).then(response => {
+                        if (response.success) {
+                            alert(`Lecturer ${lecturerName} archived successfully!`);
+                            lecturerCard.remove(); // Remove the card from the grid
+                        } else {
+                            alert(`Failed to archive lecturer: ${response.message}`);
+                        }
+                    }).catch(error => {
+                        console.error("Error archiving lecturer:", error);
+                        alert("An error occurred while archiving the lecturer.");
+                    });
                 }
             });
         });
@@ -895,6 +871,211 @@ $totalActiveLecturers = count($activeLectuers);
         // Export contacts button
         document.getElementById('exportContactsBtn').addEventListener('click', function() {
             alert('Contacts exported successfully!');
+        });
+
+        // Async function to fetch archived lecturers
+        async function fetchArchivedLecturers() {
+            try {
+                const response = await fetch('../endpoint/fetch-staff?department=' + departmentId + '&archived=true');
+                const result = await response.json();
+
+                if (!result.success) {
+                    if (result.message && result.message == "logout") {
+                        window.location.href = "../index.php";
+                        return [];
+                    }
+                    throw new Error(result.message || "Failed to load archived lecturers");
+                }
+
+                return result.data || [];
+            } catch (error) {
+                console.error("Error fetching archived lecturers:", error);
+                return [];
+            }
+        }
+
+        // Async function to restore and delete lecturers
+        async function restoreLecturer(lecturerNumber) {
+            try {
+                const response = await fetch('../endpoint/unarchive-staff', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'number[]': lecturerNumber
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert("Lecturer restored successfully!");
+                    document.getElementById('archivedLecturersBtn').click();
+                } else {
+                    alert("Failed to restore lecturer: " + data.message);
+                }
+            } catch (error) {
+                console.error("Error restoring lecturer:", error);
+                alert("An error occurred while restoring the lecturer.");
+            }
+        }
+
+        async function deleteLecturer(lecturerNumber) {
+            if (confirm("Are you sure you want to delete this lecturer permanently? This action cannot be undone.")) {
+                try {
+                    const response = await fetch('../endpoint/delete-staff', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'number[]': lecturerNumber
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert("Lecturer deleted successfully!");
+                        document.getElementById('archivedLecturersBtn').click();
+                    } else {
+                        alert("Failed to delete lecturer: " + data.message);
+                    }
+                } catch (error) {
+                    console.error("Error deleting lecturer:", error);
+                    alert("An error occurred while deleting the lecturer.");
+                }
+            }
+        }
+
+        async function archiveLecturer(lecturerNumber) {
+            try {
+                const response = await fetch('../endpoint/archive-staff', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'number': lecturerNumber
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.message || "Failed to archive lecturer");
+                }
+            } catch (error) {
+                console.error("Error archiving lecturer:", error);
+                throw error;
+            }
+
+        }
+
+        // Fetch all archived lecturers for this department and display them in the modal when archivedLecturersBtn is clicked
+        document.getElementById('archivedLecturersBtn').addEventListener('click', () => {
+            const archivedLecturersModal = document.getElementById('archivedLecturersModal');
+            const archivedLecturersGrid = archivedLecturersModal.querySelector('.archived-lecturers-grid');
+            archivedLecturersGrid.innerHTML = ''; // Clear previous content
+
+            if (!departmentId) {
+                archivedLecturersGrid.innerHTML = `
+                    <div class="no-lecturers">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error: Department ID is not set. Please select a department.</p>
+                    </div>
+                    `;
+                return;
+            }
+
+            // Show loading message
+            archivedLecturersGrid.innerHTML = `
+                    <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading archived lecturers...</p>
+                    </div>
+                `;
+
+            // Fetch archived lecturers from the server
+            fetchArchivedLecturers()
+                .then(lecturers => {
+                    lecturers = lecturers.data || [];
+
+                    if (!Array.isArray(lecturers)) {
+                        throw new Error("Invalid data format received from server.");
+                    }
+
+                    archivedLecturersGrid.innerHTML = ''; // Clear loading message
+                    if (!lecturers || lecturers.length === 0) {
+                        archivedLecturersGrid.innerHTML = `
+                            <div class="no-lecturers">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>No archived lecturers found for this department.</p>
+                            </div>
+                            `;
+                        return;
+                    }
+
+                    // Populate the archived lecturers grid with fetched data
+                    lecturers.forEach(lecturer => {
+                        const lecturerCard = document.createElement('div');
+                        lecturerCard.className = 'lecturer-card';
+                        lecturerCard.innerHTML = `
+                            <div class="lecturer-header">
+                                <div class="lecturer-info">
+                                <div class="lecturer-avatar">
+                                    <img src="../uploads/profiles/${lecturer.avatar || 'placeholder.svg'}" alt="${lecturer.full_name}">
+                                </div>
+                                <div class="lecturer-info-text">
+                                    <h3>${lecturer.full_name}</h3>
+                                    <div class="lecturer-title">${lecturer.designation}</div>
+                                    <div class="lecturer-department">${lecturer.department_name || ''}</div>
+                                </div>
+                                </div>
+                                <div class="lecturer-actions">
+                                <button class="action-icon restore-lecturer" title="Restore Lecturer" data-number="${lecturer.number}">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button class="action-icon delete-lecturer" title="Delete Lecturer" data-number="${lecturer.number}">
+                                    <i class="fas fa-trash-alt" style="color: var(--danger-color);"></i>
+                                </button>
+                                </div>
+                            </div>
+                            <div class="lecturer-details">
+                                <div class="detail-item">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value">${lecturer.email}</div>
+                                </div>
+                                <div class="detail-item">
+                                <div class="detail-label">Phone</div>
+                                <div class="detail-value">${lecturer.phone_number || ''}</div>
+                                </div>
+                                <div class="detail-item">
+                                <div class="detail-label">Specializations</div>
+                                <div class="lecturer-specializations">
+                                    ${(lecturer.specializations || []).map(spec => `<span class="specialization-tag">${spec}</span>`).join('')}
+                                </div>
+                                </div>
+                            </div>
+                            `;
+                        archivedLecturersGrid.appendChild(lecturerCard);
+                        // Add event listeners for restore and delete buttons
+                        lecturerCard.querySelector('.restore-lecturer').addEventListener('click', function() {
+                            const lecturerNumber = this.getAttribute('data-number');
+                            restoreLecturer(lecturerNumber);
+                        });
+                        lecturerCard.querySelector('.delete-lecturer').addEventListener('click', function() {
+                            const lecturerNumber = this.getAttribute('data-number');
+                            deleteLecturer(lecturerNumber);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching archived lecturers:", error);
+                    archivedLecturersGrid.innerHTML = `
+                            <div class="no-lecturers">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error loading archived lecturers: ${error.message}</p>
+                            </div>
+                        `;
+                });
         });
     </script>
 </body>

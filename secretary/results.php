@@ -168,21 +168,15 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             <div class="info-value">Nov 28, 2023</div>
                         </div>
                     </div>
-                    <div class="result-progress">
-                        <div class="progress-label">
-                            <span>Completion</span>
-                            <span>80%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 80%;"></div>
-                        </div>
-                    </div>
                     <div class="result-actions">
                         <button class="result-btn primary">
-                            <i class="fas fa-edit"></i> Continue Grading
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="result-btn primary">
+                            <i class="fas fa-edit"></i>
                         </button>
                         <button class="result-btn secondary">
-                            <i class="fas fa-eye"></i> View Details
+                            <i class="fas fa-download"></i>
                         </button>
                     </div>
                 </div>
@@ -211,21 +205,15 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             <div class="info-value">Dec 5, 2023</div>
                         </div>
                     </div>
-                    <div class="result-progress">
-                        <div class="progress-label">
-                            <span>Completion</span>
-                            <span>100%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%;"></div>
-                        </div>
-                    </div>
                     <div class="result-actions">
                         <button class="result-btn primary">
-                            <i class="fas fa-check-circle"></i> View Submission
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="result-btn primary">
+                            <i class="fas fa-edit"></i>
                         </button>
                         <button class="result-btn secondary">
-                            <i class="fas fa-download"></i> Download
+                            <i class="fas fa-download"></i>
                         </button>
                     </div>
                 </div>
@@ -254,136 +242,57 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             <div class="info-value">Dec 8, 2023</div>
                         </div>
                     </div>
-                    <div class="result-progress">
-                        <div class="progress-label">
-                            <span>Completion</span>
-                            <span>100%</span>
+                    <div class="result-actions">
+                        <button class="result-btn primary">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="result-btn primary">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="result-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Card 3 -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3 class="result-title">ME405 - Ship Design and Construction</h3>
+                        <span class="result-status approved">Approved</span>
+                    </div>
+                    <div class="result-info">
+                        <div class="info-item">
+                            <div class="info-label">Semester</div>
+                            <div class="info-value">First Semester 2023/2024</div>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 100%;"></div>
+                        <div class="info-item">
+                            <div class="info-label">Students</div>
+                            <div class="info-value">28</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Due Date</div>
+                            <div class="info-value">Dec 10, 2023</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Updated</div>
+                            <div class="info-value">Dec 8, 2023</div>
                         </div>
                     </div>
                     <div class="result-actions">
                         <button class="result-btn primary">
-                            <i class="fas fa-eye"></i> View Results
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="result-btn primary">
+                            <i class="fas fa-edit"></i>
                         </button>
                         <button class="result-btn secondary">
-                            <i class="fas fa-download"></i> Download
+                            <i class="fas fa-download"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Results Table -->
-            <div class="results-table-container">
-                <h3 class="section-title">Recent Results</h3>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Course Code</th>
-                            <th>Course Title</th>
-                            <th>Semester</th>
-                            <th>Students</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ME101</td>
-                            <td>Introduction to Marine Engineering</td>
-                            <td>First Semester 2023/2024</td>
-                            <td>45</td>
-                            <td><span class="result-status pending">Pending</span></td>
-                            <td>Dec 15, 2023</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="table-btn view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="table-btn edit" title="Edit Results">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="table-btn delete" title="Delete Results">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ME302</td>
-                            <td>Marine Propulsion Systems</td>
-                            <td>First Semester 2023/2024</td>
-                            <td>32</td>
-                            <td><span class="result-status submitted">Submitted</span></td>
-                            <td>Dec 15, 2023</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="table-btn view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="table-btn edit" title="Edit Results">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="table-btn delete" title="Delete Results">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ME405</td>
-                            <td>Ship Design and Construction</td>
-                            <td>First Semester 2023/2024</td>
-                            <td>28</td>
-                            <td><span class="result-status approved">Approved</span></td>
-                            <td>Dec 10, 2023</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="table-btn view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="table-btn edit" title="Edit Results">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="table-btn delete" title="Delete Results">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ME203</td>
-                            <td>Fluid Mechanics for Marine Engineers</td>
-                            <td>Second Semester 2022/2023</td>
-                            <td>38</td>
-                            <td><span class="result-status approved">Approved</span></td>
-                            <td>Jul 20, 2023</td>
-                            <td>
-                                <div class="table-actions">
-                                    <button class="table-btn view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="table-btn edit" title="Edit Results">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="table-btn delete" title="Delete Results">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="pagination">
-                    <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
         </div>
 
         <!-- Upload Results Modal -->

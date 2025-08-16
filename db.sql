@@ -487,6 +487,12 @@ ALTER TABLE `class_advisor` ADD INDEX `class_advisor_archived_idx1` (`archived`)
 ALTER TABLE `class` ADD COLUMN `category` VARCHAR(50) DEFAULT 'regular' AFTER `year`;
 ALTER TABLE `class` ADD INDEX `class_category_idx1` (`category`);
 
+ALTER TABLE `staff` ADD COLUMN `phone_number` VARCHAR(15) DEFAULT NULL AFTER `email`;
+ALTER TABLE `staff` ADD INDEX `staff_phone_number_idx1` (`phone_number`);
+
+ALTER TABLE `staff` ADD COLUMN `availability` VARCHAR(50) DEFAULT 'available' AFTER `phone_number`;
+ALTER TABLE `staff` ADD INDEX `staff_availability_idx1` (`availability`);
+
 
 
 

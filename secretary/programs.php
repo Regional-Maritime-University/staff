@@ -394,6 +394,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
 
         // Sample data
         const staticProgramData = <?= json_encode($activeCummulativePrograms) ?>;
+        console.log('Programs Data:', staticProgramData);
         const programsData = staticProgramData.map(program => ({
             id: program.id,
             title: capitalizeWords(program.name),
