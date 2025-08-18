@@ -27,12 +27,20 @@ class Deadline
     public function fetch(string $key = "", string $value = "", bool $archived = false)
     {
         switch ($key) {
-            case 'id':
-                $concat_stmt = "AND c.`id` = :v";
+            case 'department':
+                $concat_stmt = "AND c.`fk_department` = :v";
                 break;
 
-            case 'name':
-                $concat_stmt = "AND c.`name` = :v";
+            case 'course':
+                $concat_stmt = "AND c.`fk_course` = :v";
+                break;
+
+            case 'lecturer':
+                $concat_stmt = "AND c.`fk_staff` = :v";
+                break;
+
+            case 'semester':
+                $concat_stmt = "AND c.`fk_semester` = :v";
                 break;
 
             default:
@@ -40,7 +48,7 @@ class Deadline
                 break;
         }
 
-        $query = "SELECT `id`, `name`, `archived` FROM `course_category` WHERE `archived` = :ar $concat_stmt";
+        $query = "SELECT lca.`id`, lca.`fk_department` AS department_id, lca.`fk_staff` AS lecturer_id, lca.`fk_course` AS department_id, `archived` FROM `lecturer_course_assignments` lca WHERE `archived` = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }

@@ -493,6 +493,18 @@ ALTER TABLE `staff` ADD INDEX `staff_phone_number_idx1` (`phone_number`);
 ALTER TABLE `staff` ADD COLUMN `availability` VARCHAR(50) DEFAULT 'available' AFTER `phone_number`;
 ALTER TABLE `staff` ADD INDEX `staff_availability_idx1` (`availability`);
 
+ALTER TABLE `lecturer_course_assignments` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `notes`;
+ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_status_idx1` (`status`);
+ALTER TABLE `lecturer_course_assignments` ADD COLUMN `submission_deadline` DATE DEFAULT NULL AFTER `notes`;
+ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_submission_deadline_idx1` (`submission_deadline`);
+ALTER TABLE `lecturer_course_assignments` ADD COLUMN `deadline_note` TEXT DEFAULT NULL AFTER `submission_deadline`;
+ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_deadline_note_idx1` (`deadline_note`);
+ALTER TABLE `lecturer_course_assignments` ADD COLUMN `deadline_status` VARCHAR(15) DEFAULT NULL AFTER `deadline_note`;
+ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_deadline_status_idx1` (`deadline_status`);
+
+DROP TABLE IF EXISTS `deadlines`;
+
+
 
 
 

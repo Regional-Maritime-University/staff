@@ -110,21 +110,18 @@ class SecretaryController
         // Join for category (always required)
         $joins .= " LEFT JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` ";
 
-        // Join lecturer_course_assignments (optional match)
+        // Join lecturer_course_assignments
         $joins .= " LEFT JOIN `lecturer_course_assignments` AS lca ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
 
         // Join staff (lecturer)
         $joins .= " LEFT JOIN `staff` AS s ON lca.`fk_staff` = s.`number` ";
 
-        // Join deadlines (optional match)
-        $joins .= " LEFT JOIN `deadlines` AS dl ON dl.`fk_course` = c.`code` AND dl.`fk_semester` = c.`semester` ";
-
         $select = "c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, 
-                c.`semester`, c.`level`, c.`archived`, 
-                cg.`name` AS category {$selectExtra}, 
-                s.`number` AS lecturer_number, s.`avatar` AS lecturer_avatar, s.`email` AS lecturer_email, 
-                s.`prefix` AS lecturer_prefix, s.`first_name` AS lecturer_first_name, s.`last_name` AS lecturer_last_name, 
-                dl.`date` AS deadline_date, dl.`status` AS deadline_status, dl.`note` AS deadline_note";
+            c.`semester`, c.`level`, c.`archived`, 
+            cg.`name` AS category {$selectExtra}, 
+            s.`number` AS lecturer_number, s.`avatar` AS lecturer_avatar, s.`email` AS lecturer_email, 
+            s.`prefix` AS lecturer_prefix, s.`first_name` AS lecturer_first_name, s.`last_name` AS lecturer_last_name, 
+            lca.`submission_deadline`, lca.`status`, lca.`notes`, lca.`deadline_note`";
 
         $query = "SELECT {$select} FROM `course` AS c {$joins} {$where} ORDER BY c.`code` ASC";
 
@@ -151,19 +148,21 @@ class SecretaryController
 
     public function fetchPendingDeadlines($departmentId = null, $archived = false)
     {
-        $query = "SELECT dl.`id`, dl.`note`, dl.`date`, dl.`status`, dl.`created_at`, dl.`updated_at`, 
-                dl.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours`, c.`contact_hours`, c.`semester` AS course_semester, 
+        $query = "SELECT lca.`id`, lca.`notes`, lca.`submission_deadline`, lca.`status`, lca.`deadline_status`, lca.`created_at`, lca.`updated_at`, 
+                lca.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours`, c.`contact_hours`, c.`semester` AS course_semester, 
                 c.`level` AS course_level, c.`archived` AS course_status, c.`fk_category` AS category_id, cg.`name` AS category, 
-                dl.`fk_staff` AS staff_number, CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name 
-            FROM `deadlines` AS dl 
-            JOIN `department` AS d ON dl.`fk_department` = d.`id` 
-            JOIN `staff` AS sf ON dl.`fk_staff` = sf.`number` 
-            JOIN `course` AS c ON dl.`fk_course` = c.`code` 
-            JOIN `semester` AS s ON dl.`fk_semester` = s.`id` 
-            JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
-            WHERE dl.`fk_department` = :d AND c.`archived` = :ar ORDER BY (dl.`status` = 'pending') DESC, dl.`date` ASC";
+                lca.`fk_staff` AS staff_number, CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name 
+                FROM `lecturer_course_assignments` AS lca 
+                JOIN `department` AS d ON lca.`fk_department` = d.`id` 
+                JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
+                JOIN `course` AS c ON lca.`fk_course` = c.`code` 
+                JOIN `semester` AS s ON lca.`fk_semester` = s.`id` 
+                JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+                WHERE lca.`fk_department` = :d AND lca.`submission_deadline` <> NULL AND c.`archived` = :ar 
+                ORDER BY (lca.`deadline_status` = 'pending') DESC, lca.`submission_deadline` ASC";
         return $this->dm->getData($query, array(":d" => $departmentId, ":ar" => $archived));
     }
+
 
     public function fetchUpcomingDeadlines($departmentId = null, $archived = false)
     {
@@ -562,28 +561,26 @@ class SecretaryController
     public function fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($departmentId)
     {
         $query = "SELECT 
-                    lca.`id`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
-                    lca.`fk_department` AS department_id, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
-                    lca.`fk_staff`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
-                    sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
-                    sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_fk_department, 
-                    lca.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
-                    c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
-                    cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
-                FROM 
-                    `lecturer_course_assignments` AS lca 
-                    JOIN `department` AS d ON lca.`fk_department` = d.`id` 
-                    JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
-                    JOIN `course` AS c ON lca.`fk_course` = c.`code` 
-                    JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
-                    LEFT JOIN `deadlines` AS dl 
-                        ON dl.`fk_department` = lca.`fk_department`
-                        AND dl.`fk_staff` = lca.`fk_staff`
-                        AND dl.`fk_course` = lca.`fk_course`
-                WHERE 
-                    lca.`fk_department` = :di AND dl.`id` IS NULL";
+                lca.`id`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
+                lca.`fk_department` AS department_id, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
+                lca.`fk_staff`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
+                sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
+                sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_fk_department, 
+                lca.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
+                c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
+                cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
+            FROM 
+                `lecturer_course_assignments` AS lca 
+                JOIN `department` AS d ON lca.`fk_department` = d.`id` 
+                JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
+                JOIN `course` AS c ON lca.`fk_course` = c.`code` 
+                JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+            WHERE 
+                lca.`fk_department` = :di 
+                AND lca.`submission_deadline` IS NULL";
         return $this->dm->getData($query, array(":di" => $departmentId));
     }
+
 
     public function fetchSemesterCourseAssignmentsGroupByDepartment($departmentId, $semesterId)
     {

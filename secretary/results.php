@@ -52,10 +52,6 @@ $semesterId = 2; //$_SESSION["semester"] ?? null;
 $archived = false;
 
 $activeSemesters = $secretary->fetchActiveSemesters();
-$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
-
-$activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
-$totalActiveCourses = count($activeCourses);
 
 $assignedCourses = [];
 foreach ($activeSemesters as $semester) {
@@ -64,26 +60,13 @@ foreach ($activeSemesters as $semester) {
 }
 $totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
 
-$assignedLecturers = [];
-foreach ($activeSemesters as $semester) {
-    $semesterId = $semester['id'];
-    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
-}
-$totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
-
 $deadlines = $secretary->fetchPendingDeadlines($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     foreach ($deadlines as $d) {
-        if ($d['status'] == 'pending') $totalPendingDeadlines++;
+        if ($d['deadline_status'] == 'pending') $totalPendingDeadlines++;
     }
 }
-
-$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
-$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
-
-$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
-$totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
 
 ?>
 
@@ -255,7 +238,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     </div>
                 </div>
 
-                <!-- Result Card 3 -->
+                <!-- Result Card 4 -->
                 <div class="result-card">
                     <div class="result-header">
                         <h3 class="result-title">ME405 - Ship Design and Construction</h3>
