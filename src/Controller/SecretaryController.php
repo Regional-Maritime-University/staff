@@ -146,23 +146,206 @@ class SecretaryController
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId));
     }
 
-    public function fetchPendingDeadlines($departmentId = null, $archived = false)
+    public function assignCourseSubmissionDeadline(array $data)
     {
-        $query = "SELECT lca.`id`, lca.`notes`, lca.`submission_deadline`, lca.`status`, lca.`deadline_status`, lca.`created_at`, lca.`updated_at`, 
-                lca.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours`, c.`contact_hours`, c.`semester` AS course_semester, 
-                c.`level` AS course_level, c.`archived` AS course_status, c.`fk_category` AS category_id, cg.`name` AS category, 
-                lca.`fk_staff` AS staff_number, CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name 
-                FROM `lecturer_course_assignments` AS lca 
-                JOIN `department` AS d ON lca.`fk_department` = d.`id` 
-                JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
-                JOIN `course` AS c ON lca.`fk_course` = c.`code` 
-                JOIN `semester` AS s ON lca.`fk_semester` = s.`id` 
-                JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
-                WHERE lca.`fk_department` = :d AND lca.`submission_deadline` <> NULL AND c.`archived` = :ar 
-                ORDER BY (lca.`deadline_status` = 'pending') DESC, lca.`submission_deadline` ASC";
-        return $this->dm->getData($query, array(":d" => $departmentId, ":ar" => $archived));
+        $successCount = $failedCount = 0;
+        $successCourses = $failedCourses = [];
+
+        foreach ($data["courses"] as $course) {
+            // fetch course details
+            $selectQuery = "SELECT * FROM `course` WHERE `code` = :c";
+            $courseData = $this->dm->getData($selectQuery, [":c" => $course]);
+
+            // update lecturer_course_assignments with deadline
+            $query = "UPDATE `lecturer_course_assignments`
+                  SET `submission_deadline` = :dt, 
+                      `deadline_note` = :n,
+                      `deadline_status` = 'pending',
+                      `status` = 'marking',
+                      `updated_at` = NOW()
+                  WHERE `fk_department` = :dp 
+                    AND `fk_semester` = :sm 
+                    AND `fk_course` = :cs 
+                    AND `fk_staff` = :st";
+
+            $params = [
+                ":dp" => $data["department"],
+                ":sm" => $data["semester"],
+                ":cs" => $course,
+                ":st" => $data["lecturer"],
+                ":dt" => $data["date"],
+                ":n"  => $data["note"]
+            ];
+
+            $result = $this->dm->inputData($query, $params);
+
+            if ($result) {
+                $this->log->activity(
+                    $_SESSION["staff"]["number"],
+                    "UPDATE",
+                    "secretary",
+                    "Results Submission Deadline",
+                    "Set a deadline for {$courseData[0]["name"]} ({$course})"
+                );
+                $successCourses[] = $course;
+                $successCount++;
+            } else {
+                $failedCourses[] = $course;
+                $failedCount++;
+            }
+        }
+
+        return [
+            "success" => $successCount > 0,
+            "message" => $successCount > 0
+                ? "Successfully set deadline(s) for results submission for {$successCount} courses (" . implode(", ", $successCourses) . ") !"
+                : "Failed to set deadline(s) for results submission for {$failedCount} courses (" . implode(", ", $failedCourses) . ") !"
+        ];
     }
 
+    public function fetchPendingDeadlines($departmentId = null, $archived = false, $semesterId = null, $courseCode = null, $deadlineStatus = null)
+    {
+        $params = [":d" => $departmentId, ":ar" => $archived];
+        $where = " WHERE lca.`fk_department` = :d AND lca.`submission_deadline` IS NOT NULL AND c.`archived` = :ar ";
+
+        if ($semesterId) {
+            $where .= " AND lca.`fk_semester` = :si ";
+            $params[":si"] = $semesterId;
+        }
+
+        if ($courseCode) {
+            $where .= " AND lca.`fk_course` = :cc ";
+            $params[":cc"] = $courseCode;
+        }
+
+        if ($deadlineStatus) {
+            $where .= " AND lca.`deadline_status` = :ds ";
+            $params[":ds"] = $deadlineStatus;
+        }
+
+        return $this->fetchDeadlinesQuery($where, $params);
+    }
+
+    private function fetchDeadlinesQuery($where, $params)
+    {
+        $query = "SELECT 
+                lca.`id` AS lca_id, 
+                lca.`notes`, 
+                lca.`deadline_note`,
+                lca.`submission_deadline`, 
+                lca.`deadline_status`, 
+                lca.`status`,
+                lca.`created_at`, 
+                lca.`updated_at`, 
+                
+                c.`code` AS course_code, 
+                c.`name` AS course_name, 
+                c.`credit_hours`, 
+                c.`contact_hours`, 
+                c.`semester` AS course_semester, 
+                c.`level` AS course_level, 
+                c.`archived` AS course_status, 
+                c.`fk_category` AS category_id, 
+                cg.`name` AS category, 
+                
+                lca.`fk_staff` AS staff_number, 
+                CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name, 
+                
+                s.`id` AS semester_id, CONCAT('SEMESTER ', s.`name`) AS semester_name, 
+                d.`id` AS department_id, 
+                d.`name` AS department_name,
+
+                -- section + class info
+                sec.`id` AS section_id,
+                sec.`notes` AS section_notes,
+                cl.`code` AS class_code,
+                cl.`year` AS class_year,
+                cl.`category` AS class_category,
+
+                -- total registered students (per section)
+                (SELECT COUNT(*) 
+                 FROM `student_course_assignments` scr 
+                 WHERE scr.`fk_course` = lca.`fk_course` 
+                   AND scr.`fk_semester` = lca.`fk_semester` 
+                   AND scr.`registered` = 1) AS total_registered_students,
+
+                -- total assigned students (per section)
+                (SELECT COUNT(*) 
+                 FROM `student_course_assignments` scr2 
+                 WHERE scr2.`fk_course` = lca.`fk_course` 
+                   AND scr2.`fk_semester` = lca.`fk_semester`) AS total_assigned_students
+                  
+              FROM `lecturer_course_assignments` AS lca 
+              JOIN `department` AS d ON lca.`fk_department` = d.`id`
+              JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number`
+              JOIN `course` AS c ON lca.`fk_course` = c.`code`
+              JOIN `semester` AS s ON lca.`fk_semester` = s.`id`
+              JOIN `course_category` AS cg ON c.`fk_category` = cg.`id`
+
+              -- use LEFT JOIN to avoid NULL issues if some classes don't exist yet
+              LEFT JOIN `section` AS sec 
+                     ON sec.`fk_course` = lca.`fk_course`
+                    AND sec.`fk_semester` = lca.`fk_semester`
+              LEFT JOIN `class` AS cl 
+                     ON sec.`fk_class` = cl.`code`
+
+              {$where}
+              GROUP BY sec.`id`
+              ORDER BY (lca.`deadline_status` = 'pending') DESC, lca.`submission_deadline` ASC";
+        return $this->dm->getData($query, $params);
+    }
+
+    public function fetchAllDeadlines($departmentId = null, $archived = false)
+    {
+        $query = "SELECT 
+                    lca.`id`, 
+                    lca.`notes`, 
+                    lca.`deadline_note`,
+                    lca.`submission_deadline`, 
+                    lca.`deadline_status`, 
+                    lca.`status`,
+                    lca.`created_at`, 
+                    lca.`updated_at`, 
+                    lca.`fk_course` AS course_code, 
+                    c.`name` AS course_name, 
+                    c.`credit_hours`, 
+                    c.`contact_hours`, 
+                    c.`semester` AS course_semester, 
+                    c.`level` AS course_level, 
+                    c.`archived` AS course_status, 
+                    c.`fk_category` AS category_id, 
+                    cg.`name` AS category, 
+                    lca.`fk_staff` AS staff_number, 
+                    CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name, 
+                    s.`id` AS semester_id, CONCAT('SEMESTER ', s.`name`) AS semester_name, 
+                    d.`id` AS department_id, 
+                    d.`name` AS department_name,
+                    
+                    -- total registered students
+                    (SELECT COUNT(*) 
+                    FROM `student_course_assignments` scr 
+                    WHERE scr.`fk_course` = lca.`fk_course` 
+                    AND scr.`fk_semester` = lca.`fk_semester` 
+                    AND scr.`registered` = 1) AS total_registered_students,
+                    
+                    -- total assigned students (all records regardless of registered)
+                    (SELECT COUNT(*) 
+                    FROM `student_course_assignments` scr2 
+                    WHERE scr2.`fk_course` = lca.`fk_course` 
+                    AND scr2.`fk_semester` = lca.`fk_semester`) AS total_assigned_students
+                    
+                    FROM `lecturer_course_assignments` AS lca 
+                    JOIN `department` AS d ON lca.`fk_department` = d.`id` 
+                    JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
+                    JOIN `course` AS c ON lca.`fk_course` = c.`code` 
+                    JOIN `semester` AS s ON lca.`fk_semester` = s.`id` 
+                    JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` 
+                    WHERE lca.`fk_department` = :d 
+                    AND lca.`submission_deadline` IS NOT NULL 
+                    AND c.`archived` = :ar 
+                    ORDER BY (lca.`deadline_status` = 'pending') DESC, lca.`submission_deadline` ASC";
+        return $this->dm->getData($query, array(":d" => $departmentId, ":ar" => $archived));
+    }
 
     public function fetchUpcomingDeadlines($departmentId = null, $archived = false)
     {
@@ -558,6 +741,28 @@ class SecretaryController
         return $this->dm->getData($query, array(":di" => $departmentId));
     }
 
+    public function fetchAssignedSemesterCoursesByDepartmentGroupByClass($departmentId)
+    {
+        $query = "SELECT 
+                    lca.`id`, lca.`notes`, lca.`created_at`, lca.`updated_at`,
+                    lca.`fk_department`, d.`code` AS department_code, d.`name` AS department_name, d.`archived` AS department_archived, 
+                    lca.`fk_staff`, sf.`number` AS staff_number, sf.`prefix` AS lecturer_prefix, sf.`gender`, 
+                    sf.`first_name` AS lecturer_first_name, sf.`middle_name` AS lecturer_middle_name, sf.`last_name` AS lecturer_last_name, 
+                    sf.`designation` AS lecturer_designation, sf.`role` AS lecturer_role, sf.`fk_department` AS lecturer_fk_department, 
+                    lca.`fk_course` AS course_code, c.`name` AS course_name, c.`credit_hours` AS course_credit_hours, c.`contact_hours` AS course_contact_hours, c.`semester` AS course_semester,
+                    c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
+                    cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
+                FROM 
+                    `lecturer_course_assignments` AS lca 
+                    JOIN `department` AS d ON lca.`fk_department` = d.`id` 
+                    JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
+                    JOIN `course` AS c ON lca.`fk_course` = c.`code` 
+                    JOIN `course_category` AS cg ON c.`fk_category` = cg.`id`
+                WHERE lca.`fk_department` = :di
+                GROUP BY lca.fk_course";
+        return $this->dm->getData($query, array(":di" => $departmentId));
+    }
+
     public function fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($departmentId)
     {
         $query = "SELECT 
@@ -749,6 +954,31 @@ class SecretaryController
                 FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
                 WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = 0";
         return $this->dm->getData($query, array(":p" => $programId, ":d" => $departmentId));
+    }
+
+    public function fetchSemesterCourseResultsHeaders($semesterId, $courseCode, $classCode)
+    {
+        // fetch exam results and check if is project based
+        $query = "SELECT r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, r.`project_based`, cr.`name` AS course, sm.`name` AS semester
+                FROM `exam_results` AS r 
+                JOIN `course` AS cr ON r.`fk_course` = cr.`code` 
+                JOIN `class` AS cs ON r.`class` = cs.`code` 
+                WHERE r.`fk_semester` = :sm AND r.`fk_course` = :cr AND r.`fk_class` = :cs";
+        $params = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
+        $results = $this->dm->getData($query, $params);
+
+        if (empty($results)) {
+            return ["success" => false, "message" => "No records found"];
+        }
+
+        // Determine if the course is project based (assume all results have the same course)
+        $isProjectBased = (bool)$results[0]['is_project_based'];
+
+        if ($isProjectBased) {
+            return ["Student ID", "Exam Score (40%)", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"];
+        }
+
+        return ["Student ID", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"];
     }
 
     // Create functions for to perform CRUD operations on lecturers. The adding of a lecturer should send an SMS and also email use the sms and email functions

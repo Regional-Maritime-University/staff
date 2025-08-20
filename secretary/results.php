@@ -53,12 +53,7 @@ $archived = false;
 
 $activeSemesters = $secretary->fetchActiveSemesters();
 
-$assignedCourses = [];
-foreach ($activeSemesters as $semester) {
-    $semesterId = $semester['id'];
-    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
-}
-$totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
+$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
 
 $deadlines = $secretary->fetchPendingDeadlines($departmentId);
 $totalPendingDeadlines = 0;
@@ -127,160 +122,56 @@ if ($deadlines && is_array($deadlines)) {
 
             <!-- Results Cards -->
             <div class="results-cards">
-                <!-- Result Card 1 -->
-                <div class="result-card">
-                    <div class="result-header">
-                        <h3 class="result-title">ME101 - Introduction to Marine Engineering</h3>
-                        <span class="result-status pending">Pending</span>
-                    </div>
-                    <div class="result-info">
-                        <div class="info-item">
-                            <div class="info-label">Semester</div>
-                            <div class="info-value">First Semester 2023/2024</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Students</div>
-                            <div class="info-value">45</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Due Date</div>
-                            <div class="info-value">Dec 15, 2023</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Last Updated</div>
-                            <div class="info-value">Nov 28, 2023</div>
-                        </div>
-                    </div>
-                    <div class="result-actions">
-                        <button class="result-btn primary">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="result-btn primary">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="result-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Result Card 2 -->
-                <div class="result-card">
-                    <div class="result-header">
-                        <h3 class="result-title">ME302 - Marine Propulsion Systems</h3>
-                        <span class="result-status submitted">Submitted</span>
+                <?php if ($totalPendingDeadlines > 0) : ?>
+                    <!-- Display pending deadlines -->
+                    <?php foreach ($deadlines as $deadline) : ?>
+                        <?php if ($deadline['deadline_status'] == 'pending') : ?>
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <h3 class="result-title"><?= $deadline['course_name'] ?></h3>
+                                    <span class="result-status pending">Pending</span>
+                                </div>
+                                <div class="result-info">
+                                    <div class="info-item">
+                                        <div class="info-label">Semester</div>
+                                        <div class="info-value"><?= $deadline['semester_name'] ?></div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Students</div>
+                                        <div class="info-value"><?= $deadline['total_registered_students'] ?? 0 ?></div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Due Date</div>
+                                        <div class="info-value"><?= date('M d, Y', strtotime($deadline['submission_deadline'])) ?></div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Lecturer</div>
+                                        <div class="info-value"><?= $deadline['lecturer_name'] ?></div>
+                                    </div>
+                                </div>
+                                <div class="result-actions">
+                                    <button class="result-btn primary viewResultsBtn" data-class="<?= $deadline['class_code'] ?>" data-course="<?= $deadline['course_code'] ?>" data-semester="<?= $deadline['semester_id'] ?>">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="result-btn secondary downloadResultsBtn" data-class="<?= $deadline['class_code'] ?>" data-course="<?= $deadline['course_code'] ?>" data-semester="<?= $deadline['semester_id'] ?>">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <div class="no-results">
+                        <p>No pending deadlines for results upload.</p>
                     </div>
-                    <div class="result-info">
-                        <div class="info-item">
-                            <div class="info-label">Semester</div>
-                            <div class="info-value">First Semester 2023/2024</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Students</div>
-                            <div class="info-value">32</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Due Date</div>
-                            <div class="info-value">Dec 15, 2023</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Last Updated</div>
-                            <div class="info-value">Dec 5, 2023</div>
-                        </div>
-                    </div>
-                    <div class="result-actions">
-                        <button class="result-btn primary">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="result-btn primary">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="result-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Result Card 3 -->
-                <div class="result-card">
-                    <div class="result-header">
-                        <h3 class="result-title">ME405 - Ship Design and Construction</h3>
-                        <span class="result-status approved">Approved</span>
-                    </div>
-                    <div class="result-info">
-                        <div class="info-item">
-                            <div class="info-label">Semester</div>
-                            <div class="info-value">First Semester 2023/2024</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Students</div>
-                            <div class="info-value">28</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Due Date</div>
-                            <div class="info-value">Dec 10, 2023</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Last Updated</div>
-                            <div class="info-value">Dec 8, 2023</div>
-                        </div>
-                    </div>
-                    <div class="result-actions">
-                        <button class="result-btn primary">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="result-btn primary">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="result-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Result Card 4 -->
-                <div class="result-card">
-                    <div class="result-header">
-                        <h3 class="result-title">ME405 - Ship Design and Construction</h3>
-                        <span class="result-status approved">Approved</span>
-                    </div>
-                    <div class="result-info">
-                        <div class="info-item">
-                            <div class="info-label">Semester</div>
-                            <div class="info-value">First Semester 2023/2024</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Students</div>
-                            <div class="info-value">28</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Due Date</div>
-                            <div class="info-value">Dec 10, 2023</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Last Updated</div>
-                            <div class="info-value">Dec 8, 2023</div>
-                        </div>
-                    </div>
-                    <div class="result-actions">
-                        <button class="result-btn primary">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="result-btn primary">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="result-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
-
         </div>
 
         <!-- Upload Results Modal -->
         <div class="modal" id="uploadResultsModal">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg modal-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>Upload Exam Results</h2>
@@ -288,26 +179,78 @@ if ($deadlines && is_array($deadlines)) {
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
+                            <label for="uploadClass">Select Class</label>
+                            <select id="uploadClass" required>
+                                <option value="">Select a class</option>
+                                <?php
+                                foreach ($activeClasses as $class) {
+                                    echo '<option value="' . $class['code'] . '">' . $class['code'] . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="uploadCourse">Select Course</label>
                             <select id="uploadCourse" required>
                                 <option value="">Select a course</option>
-                                <option value="ME101">ME101 - Introduction to Marine Engineering</option>
-                                <option value="ME302">ME302 - Marine Propulsion Systems</option>
-                                <option value="ME405">ME405 - Ship Design and Construction</option>
+                                <?php
+                                foreach ($deadlines as $deadline) {
+                                    if ($deadline['deadline_status'] == 'pending') {
+                                        echo '<option value="' . $deadline['course_code'] . '">' . $deadline['course_code'] . ' - ' . $deadline['course_name'] . '</option>';
+                                    }
+                                }
+                                ?>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="uploadSemester">Semester</label>
                             <select id="uploadSemester" required>
-                                <option value="current">First Semester 2023/2024</option>
-                                <option value="previous">Second Semester 2022/2023</option>
+                                <option value="">Select a semester</option>
+                                <?php foreach ($activeSemesters as $semester) : ?>
+                                    <option value="<?= $semester['id'] ?>" data-academicYear="<?= $semester["academic_year_name"] ?>"><?= $semester['name'] == 1 ? 'First Semester' : ($semester['name'] == 2 ? 'Second Semester' : 'Summer Semester') ?> <?= $semester['academic_year_start_year'] . '/' . $semester['academic_year_end_year'] ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label>Is the course project based?</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="projectBasedYes" name="uploadProjectBased" value="yes" checked>
+                                    <label for="projectBasedYes">Yes</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="projectBasedNo" name="uploadProjectBased" value="no">
+                                    <label for="projectBasedNo">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="score-weights-group">
+                                <div class="score-weights-title">Score Weights</div>
+                                <div class="score-weight-item">
+                                    <label for="uploadExamScoreWeight">Exam Score Weight</label>
+                                    <input type="number" title="Exam Score Weight" value="60" min="0" max="100" id="uploadExamScoreWeight" name="uploadExamScoreWeight">
+                                </div>
+                                <div class="score-weight-item">
+                                    <label for="uploadProjectScoreWeight">Project Score Weight</label>
+                                    <input type="number" title="Project Score Weight" value="0" min="0" max="100" id="uploadProjectScoreWeight" name="uploadProjectScoreWeight">
+                                </div>
+                                <div class="score-weight-item">
+                                    <label for="uploadAssessmentScoreWeight">Assessment Score Weight</label>
+                                    <input type="number" title="Assessment Score Weight" value="40" min="0" max="100" id="uploadAssessmentScoreWeight" name="uploadAssessmentScoreWeight">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>Upload Results File</label>
                             <div class="file-upload">
                                 <div class="file-input-wrapper">
-                                    <input type="file" id="resultsFile" accept=".xlsx, .csv">
+                                    <input type="file" id="uploadResultsFile" accept=".xlsx, .csv">
                                     <div class="file-input-btn">
                                         <i class="fas fa-cloud-upload-alt"></i> Choose File or Drop File Here
                                     </div>
@@ -316,20 +259,93 @@ if ($deadlines && is_array($deadlines)) {
                                 <div class="file-format-info">Accepted formats: Excel (.xlsx) or CSV (.csv)</div>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label for="uploadNotes">Additional Notes (Optional)</label>
                             <textarea id="uploadNotes" rows="3" placeholder="Enter any additional notes or comments"></textarea>
                         </div>
+
+                        <input type="hidden" id="staffId" value="<?= $_SESSION['staff']['number'] ?>">
                     </div>
                     <div class="modal-footer">
                         <button class="cancel-btn" data-dismiss="modal">Cancel</button>
-                        <button class="submit-btn" id="submitUploadBtn">Upload Results</button>
+                        <button class="normal-btn" id="submitUploadBtn">Upload Results</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <script>
+        <!-- View Results Modal -->
+        <div class="modal" id="viewResultsModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>View Exam Results</h2>
+                        <button class="close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Course and Semester Info -->
+                        <div class="course-info">
+                            <!-- Programme -->
+                            <div class="program-info">
+                                <span>Programme: </span>
+                                <span>BSc Marine Engineering</span>
+                            </div>
+                            <!-- Course -->
+                            <div class="course-info">
+                                <span>Course: </span>
+                                <span>ME101 - Introduction to Marine Engineering</span>
+                            </div>
+                            <!-- Semester -->
+                            <div class="semester-info">
+                                <span>Semester: </span>
+                                <span>First Semester 2023/2024</span>
+                            </div>
+                        </div>
+
+                        <!-- Results Table -->
+                        <div class="results-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Exam Score (40%)</th>
+                                        <th>Project Score (20%)</th>
+                                        <th>Ass. Score (40%)</th>
+                                        <th>ACH Mark</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>123456</td>
+                                        <td>30</td>
+                                        <td>16</td>
+                                        <td>30</td>
+                                        <td>80</td>
+                                        <td>A</td>
+                                    </tr>
+                                    <!-- More rows as needed -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="cancel-btn" data-dismiss="modal">Close</button>
+                        <button class="normal-btn">Download Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const departmentId = <?= json_encode($departmentId) ?>;
+
             // Toggle sidebar
             document.querySelector('.toggle-sidebar').addEventListener('click', function() {
                 document.querySelector('.sidebar').classList.toggle('collapsed');
@@ -344,6 +360,121 @@ if ($deadlines && is_array($deadlines)) {
                 uploadResultsModal.classList.add('active');
             });
 
+            // fetch assigned semester courses
+            const fetchCourseResults = async (classCode, courseCode, semesterId) => {
+                try {
+                    // fetch course results headers first
+                    if (!courseCode || !semesterId) {
+                        alert('Course code and semester ID are required to fetch results.');
+                        return [];
+                    }
+
+                    const resultsHeadersResponse = await fetch('../endpoint/fetch-semester-course-results-headers', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            class: classCode,
+                            course: courseCode,
+                            semester: semesterId
+                        })
+                    });
+
+                    const resultsHeaders = await resultsHeadersResponse.json();
+                    console.log("resultsHeaders", resultsHeaders);
+                    if (!resultsHeaders.success) {
+                        alert('Error fetching course results headers: ' + resultsHeaders.message);
+                        return [];
+                    }
+
+                    // fetch course results data
+                    const resultsBodyResponse = await fetch('../endpoint/fetch-semester-course-results', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            course: courseCode,
+                            semester: semesterId
+                        })
+                    });
+
+                    const resultsBody = await resultsBodyResponse.json();
+                    console.log("resultsBody", resultsBody);
+                    if (!resultsBody.success) {
+                        alert('Error fetching course results: ' + resultsBody.message);
+                        return [];
+                    }
+
+                    const result = {
+                        success: true,
+                        data: {
+                            header: resultsHeaders.data,
+                            body: resultsBody.data
+                        }
+                    }
+
+                    return result;
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                }
+            };
+
+            // Open view results modal
+            document.querySelectorAll('.result-btn.primary').forEach(button => {
+                button.addEventListener('click', function() {
+                    const classCode = this.getAttribute('data-class');
+                    const courseCode = this.getAttribute('data-course');
+                    const semesterId = this.getAttribute('data-semester');
+
+                    // fetch results data based on courseCode and semesterId
+                    fetchCourseResults(courseCode, semesterId).then(result => {
+                        if (result.success) {
+                            const modal = document.getElementById('viewResultsModal');
+                            const courseInfo = modal.querySelector('.course-info');
+                            const resultsTable = modal.querySelector('.results-table table tbody');
+
+                            // Clear previous results
+                            resultsTable.innerHTML = '';
+
+                            // Set course and semester info
+                            courseInfo.querySelector('.program-info span:nth-child(2)').textContent = 'BSc Marine Engineering';
+                            courseInfo.querySelector('.course-info span:nth-child(2)').textContent = courseCode;
+                            courseInfo.querySelector('.semester-info span:nth-child(2)').textContent = semesterId;
+
+                            // Populate table headers
+                            const thead = modal.querySelector('.results-table table thead');
+                            thead.innerHTML = '';
+                            const headerRow = document.createElement('tr');
+                            result.data.header.forEach(header => {
+                                const th = document.createElement('th');
+                                th.textContent = `${header} (${header.weight}%)`;
+                                headerRow.appendChild(th);
+                            });
+
+                            // Populate results table
+                            result.data.body.forEach(row => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                        <td>${row.student_id}</td>
+                                        <td>${row.exam_score}</td>
+                                        ${row.isProjectBased ? `<td>${row.project_score}</td>` : ''}
+                                        <td>${row.assessment_score}</td>
+                                        <td>${row.ach_mark}</td>
+                                        <td>${row.grade}</td>
+                                    `;
+                                resultsTable.appendChild(tr);
+                            });
+
+                            modal.classList.add('active');
+                        } else {
+                            alert('Error fetching results: ' + result.message);
+                        }
+                    });
+                });
+            });
+
             // Close modal
             document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
                 button.addEventListener('click', function() {
@@ -352,7 +483,7 @@ if ($deadlines && is_array($deadlines)) {
             });
 
             // File upload
-            const resultsFile = document.getElementById('resultsFile');
+            const resultsFile = document.getElementById('uploadResultsFile');
             const fileName = document.getElementById('fileName');
 
             resultsFile.addEventListener('change', function() {
@@ -363,19 +494,60 @@ if ($deadlines && is_array($deadlines)) {
                 }
             });
 
-            // Submit upload
-            document.getElementById('submitUploadBtn').addEventListener('click', function() {
-                const course = document.getElementById('uploadCourse').value;
-                const semester = document.getElementById('uploadSemester').value;
-                const file = document.getElementById('resultsFile').value;
+            // When semester is changed, update the academic year
+            document.getElementById('uploadSemester').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const academicYear = selectedOption.getAttribute('data-academicYear');
+                console.log('Selected academic year:', academicYear);
+                if (academicYear) {
+                    document.getElementById('uploadSemester').setAttribute('data-academicYear', academicYear);
+                    console.log('Updated academic year:', academicYear);
+                }
+            });
 
-                if (!course || !semester || !file) {
+            // Submit upload
+            document.getElementById('submitUploadBtn').addEventListener('click', async function() {
+                const classCode = document.getElementById('uploadClass').value;
+                const courseCode = document.getElementById('uploadCourse').value;
+                const semesterId = document.getElementById('uploadSemester').value;
+                const resultsFile = document.getElementById('uploadResultsFile').value;
+                const staffId = document.getElementById('staffId').value;
+                const projectBased = document.querySelector('input[name="uploadProjectBased"]:checked').value;
+                const academicYear = document.getElementById('uploadSemester').getAttribute('data-academicYear');
+                const examScoreWeight = document.getElementById('uploadExamScoreWeight').value;
+                const projectScoreWeight = document.getElementById('uploadProjectScoreWeight').value;
+                const assessmentScoreWeight = document.getElementById('uploadAssessmentScoreWeight').value;
+
+
+                if (!classCode || !courseCode || !semesterId || !resultsFile || !staffId) {
                     alert('Please fill all required fields and select a file.');
                     return;
                 }
 
-                // In a real application, you would upload the file to the server
-                alert('Results uploaded successfully!');
+                // Send the upload request
+                const formData = new FormData();
+                formData.append('class', classCode);
+                formData.append('course', courseCode);
+                formData.append('semester', semesterId);
+                formData.append('resultsFile', document.getElementById('uploadResultsFile').files[0]);
+                formData.append('staffId', staffId);
+                formData.append('projectBased', projectBased);
+                formData.append('academicYear', academicYear);
+                formData.append('examScoreWeight', examScoreWeight);
+                formData.append('projectScoreWeight', projectScoreWeight);
+                formData.append('assessmentScoreWeight', assessmentScoreWeight);
+                formData.append('notes', document.getElementById('uploadNotes').value);
+
+                response = await fetch('../endpoint/upload-results', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const result = await response.json();
+
+                console.log('Upload result:', result);
                 uploadResultsModal.classList.remove('active');
             });
 
@@ -439,7 +611,8 @@ if ($deadlines && is_array($deadlines)) {
                     }
                 });
             });
-        </script>
+        });
+    </script>
 </body>
 
 </html>

@@ -1010,7 +1010,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 departmentId
                             })
                         }),
-                        fetch(`../endpoint/fetch-assigned-courses`, {
+                        fetch(`../endpoint/fetch-assigned-courses-no-deadlines`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded'

@@ -385,11 +385,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $_POST["value"] = "";
         }
         die(json_encode(["success" => true, "data" => $course->fetch($_POST["key"], $_POST["value"])]));
-    } elseif ($_GET["url"] == "fetch-assigned-courses") {
+    } elseif ($_GET["url"] == "fetch-assigned-courses-no-deadlines") {
         if (! isset($_POST["department"]) || empty($_POST["department"])) {
             die(json_encode(["success" => false, "message" => "Department is required!"]));
         }
         die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesWithNoDeadlinesByDepartment($_POST["department"])]));
+    } elseif ($_GET["url"] == "fetch-assigned-courses") {
+        if (! isset($_POST["department"]) || empty($_POST["department"])) {
+            die(json_encode(["success" => false, "message" => "Department is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchAssignedSemesterCoursesByDepartment($_POST["department"])]));
     } elseif ($_GET["url"] == "fetch-semester-courses") {
         if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester is required!"]));
@@ -477,7 +482,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Invalid file type!"]));
         }
 
-        $excelData = new UploadExcelDataController($_FILES["courseFile"], 2, 0);
+        $excelData = new UploadExcelDataController($_FILES["courseFile"], 2, 0, "course");
         $result    = $excelData->run($_SESSION["staff"]["department_id"]);
         die(json_encode($result));
     } elseif ($_GET["url"] == "assign-course") {
@@ -690,7 +695,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else {
             $note = $_POST["note"];
         }
-        die(json_encode($deadline->add($_POST)));
+        die(json_encode($secretary->assignCourseSubmissionDeadline($_POST)));
     } elseif ($_GET["url"] == "edit-deadline") {
         if (! isset($_POST["deadline"]) || empty($_POST["deadline"])) {
             die(json_encode(["success" => false, "message" => "Deadline id required!"]));
@@ -708,6 +713,99 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
         die(json_encode($deadline->add($_POST["deadline"], $_POST["semester"], $_POST["department"])));
     }
+
+    // Upload Results
+    elseif ($_GET["url"] == "upload-results") {
+
+        if (! isset($_FILES["resultsFile"]) || empty($_FILES["resultsFile"])) {
+            die(json_encode(["success" => false, "message" => "Invalid request. An Excel file is required!"]));
+        }
+
+        if ($_FILES["resultsFile"]['error']) {
+            die(json_encode(["success" => false, "message" => "Failed to upload file!"]));
+        }
+
+        if ($_FILES["resultsFile"]['size'] > 5242880) {
+            die(json_encode(["success" => false, "message" => "File size is too large!"]));
+        }
+
+        if ($_FILES["resultsFile"]['type'] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+            die(json_encode(["success" => false, "message" => "Invalid file type!"]));
+        }
+
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+
+        if (! isset($_POST["class"]) || empty($_POST["class"])) {
+            die(json_encode(["success" => false, "message" => "Class is required!"]));
+        }
+
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        }
+
+        if (! isset($_POST["staffId"]) || empty($_POST["staffId"])) {
+            die(json_encode(["success" => false, "message" => "Staff number is required!"]));
+        }
+
+        if (! isset($_POST["projectBased"]) || empty($_POST["projectBased"])) {
+            die(json_encode(["success" => false, "message" => "Course upload type is required!"]));
+        }
+
+        if (! isset($_POST["academicYear"]) || empty($_POST["academicYear"])) {
+            die(json_encode(["success" => false, "message" => "Academic year is required!"]));
+        }
+
+        if (! isset($_POST["examScoreWeight"]) || empty($_POST["examScoreWeight"])) {
+            die(json_encode(["success" => false, "message" => "Exam score weight is required!"]));
+        }
+
+        if (! isset($_POST["projectScoreWeight"])) {
+            die(json_encode(["success" => false, "message" => "Project score weight is required!"]));
+        }
+
+        if (! isset($_POST["assessmentScoreWeight"]) || empty($_POST["assessmentScoreWeight"])) {
+            die(json_encode(["success" => false, "message" => "Assessment score weight is required!"]));
+        }
+
+        $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
+
+        $data = [
+            "semester"              => $_POST["semester"],
+            "class"                 => $_POST["class"],
+            "course"                => $_POST["course"],
+            "staffId"               => $_POST["staffId"],
+            "projectBased"          => $_POST["projectBased"],
+            "academicYear"          => $_POST["academicYear"],
+            "examScoreWeight"       => $_POST["examScoreWeight"],
+            "projectScoreWeight"    => $_POST["projectScoreWeight"],
+            "assessmentScoreWeight" => $_POST["assessmentScoreWeight"],
+            "notes"                 => $notes
+        ];
+
+        $excelData = new UploadExcelDataController($_FILES["resultsFile"], 13, 0, "result");
+        $result    = $excelData->run($_SESSION["staff"]["department_id"], $data);
+        die(json_encode($result));
+    }
+
+    // fetch semester course results headers
+    elseif ($_GET["url"] == "fetch-semester-course-results-headers") {
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        }
+
+        if (! isset($_POST["class"]) || empty($_POST["class"])) {
+            die(json_encode(["success" => false, "message" => "Class is required!"]));
+        }
+
+        die(json_encode($secretary->fetchSemesterCourseResultsHeaders($_POST["semester"], $_POST["course"], $_POST["class"])));
+    }
+
 
     // All PUT request will be sent here
 } else if ($_SERVER['REQUEST_METHOD'] == "PUT") {

@@ -178,7 +178,7 @@ class Student
         $query = "SELECT 
                     s.`index_number`, sca.`fk_semester` AS semester_id, sca.`fk_course` AS course_code, c.`name` AS course_name, 
                     sca.`credit_hours` AS course_credit_hours, sca.`level` AS course_level, sca.`semester` AS course_semester, 
-                    sca.`continues_assessments` AS continues_assessments_score, sca.`exam` AS exam_score, sca.`final_score`, sca.`grade`, sca.`gpa`  
+                    sca.`continues_assessments_score`, sca.`exam_score`, sca.`final_score`, sca.`grade`, sca.`gpa`  
                 FROM `student_course_assignments` AS sca 
                 JOIN `student` AS s ON sca.`fk_student` = s.`index_number` 
                 JOIN `course` AS c ON sca.`fk_course` = c.`code` 
