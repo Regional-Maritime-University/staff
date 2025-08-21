@@ -89,7 +89,7 @@ class UploadExcelDataController
             }
 
             if ($this->type == "result") {
-                $query = "INSERT INTO `exam_results` (`fk_class`, `fk_semseter`, `fk_staff`, `fk_course`, `project_based`, `notes`, `file_name`, `status`) 
+                $query = "INSERT INTO `exam_results` (`fk_class`, `fk_semester `, `fk_staff`, `fk_course`, `project_based`, `notes`, `file_name`, `status`) 
                                           VALUES (:cs, :sm, :sf, :c, :pb, :n, :fn, 'pending')";
                 $params = array(
                     ":cs" => $data["class"],
@@ -156,7 +156,7 @@ class UploadExcelDataController
             // Check if results already uploaded using class code, semester id, and course code
             $inputQuery = "";
 
-            $existingResultQuery = "SELECT `id` FROM `exam_results` WHERE `fk_class` = :cs AND `fk_semseter` = :sm AND `fk_course` = :cr";
+            $existingResultQuery = "SELECT `id` FROM `exam_results` WHERE `fk_class` = :cs AND `fk_semester` = :sm AND `fk_course` = :cr";
             $existingResult = $this->dm->getData($existingResultQuery, array(":cs" => $data["class"], ":sm" => $data["semester"], ":cr" => $data["course"]));
 
             if (!empty($existingResult)) {
@@ -169,10 +169,10 @@ class UploadExcelDataController
                                 `notes` = :nt, 
                                 `file_name` = :fn, 
                                 `status` = 'pending' 
-                            WHERE `fk_class` = :cs AND `fk_semseter` = :sm AND `fk_course` = :cr";
+                            WHERE `fk_class` = :cs AND `fk_semester` = :sm AND `fk_course` = :cr";
             } else {
                 $inputQuery = "INSERT INTO `exam_results` 
-                                (`fk_class`, `fk_semseter`, `fk_staff`, `fk_course`, `exam_score_weight`, `project_score_weight`, `assessment_score_weight`, `project_based`, `notes`, `file_name`, `status`) 
+                                (`fk_class`, `fk_semester`, `fk_staff`, `fk_course`, `exam_score_weight`, `project_score_weight`, `assessment_score_weight`, `project_based`, `notes`, `file_name`, `status`) 
                             VALUES (:cs, :sm, :sf, :cr, :esw, :psw, :asw, :pb, :nt, :fn, 'pending')";
             }
 
@@ -447,7 +447,7 @@ class UploadExcelDataController
                     continue;
                 }
 
-                $resultInsertQuery = "UPDATE `student_course_assignments` SET 
+                $resultInsertQuery = "UPDATE `student_courses` SET 
                                             `exam_score` = :es, 
                                             `project_score` = :ps, 
                                             `continues_assessments_score` = :cas 

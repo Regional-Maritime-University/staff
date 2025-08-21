@@ -60,14 +60,16 @@ $totalActiveCourses = count($activeCourses);
 $assignedCourses = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
+    $departmentAssigndCourses = $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId);
+    if ($departmentAssigndCourses) $assignedCourses = array_merge($assignedCourses, $departmentAssigndCourses);
 }
 $totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
 
 $assignedLecturers = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
+    $departmentAssignedLecturers = $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId);
+    if ($departmentAssignedLecturers) $assignedLecturers = array_merge($assignedLecturers, $departmentAssignedLecturers);
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 
@@ -888,7 +890,6 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
 
-
             // Open modals
             document.getElementById('addCourseBtn').addEventListener('click', () => openModal('addCourseModal'));
             document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
@@ -1211,6 +1212,50 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 });
             });
 
+            /**
+             * Reset the Assign Courses Modal to its initial state
+             */
+            function resetAssignCoursesModal() {
+                // Reset selects and textarea
+                document.getElementById("semesterSelect").value = "";
+                document.getElementById("lecturerSelect").value = "";
+                document.getElementById("studentSelect").value = "";
+                document.getElementById("classSelect").value = "";
+                document.getElementById("assignmentNotes").value = "";
+
+                // Reset tab to default (toLecturer)
+                document.querySelectorAll(".assign-course-tabs .tab-btn").forEach((btn, idx) => {
+                    if (btn.getAttribute("data-tab") === "toLecturer") {
+                        btn.classList.add("active");
+                    } else {
+                        btn.classList.remove("active");
+                    }
+                });
+
+                document.querySelectorAll(".tab-content").forEach(content => {
+                    if (content.id === "toLecturer") {
+                        content.classList.add("active");
+                    } else {
+                        content.classList.remove("active");
+                    }
+                });
+
+                document.getElementById("assignCourseActionSelect").value = "toLecturer";
+
+                // Remove all selected courses
+                document.getElementById("departmentSelectedCoursesList").innerHTML = "";
+                // Show the empty message
+                const noCoursesMsg = document.getElementById("departmentNoCoursesMessage");
+                if (noCoursesMsg) noCoursesMsg.style.display = "block";
+            }
+
+            /**
+             * Attach resetAssignCoursesModal to modal close events
+             */
+            document.querySelectorAll('#assignCoursesModal .close-btn, #assignCoursesModal .cancel-btn').forEach(btn => {
+                btn.addEventListener('click', resetAssignCoursesModal);
+            });
+
             const saveAssignmentsBtn = document.getElementById("saveAssignmentsBtn");
 
             saveAssignmentsBtn.addEventListener("click", function() {
@@ -1235,7 +1280,6 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     selectedCourses.push(element.getAttribute("data-code"));
                 });
 
-                const form = document.getElementById("assignCourseForm");
                 const action = document.getElementById("assignCourseActionSelect").value;
 
                 // Simulate API call
@@ -1299,7 +1343,6 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         if (result.success) {
                             alert(result.message);
                             closeModal("assignCoursesModal");
-                            form.reset();
                         } else {
                             alert(result['message']);
                         }

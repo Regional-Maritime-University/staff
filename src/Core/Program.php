@@ -231,4 +231,16 @@ class Program
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }
+
+    public function archiveCurriculumCourse($programId, $courseCode)
+    {
+        $query = "UPDATE `curriculum` SET `archived` = 1 WHERE `fk_program` = :p AND `fk_course` = :c";
+        $query_result = $this->dm->inputData($query, array(":p" => $programId, ":c" => $courseCode));
+        if ($query_result) {
+            $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Program Archive", "Archived course ({$courseCode}) for program {$programId}");
+            return array("success" => true, "message" => "Course ({$courseCode}) for this program successfully archived!");
+        } else {
+            return array("success" => false, "message" => "Failed to archive course ({$courseCode}) for this program!");
+        }
+    }
 }

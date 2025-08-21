@@ -74,8 +74,8 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMU Staff Portal - Programs</title>
     <link rel="stylesheet" href="./css/program.css">
+    <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
 
 <body>
@@ -149,6 +149,12 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                         <option value="all">All Semesters</option>
                         <option value="1">Semester 1</option>
                         <option value="2">Semester 2</option>
+                    </select>
+                    <select class="modal-filter-select" id="curriculumTypeFilter">
+                        <option value="all">All Types</option>
+                        <option value="compulsory">Compulsory</option>
+                        <option value="elective">Elective</option>
+                        <option value="optional">Optional</option>
                     </select>
                 </div>
                 <div class="modal-body">
@@ -229,42 +235,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 <div class="modal-body">
                     <div class="modal-list" id="studentsList">
                         <!-- Students items will be dynamically generated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Courses Modal -->
-    <div class="modal" id="coursesModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-book"></i> <span id="coursesModalTitle">Program Courses</span></h2>
-                    <button class="close-btn" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-filters">
-                    <div class="modal-search">
-                        <input type="text" placeholder="Search courses..." id="coursesSearch">
-                        <button class="modal-search-btn">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                    <select class="modal-filter-select" id="coursesTypeFilter">
-                        <option value="all">All Types</option>
-                        <option value="core">Core</option>
-                        <option value="elective">Elective</option>
-                        <option value="practical">Practical</option>
-                    </select>
-                    <select class="modal-filter-select" id="coursesStatusFilter">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-list" id="coursesList">
-                        <!-- Courses items will be dynamically generated here -->
                     </div>
                 </div>
             </div>
@@ -374,6 +344,69 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         </div>
     </div>
 
+    <!-- Add course to -->
+    <div class="modal" id="assignCourseModal">
+        <div class="modal-dialog modal-lg modal-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user-graduate"></i> <span id="assignCourseModalTitle">Assign Course To Program</span></h2>
+                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="course-selection-header">
+                            <label>Selected Courses</label>
+                            <button type="button" id="departmentSelectCoursesBtn">
+                                <i class="fas fa-search"></i> Find Courses
+                            </button>
+                        </div>
+                        <div class="department-selected-courses-container">
+                            <div id="departmentSelectedCoursesList">
+                                <!-- Selected courses will be added here dynamically -->
+                            </div>
+                            <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
+                                No courses selected. Click "Find Courses" to add courses.
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="programSelect" name="program">
+                    <div class="modal-footer" style="display: flex; justify-content:right">
+                        <button class="cancel-btn" data-dismiss="modal">Cancel</button>
+                        <button class="submit-btn" id="saveAssignmentsBtn">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Course Selection Modal -->
+    <div class="modal" id="departmentCourseSelectionModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Courses</h2>
+                    <button class="close-btn" id="closeDepartmentCourseSelectionModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="department-course-search">
+                        <input type="text" id="departmentCourseSearchInput" placeholder="Search by course code or name">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="department-course-list" id="departmentCourseList">
+                        <!-- Course items will be added here dynamically -->
+                    </div>
+                    <input type="hidden" name="program" id="programId">
+                    <div class="modal-footer">
+                        <button class="cancel-btn" id="closeDepartmentCourseSelectionModal">Cancel</button>
+                        <button class="submit-btn" id="confirmDepartmentCourseSelectionBtn">Confirm Selection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script>
         // Modal Functions
         function openModal(modalId) {
@@ -418,11 +451,18 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
 
         let curriculumData = {};
 
+        let semesterCourses = null;
+
         let classesData = {};
 
         let studentsData = {};
 
         let coursesData = {};
+
+        const user = <?= json_encode($staffData); ?>;
+        const departmentId = user ? user.department_id : null;
+
+        document.getElementById('departmentSelectCoursesBtn').addEventListener('click', () => openModal('departmentCourseSelectionModal'));
 
         async function fetchProgramCurriculum(programId) {
             if (!programId) {
@@ -543,9 +583,242 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         let filteredPrograms = [...programsData];
 
         // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             renderPrograms();
             initializeEventListeners();
+
+            await fetch(`../endpoint/fetch-course`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        department: departmentId,
+                    }).toString()
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        semesterCourses = data.data;
+                        console.log("Courses: ", semesterCourses);
+                    }
+                })
+                .catch(error => console.error("Error fetching courses:", error));
+        });
+
+        const confirmDepartmentCourseSelectionBtn = document.getElementById("confirmDepartmentCourseSelectionBtn");
+        const departmentCourseSearchInput = document.getElementById("departmentCourseSearchInput");
+
+        confirmDepartmentCourseSelectionBtn.addEventListener("click", () => {
+            closeModal("departmentCourseSelectionModal");
+        });
+
+        departmentCourseSearchInput.addEventListener("input", () => {
+            departmentSearchCourses();
+        });
+
+        // Initialize course list on modal open
+        departmentCourseSearchInput.addEventListener("focus", () => {
+            if (departmentCourseSearchInput.value === "") {
+                departmentSearchCourses();
+            }
+        });
+
+        // Initialize course list when modal opens
+        departmentSelectCoursesBtn.addEventListener("click", () => {
+            setTimeout(() => {
+                departmentSearchCourses();
+            }, 100);
+        });
+
+        function departmentSearchCourses() {
+            const searchTerm = document.getElementById("departmentCourseSearchInput").value.toLowerCase();
+            const courseList = document.getElementById("departmentCourseList");
+            courseList.innerHTML = "";
+
+            // Check if semester courses has data
+            if (!semesterCourses || semesterCourses.length === 0) {
+                courseList.innerHTML = `
+                        <div class="department-no-courses-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No courses are available.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            semesterCourses.forEach((course) => {
+                if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
+                    // Check if course is already selected
+                    const isSelected = document.querySelector(`.department-selected-course[data-code="${course.code}"]`) !== null;
+                    const courseItem = document.createElement("div");
+                    courseItem.className = "department-course-item";
+
+                    // Add a class if the course is selected
+                    if (isSelected) {
+                        courseItem.classList.add("department-course-selected");
+                    }
+
+                    courseItem.innerHTML = `
+                                <div class="department-course-info">
+                                    <strong>${course.code}</strong> - ${course.name}
+                                </div>
+                                <button class="department-add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.code}" data-name="${course.name}" ${isSelected ? "disabled" : ""}>
+                                    <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                                </button>
+                            `;
+                    courseList.appendChild(courseItem);
+                }
+            });
+
+            // Add event listeners to the add buttons
+            document.querySelectorAll(".department-add-course-btn:not(.selected)").forEach((btn) => {
+                btn.addEventListener("click", function() {
+                    const code = this.getAttribute("data-code");
+                    const name = this.getAttribute("data-name");
+                    departmentAddCourseToSelection(code, name);
+
+                    // Update the button to show it's selected
+                    this.classList.add("selected");
+                    this.disabled = true;
+                    this.querySelector("i").classList.remove("fa-plus");
+                    this.querySelector("i").classList.add("fa-check");
+                    this.closest(".department-course-item").classList.add("course-selected");
+                });
+            });
+        }
+
+        function departmentAddCourseToSelection(code, name) {
+            const selectedCoursesList = document.getElementById("departmentSelectedCoursesList");
+
+            // Check if course is already added
+            if (document.querySelector(`.department-selected-course[data-code="${code}"]`)) {
+                return;
+            }
+
+            const courseItem = document.createElement("div");
+            courseItem.className = "department-selected-course";
+            courseItem.setAttribute("data-code", code);
+            courseItem.innerHTML = `
+                    <div class="department-course-info">
+                        <strong>${code}</strong> - ${name}
+                    </div>
+                    <button class="department-remove-course-btn" data-code="${code}"">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="departmentSelectedCourses[]" value="${code}">
+                `;
+            selectedCoursesList.appendChild(courseItem);
+
+            // Add event listener to the remove button
+            courseItem.querySelector(".department-remove-course-btn").addEventListener("click", function() {
+                const code = this.getAttribute("data-code");
+                departmentRemoveFromSelection(code);
+            });
+        }
+
+        function departmentRemoveFromSelection(code) {
+            const courseItem = document.querySelector(`.department-selected-course[data-code="${code}"]`)
+            if (courseItem) {
+                courseItem.remove()
+
+                // Update the course in the search list if it's visible
+                const courseInList = document.querySelector(`.department-course-item .department-add-course-btn[data-code="${code}"]`)
+                if (courseInList) {
+                    courseInList.classList.remove("selected")
+                    courseInList.disabled = false
+                    courseInList.querySelector("i").classList.remove("fa-check")
+                    courseInList.querySelector("i").classList.add("fa-plus")
+                    courseInList.closest(".department-course-item").classList.remove("department-course-selected")
+
+                    // Re-add the click event listener
+                    courseInList.addEventListener("click", function() {
+                        const name = this.getAttribute("data-name")
+                        departmentAddCourseToSelection(code, name)
+
+                        // Update the button to show it's selected
+                        this.classList.add("selected")
+                        this.disabled = true
+                        this.querySelector("i").classList.remove("fa-plus")
+                        this.querySelector("i").classList.add("fa-check")
+                        this.closest(".department-course-item").classList.add("department-course-selected")
+                    });
+                }
+            }
+        }
+
+        /**
+         * Reset the Assign Courses Modal to its initial state
+         */
+        function resetAssignCoursesModal() {
+            // Reset selects and textarea
+            document.getElementById("programSelect").value = "";
+
+            // Remove all selected courses
+            document.getElementById("departmentSelectedCoursesList").innerHTML = "";
+            // Show the empty message
+            const noCoursesMsg = document.getElementById("departmentNoCoursesMessage");
+            if (noCoursesMsg) noCoursesMsg.style.display = "block";
+        }
+
+        /**
+         * Attach resetAssignCoursesModal to modal close events
+         */
+        document.querySelectorAll('#assignCoursesModal .close-btn, #assignCoursesModal .cancel-btn').forEach(btn => {
+            btn.addEventListener('click', resetAssignCoursesModal);
+        });
+
+        const saveAssignmentsBtn = document.getElementById("saveAssignmentsBtn");
+
+        saveAssignmentsBtn.addEventListener("click", function() {
+            // Validate form
+            const programSelect = document.getElementById("programSelect");
+
+            if (!programSelect.value) {
+                alert("Please fill in all required fields");
+                return;
+            }
+
+            const selectedCourseElements = document.querySelectorAll('#departmentSelectedCoursesList .department-selected-course');
+            if (selectedCourseElements.length === 0) {
+                alert("Please select at least one course");
+                return;
+            }
+
+            const selectedCourses = [];
+            selectedCourseElements.forEach((element) => {
+                selectedCourses.push(element.getAttribute("data-code"));
+            });
+
+            const action = "program";
+
+            // Simulate API call
+            let formData = {
+                action: action,
+                courses: selectedCourses,
+                program: programSelect.value
+            }
+
+            console.log(formData);
+
+            $.ajax({
+                type: "POST",
+                url: "../endpoint/assign-course",
+                data: formData,
+                success: function(result) {
+                    console.log(result);
+                    if (result.success) {
+                        alert(result.message);
+                        resetAssignCoursesModal();
+                        //closeModal("assignCoursesModal");
+                    } else {
+                        alert(result['message']);
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
         });
 
         // Render programs
@@ -623,8 +896,8 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                         <button class="program-btn primary" onclick="openStudentsModal(${program.id})">
                             <i class="fas fa-user-graduate"></i> Students
                         </button>
-                        <button class="program-btn secondary" onclick="openCoursesModal(${program.id})">
-                            <i class="fas fa-book"></i> Courses
+                        <button class="program-btn secondary" onclick="openAssignCourseModal(${program.id})">
+                            <i class="fas fa-plus"></i> Assign Courses
                         </button>
                     </div>
                 </div>
@@ -657,8 +930,13 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
 
             // Modal close buttons
             document.querySelectorAll('.close-btn, [data-dismiss="modal"]').forEach(button => {
-                button.addEventListener('click', function() {
-                    closeAllModals();
+                button.addEventListener('click', function(event) {
+                    // If the close button is inside departmentCourseSelectionModal, only close that modal
+                    if (this.closest('#departmentCourseSelectionModal')) {
+                        closeModal('departmentCourseSelectionModal');
+                    } else {
+                        closeAllModals();
+                    }
                 });
             });
 
@@ -699,7 +977,8 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                             year: course.level,
                             semester: course.semester,
                             credits: course.credit_hours,
-                            type: course.category
+                            type: course.category,
+                            status: !course.archived ? 'Active' : 'Inactive',
                         }));
                     }
                     document.getElementById('curriculumModalTitle').textContent = `${program.title} - Curriculum`;
@@ -759,28 +1038,11 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 });
         }
 
-        function openCoursesModal(programId) {
+        function openAssignCourseModal(programId) {
             const program = programsData.find(p => p.id === programId);
-            fetchProgramCourses(programId)
-                .then(courses => {
-                    console.log("Courses Data:", courses.data);
-                    if (courses.data && Array.isArray(courses.data)) {
-                        coursesData[programId] = courses.data.map(course => ({
-                            id: course.id,
-                            code: course.code || `Course ${course.id}`,
-                            title: course.name || `Course Name ${course.id}`,
-                            credits: course.credit_hours || 3,
-                            type: course.category || "N/A",
-                            status: course.status || "N/A"
-                        }));
-                    }
-                    document.getElementById('coursesModalTitle').textContent = `${program.title} - Courses`;
-                    renderCoursesList(programId);
-                    document.getElementById('coursesModal').classList.add('active');
-                })
-                .catch(error => {
-                    console.error("Error fetching program courses: ", error);
-                });
+            document.getElementById('assignCourseModalTitle').textContent = `${program.title} - Assign Courses`;
+            document.getElementById('assignCourseModal').classList.add('active');
+            document.getElementById("programSelect").value = programId;
         }
 
         function closeAllModals() {
@@ -806,14 +1068,20 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             }
 
             listContainer.innerHTML = curriculum.map(course => `
-                <div class="list-item" data-year="${course.year}" data-semester="${course.semester}">
+                <div class="list-item" data-year="${course.year}" data-semester="${course.semester}" data-type="${course.type}">
                     <div class="list-item-info">
                         <div class="list-item-title">${course.code} - ${course.title}</div>
                         <div class="list-item-subtitle">Level ${course.year}, Semester ${course.semester} • ${course.credits} Credits • ${course.type}</div>
+                        <div class="list-item-meta">
+                            <span>Status: ${course.status}</span>
+                        </div>
                     </div>
                     <div class="list-item-actions">
-                        <button class="list-item-btn view" onclick="viewCourseDetails(${course.id})">
-                            <i class="fas fa-eye"></i> View
+                        <button class="list-item-btn view" onclick="viewCourseDetails(${course.code})" title="View course details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="list-item-btn remove" onclick="archiveCurriculumCourse(${programId}, '${course.code}')" title="Archive this course from this curriculum">
+                            <i class="fas fa-archive"></i>
                         </button>
                     </div>
                 </div>
@@ -935,6 +1203,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             document.getElementById('curriculumSearch').addEventListener('input', filterCurriculum);
             document.getElementById('curriculumYearFilter').addEventListener('change', filterCurriculum);
             document.getElementById('curriculumSemesterFilter').addEventListener('change', filterCurriculum);
+            document.getElementById('curriculumTypeFilter').addEventListener('change', filterCurriculum);
 
             // Classes filters
             document.getElementById('classesSearch').addEventListener('input', filterClasses);
@@ -945,11 +1214,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             document.getElementById('studentsSearch').addEventListener('input', filterStudents);
             document.getElementById('studentsYearFilter').addEventListener('change', filterStudents);
             document.getElementById('studentsStatusFilter').addEventListener('change', filterStudents);
-
-            // Courses filters
-            document.getElementById('coursesSearch').addEventListener('input', filterCourses);
-            document.getElementById('coursesTypeFilter').addEventListener('change', filterCourses);
-            document.getElementById('coursesStatusFilter').addEventListener('change', filterCourses);
         }
 
         // Modal filter functions
@@ -957,18 +1221,21 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             const searchTerm = document.getElementById('curriculumSearch').value.toLowerCase();
             const yearFilter = document.getElementById('curriculumYearFilter').value;
             const semesterFilter = document.getElementById('curriculumSemesterFilter').value;
+            const typeFilter = document.getElementById('curriculumTypeFilter').value;
 
             const items = document.querySelectorAll('#curriculumList .list-item');
             items.forEach(item => {
                 const title = item.querySelector('.list-item-title').textContent.toLowerCase();
                 const year = item.dataset.year;
                 const semester = item.dataset.semester;
+                const type = item.dataset.type;
 
                 const matchesSearch = title.includes(searchTerm);
                 const matchesYear = yearFilter === 'all' || year === yearFilter;
                 const matchesSemester = semesterFilter === 'all' || semester === semesterFilter;
+                const matchesType = typeFilter === 'all' || type === typeFilter;
 
-                if (matchesSearch && matchesYear && matchesSemester) {
+                if (matchesSearch && matchesYear && matchesSemester && matchesType) {
                     item.style.display = 'flex';
                 } else {
                     item.style.display = 'none';
@@ -1015,29 +1282,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 const matchesStatus = statusFilter === 'all' || status === statusFilter;
 
                 if (matchesSearch && matchesYear && matchesStatus) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        function filterCourses() {
-            const searchTerm = document.getElementById('coursesSearch').value.toLowerCase();
-            const typeFilter = document.getElementById('coursesTypeFilter').value;
-            const statusFilter = document.getElementById('coursesStatusFilter').value;
-
-            const items = document.querySelectorAll('#coursesList .list-item');
-            items.forEach(item => {
-                const title = item.querySelector('.list-item-title').textContent.toLowerCase();
-                const type = item.dataset.type;
-                const status = item.dataset.status;
-
-                const matchesSearch = title.includes(searchTerm);
-                const matchesType = typeFilter === 'all' || type === typeFilter;
-                const matchesStatus = statusFilter === 'all' || status === statusFilter;
-
-                if (matchesSearch && matchesType && matchesStatus) {
                     item.style.display = 'flex';
                 } else {
                     item.style.display = 'none';
@@ -1132,17 +1376,61 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             }
         }
 
-        // Close modals when clicking outside
+        function archiveCurriculumCourse(programId, courseCode) {
+            if (confirm("Are you sure you want to archive this course for this program?")) {
+                // Perform AJAX request to archive curriculum course
+                fetch('../endpoint/archive-curriculum-course', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'program': programId,
+                            'course': courseCode,
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Course archived successfully for this program!");
+                            // Remove course from curriculum list for program
+                            if (curriculumData[programId]) {
+                                curriculumData[programId] = curriculumData[programId].filter(course => course.code !== courseCode);
+                            }
+                            // Optionally, refresh the course list for program
+                            renderCurriculumList(programId);
+                            // hard reload the page to reflect the changes
+                            // window.location.reload();
+                        } else {
+                            alert("Error archiving course for the program: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error archiving program:", error);
+                        alert("An error occurred while archiving the program.");
+                    });
+            }
+        }
+
         window.addEventListener('click', function(event) {
             if (event.target.classList.contains('modal')) {
-                closeAllModals();
+                // Only close the topmost modal if departmentCourseSelectionModal is open
+                if (event.target.id === 'departmentCourseSelectionModal') {
+                    closeModal('departmentCourseSelectionModal');
+                } else {
+                    closeAllModals();
+                }
             }
         });
 
-        // Keyboard navigation for modals
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                closeAllModals();
+                // If departmentCourseSelectionModal is open, close only it
+                if (document.getElementById('departmentCourseSelectionModal').classList.contains('active')) {
+                    closeModal('departmentCourseSelectionModal');
+                } else {
+                    closeAllModals();
+                }
             }
         });
 

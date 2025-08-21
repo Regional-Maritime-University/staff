@@ -110,8 +110,8 @@ class SecretaryController
         // Join for category (always required)
         $joins .= " LEFT JOIN `course_category` AS cg ON c.`fk_category` = cg.`id` ";
 
-        // Join lecturer_course_assignments
-        $joins .= " LEFT JOIN `lecturer_course_assignments` AS lca ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
+        // Join lecturer_courses
+        $joins .= " LEFT JOIN `lecturer_courses` AS lca ON lca.`fk_course` = c.`code` AND lca.`fk_semester` = c.`semester` ";
 
         // Join staff (lecturer)
         $joins .= " LEFT JOIN `staff` AS s ON lca.`fk_staff` = s.`number` ";
@@ -156,8 +156,8 @@ class SecretaryController
             $selectQuery = "SELECT * FROM `course` WHERE `code` = :c";
             $courseData = $this->dm->getData($selectQuery, [":c" => $course]);
 
-            // update lecturer_course_assignments with deadline
-            $query = "UPDATE `lecturer_course_assignments`
+            // update lecturer_courses with deadline
+            $query = "UPDATE `lecturer_courses`
                   SET `submission_deadline` = :dt, 
                       `deadline_note` = :n,
                       `deadline_status` = 'pending',
@@ -237,6 +237,7 @@ class SecretaryController
                 lca.`status`,
                 lca.`created_at`, 
                 lca.`updated_at`, 
+                lca.`fk_semester`,
                 
                 c.`code` AS course_code, 
                 c.`name` AS course_name, 
@@ -264,18 +265,18 @@ class SecretaryController
 
                 -- total registered students (per section)
                 (SELECT COUNT(*) 
-                 FROM `student_course_assignments` scr 
+                 FROM `student_courses` scr 
                  WHERE scr.`fk_course` = lca.`fk_course` 
                    AND scr.`fk_semester` = lca.`fk_semester` 
                    AND scr.`registered` = 1) AS total_registered_students,
 
                 -- total assigned students (per section)
                 (SELECT COUNT(*) 
-                 FROM `student_course_assignments` scr2 
+                 FROM `student_courses` scr2 
                  WHERE scr2.`fk_course` = lca.`fk_course` 
                    AND scr2.`fk_semester` = lca.`fk_semester`) AS total_assigned_students
                   
-              FROM `lecturer_course_assignments` AS lca 
+              FROM `lecturer_courses` AS lca 
               JOIN `department` AS d ON lca.`fk_department` = d.`id`
               JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number`
               JOIN `course` AS c ON lca.`fk_course` = c.`code`
@@ -323,18 +324,18 @@ class SecretaryController
                     
                     -- total registered students
                     (SELECT COUNT(*) 
-                    FROM `student_course_assignments` scr 
+                    FROM `student_courses` scr 
                     WHERE scr.`fk_course` = lca.`fk_course` 
                     AND scr.`fk_semester` = lca.`fk_semester` 
                     AND scr.`registered` = 1) AS total_registered_students,
                     
                     -- total assigned students (all records regardless of registered)
                     (SELECT COUNT(*) 
-                    FROM `student_course_assignments` scr2 
+                    FROM `student_courses` scr2 
                     WHERE scr2.`fk_course` = lca.`fk_course` 
                     AND scr2.`fk_semester` = lca.`fk_semester`) AS total_assigned_students
                     
-                    FROM `lecturer_course_assignments` AS lca 
+                    FROM `lecturer_courses` AS lca 
                     JOIN `department` AS d ON lca.`fk_department` = d.`id` 
                     JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
                     JOIN `course` AS c ON lca.`fk_course` = c.`code` 
@@ -425,6 +426,10 @@ class SecretaryController
                 $result = $this->assignCoursesToClass($data);
                 break;
 
+            case 'program':
+                $result = $this->assignCoursesToProgram($data);
+                break;
+
             default:
                 $result = array("success" => false, "message" => "No match found for selected action!");
                 break;
@@ -447,7 +452,7 @@ class SecretaryController
             $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
 
             // Check if the course is already assigned to any lecturer or the same lecturer
-            $query1 = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_department` = :dt AND `fk_course` = :cc AND `fk_semester` = :si";
+            $query1 = "SELECT * FROM `lecturer_courses` WHERE `fk_department` = :dt AND `fk_course` = :cc AND `fk_semester` = :si";
             $result1 = $this->dm->getData($query1, array(":dt" => $data["department"], ":cc" => $course, ":si" => $data["semester"]));
 
             if ($result1) {
@@ -460,7 +465,7 @@ class SecretaryController
                 continue;
             }
 
-            $query2 = "INSERT INTO `lecturer_course_assignments` (`fk_department`, `fk_staff`, `fk_course`, `fk_semester`, `notes`) VALUES (:di, :sn, :cc, :si, :nt)";
+            $query2 = "INSERT INTO `lecturer_courses` (`fk_department`, `fk_staff`, `fk_course`, `fk_semester`, `notes`) VALUES (:di, :sn, :cc, :si, :nt)";
             $result2 = $this->dm->inputData($query2, array(":di" => $data["department"], ":sn" => $data["lecturer"],  ":cc" => $course, ":si" => $data["semester"], ":nt" => $data["notes"]));
 
             if (!$result2) {
@@ -498,7 +503,7 @@ class SecretaryController
             $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
 
             // Check if the course is already assigned to any student or the same student
-            $query1 = "SELECT * FROM `student_course_assignments` WHERE `fk_student` = :st AND `fk_course` = :cc";
+            $query1 = "SELECT * FROM `student_courses` WHERE `fk_student` = :st AND `fk_course` = :cc";
             $result1 = $this->dm->getData($query1, array(":st" => $data["student"], ":cc" => $course));
 
             $studentFullName = "{$studentData["prefix"]} {$studentData["first_name"]} {$studentData["last_name"]} ({$studentData["index_number"]})";
@@ -526,7 +531,7 @@ class SecretaryController
                 continue;
             }
 
-            $query3 = "INSERT INTO `student_course_assignments` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+            $query3 = "INSERT INTO `student_courses` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
                         VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
             $result3 = $this->dm->inputData(
                 $query3,
@@ -572,10 +577,9 @@ class SecretaryController
         foreach ($data["courses"] as $course) {
             // Fetch class details
             $classData = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "code", value: $data["class"], archived: false)[0];
-            //return $classData;
+
             // Fetch course details
             $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
-            //return $courseData;
 
             // Check if the course is already assigned to any class or the same class
             $query1 = "SELECT * FROM `section` WHERE `fk_class` = :cs AND `fk_course` = :cc";
@@ -585,8 +589,6 @@ class SecretaryController
                 $errorEncountered++;
                 if ($result1[0]["fk_class"] == $data["class"]) {
                     array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to {$data["class"]}.");
-                } else {
-                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to another class.");
                 }
                 continue;
             }
@@ -597,10 +599,7 @@ class SecretaryController
 
             if (empty($result2)) {
                 $errorEncountered++;
-                array_push(
-                    $errors,
-                    "Curricullum not set for this class {$data["class"]}."
-                );
+                array_push($errors, "Curricullum not set for this class {$data["class"]}.");
                 continue;
             }
 
@@ -626,9 +625,9 @@ class SecretaryController
 
             // fetch all students in the class
             $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "class", value: $data["class"], archived: false);
-            // assign course and semester to all students in the class in the student_course_assignments table
+            // assign course and semester to all students in the class in the student_courses table
             foreach ($students as $student) {
-                $query4 = "INSERT INTO `student_course_assignments` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+                $query4 = "INSERT INTO `student_courses` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
                             VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
                 $result4 = $this->dm->inputData(
                     $query4,
@@ -667,9 +666,60 @@ class SecretaryController
         );
     }
 
+    public function assignCoursesToProgram($data)
+    {
+        $errorEncountered = 0;
+        $successEncountered = 0;
+        $errors = [];
+        $coursesAssigned = [];
+
+        foreach ($data["courses"] as $course) {
+            // Fetch lecturer details
+            $programData = (new Program($this->db, $this->user, $this->pass))->fetch(key: "id", value: $data["program"], archived: false)[0];
+            // Fetch course details
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+
+            // Check if the course is already assigned to any lecturer or the same lecturer
+            $query1 = "SELECT * FROM `curriculum` WHERE `fk_program` = :dt AND `fk_course` = :cc";
+            $result1 = $this->dm->getData($query1, array(":dt" => $data["program"], ":cc" => $course));
+
+            if ($result1) {
+                $errorEncountered++;
+                if ($result1[0]["fk_program"] == $data["program"]) {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to {$programData["name"]}.");
+                } else {
+                    array_push($errors, "{$courseData["name"]} ({$courseData["code"]}) is already assigned to another program.");
+                }
+                continue;
+            }
+
+            $query2 = "INSERT INTO `curriculum` (`fk_program`, `fk_course`) VALUES (:p, :c)";
+            $result2 = $this->dm->inputData($query2, array(":p" => $data["program"], ":c" => $course));
+
+            if (!$result2) {
+                $errorEncountered++;
+                array_push($errors, "Fatal error occurred while in server!");
+            }
+
+            $successEncountered++;
+            array_push($coursesAssigned, $course);
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned{$courseData["name"]} ({$course}) to {$programData["name"]}");
+        }
+
+        $messageStatus = $successEncountered ? true : false;
+        $courses = $coursesAssigned ? implode(", ", $coursesAssigned) : "";
+        $errors = implode(" | ", $errors);
+        $message = $messageStatus ? "Successfully assigned {$successEncountered} [{$courses}] course(s) to {$programData["name"]}!" : $errors;
+
+        return array(
+            "success" => $messageStatus,
+            "message" => $message
+        );
+    }
+
     public function fetchSemesterCourseAssignmentsByLecturer($lecturerId, $semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_staff` = :sn AND `fk_semester` = :si";
+        $query = "SELECT * FROM `lecturer_courses` WHERE `fk_staff` = :sn AND `fk_semester` = :si";
         return $this->dm->getData($query, array(":sn" => $lecturerId, ":si" => $semesterId));
     }
 
@@ -679,7 +729,7 @@ class SecretaryController
                 st.`prefix` AS lecturer_prefix, st.`first_name` AS lecturer_first_name, st.`last_name` AS lecturer_last_name, 
                 cc.`name` AS course_name, cc.`credit_hours` AS course_credit_hours, cc.`contact_hours` AS course_contact_hours,
                 cc.`semester` AS course_semester, cc.`level` AS course_level 
-                FROM `lecturer_course_assignments` AS lca, `course` AS cc, `staff` AS st 
+                FROM `lecturer_courses` AS lca, `course` AS cc, `staff` AS st 
                 WHERE lca.`fk_course` = cc.`code` AND lca.`fk_staff` = st.`number` AND 
                     lca.`fk_department` = :di AND lca.`fk_semester` = :si GROUP BY `fk_staff`";
         return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
@@ -687,13 +737,13 @@ class SecretaryController
 
     public function fetchSemesterCourseAssignmentsByCourse($courseCode, $semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_course` = :cc AND `fk_semester` = :si";
+        $query = "SELECT * FROM `lecturer_courses` WHERE `fk_course` = :cc AND `fk_semester` = :si";
         return $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
     }
 
     public function fetchSemesterCourseAssignmentsGroupByCourse($courseCode, $semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_course` = :cc AND `fk_semester` = :si GROUP BY `fk_course`";
+        $query = "SELECT * FROM `lecturer_courses` WHERE `fk_course` = :cc AND `fk_semester` = :si GROUP BY `fk_course`";
         return $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
     }
 
@@ -709,7 +759,7 @@ class SecretaryController
                     c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
                     cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
                 FROM 
-                    `lecturer_course_assignments` AS lca 
+                    `lecturer_courses` AS lca 
                     JOIN `department` AS d ON lca.`fk_department` = d.`id` 
                     JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
                     JOIN `course` AS c ON lca.`fk_course` = c.`code` 
@@ -731,7 +781,7 @@ class SecretaryController
                     c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
                     cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
                 FROM 
-                    `lecturer_course_assignments` AS lca 
+                    `lecturer_courses` AS lca 
                     JOIN `department` AS d ON lca.`fk_department` = d.`id` 
                     JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
                     JOIN `course` AS c ON lca.`fk_course` = c.`code` 
@@ -753,7 +803,7 @@ class SecretaryController
                     c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
                     cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
                 FROM 
-                    `lecturer_course_assignments` AS lca 
+                    `lecturer_courses` AS lca 
                     JOIN `department` AS d ON lca.`fk_department` = d.`id` 
                     JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
                     JOIN `course` AS c ON lca.`fk_course` = c.`code` 
@@ -775,7 +825,7 @@ class SecretaryController
                 c.`level` AS course_level, c.`archived` AS course_archived, c.`fk_category` AS course_category_id, cg.`name` AS course_category_name,
                 cg.`archived` AS course_category_archived, c.`fk_department` AS course_fk_department 
             FROM 
-                `lecturer_course_assignments` AS lca 
+                `lecturer_courses` AS lca 
                 JOIN `department` AS d ON lca.`fk_department` = d.`id` 
                 JOIN `staff` AS sf ON lca.`fk_staff` = sf.`number` 
                 JOIN `course` AS c ON lca.`fk_course` = c.`code` 
@@ -789,13 +839,13 @@ class SecretaryController
 
     public function fetchSemesterCourseAssignmentsGroupByDepartment($departmentId, $semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_department` = :di AND `fk_semester` = :si GROUP BY `fk_department`";
+        $query = "SELECT * FROM `lecturer_courses` WHERE `fk_department` = :di AND `fk_semester` = :si GROUP BY `fk_department`";
         return $this->dm->getData($query, array(":di" => $departmentId, ":si" => $semesterId));
     }
 
     public function fetchSemesterCourseAssignmentsBySemester($semesterId)
     {
-        $query = "SELECT * FROM `lecturer_course_assignments` WHERE `fk_semester` = :si";
+        $query = "SELECT * FROM `lecturer_courses` WHERE `fk_semester` = :si";
         return $this->dm->getData($query, array(":si" => $semesterId));
     }
 
@@ -901,7 +951,7 @@ class SecretaryController
         $query = "SELECT DISTINCT c.`code`, c.`name`, c.`credit_hours`, c.`contact_hours`, c.`semester`, c.`level`, c.`archived`, 
                 `fk_category` AS category_id, cg.`name` AS category, `fk_department` AS `fk_department`, d.`name` AS `department_name` 
                 FROM `course` AS c, `course_category` AS cg, `department` AS d, `curriculum` AS cu 
-                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND c.`archived` = :ar";
+                WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND cu.`fk_course` = c.`code` AND cu.`fk_program` = :p AND d.`id` = :d AND cu.`archived` = :ar";
         return $this->dm->getData($query, array(":ar" => $archived, ":d" => $departmentId, ":p" => $programId));
     }
 
@@ -962,7 +1012,8 @@ class SecretaryController
         $query = "SELECT r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, r.`project_based`, cr.`name` AS course, sm.`name` AS semester
                 FROM `exam_results` AS r 
                 JOIN `course` AS cr ON r.`fk_course` = cr.`code` 
-                JOIN `class` AS cs ON r.`class` = cs.`code` 
+                JOIN `class` AS cs ON r.`fk_class` = cs.`code` 
+                JOIN `semester` AS sm ON r.`fk_semester` = sm.`id` 
                 WHERE r.`fk_semester` = :sm AND r.`fk_course` = :cr AND r.`fk_class` = :cs";
         $params = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
         $results = $this->dm->getData($query, $params);
@@ -972,13 +1023,13 @@ class SecretaryController
         }
 
         // Determine if the course is project based (assume all results have the same course)
-        $isProjectBased = (bool)$results[0]['is_project_based'];
+        $isProjectBased = (bool) $results[0]['project_based'];
 
         if ($isProjectBased) {
-            return ["Student ID", "Exam Score (40%)", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"];
+            return ["success" => true, "data" => ["Student ID", "Exam Score (40%)", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"]];
         }
 
-        return ["Student ID", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"];
+        return ["success" => true, "data" => ["Student ID", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"]];
     }
 
     // Create functions for to perform CRUD operations on lecturers. The adding of a lecturer should send an SMS and also email use the sms and email functions

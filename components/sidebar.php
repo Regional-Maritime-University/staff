@@ -29,13 +29,13 @@
                         <i class="fas fa-th-list"></i>
                         <span>Programs</span>
                     </a>
-                    <a href="classes.php" class="menu-item  <?= $activePage == 'classes' ? 'active' : '' ?>">
-                        <i class="fas fa-th-large"></i>
-                        <span>Classes</span>
-                    </a>
                     <a href="courses.php" class="menu-item  <?= $activePage == 'courses' ? 'active' : '' ?>">
                         <i class="fas fa-book"></i>
                         <span>Courses</span>
+                    </a>
+                    <a href="classes.php" class="menu-item  <?= $activePage == 'classes' ? 'active' : '' ?>">
+                        <i class="fas fa-th-large"></i>
+                        <span>Classes</span>
                     </a>
                     <a href="students.php" class="menu-item  <?= $activePage == 'students' ? 'active' : '' ?>">
                         <i class="fas fa-users"></i>

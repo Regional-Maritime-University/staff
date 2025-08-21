@@ -129,7 +129,7 @@ if ($deadlines && is_array($deadlines)) {
                         <?php if ($deadline['deadline_status'] == 'pending') : ?>
                             <div class="result-card">
                                 <div class="result-header">
-                                    <h3 class="result-title"><?= $deadline['course_name'] ?></h3>
+                                    <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
                                     <span class="result-status pending">Pending</span>
                                 </div>
                                 <div class="result-info">
@@ -364,8 +364,8 @@ if ($deadlines && is_array($deadlines)) {
             const fetchCourseResults = async (classCode, courseCode, semesterId) => {
                 try {
                     // fetch course results headers first
-                    if (!courseCode || !semesterId) {
-                        alert('Course code and semester ID are required to fetch results.');
+                    if (!classCode || !courseCode || !semesterId) {
+                        alert('Class code, course code and semester ID are required to fetch results.');
                         return [];
                     }
 
@@ -427,9 +427,9 @@ if ($deadlines && is_array($deadlines)) {
                     const classCode = this.getAttribute('data-class');
                     const courseCode = this.getAttribute('data-course');
                     const semesterId = this.getAttribute('data-semester');
-
-                    // fetch results data based on courseCode and semesterId
-                    fetchCourseResults(courseCode, semesterId).then(result => {
+                    console.log(classCode);
+                    // fetch results data based on classCode, courseCode and semesterId
+                    fetchCourseResults(classCode, courseCode, semesterId).then(result => {
                         if (result.success) {
                             const modal = document.getElementById('viewResultsModal');
                             const courseInfo = modal.querySelector('.course-info');

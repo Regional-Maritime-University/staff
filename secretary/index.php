@@ -60,14 +60,16 @@ $totalActiveCourses = count($activeCourses);
 $assignedCourses = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedCourses = array_merge($assignedCourses, $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId));
+    $departmentAssigndCourses = $secretary->fetchSemesterCourseAssignmentsByDepartment($departmentId, $semesterId);
+    if ($departmentAssigndCourses) $assignedCourses = array_merge($assignedCourses, $departmentAssigndCourses);
 }
 $totalAssignedCourses = $assignedCourses && is_array($assignedCourses) ? count($assignedCourses) : 0;
 
 $assignedLecturers = [];
 foreach ($activeSemesters as $semester) {
     $semesterId = $semester['id'];
-    $assignedLecturers = array_merge($assignedLecturers, $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId));
+    $departmentAssignedLecturers = $secretary->fetchSemesterCourseAssignmentsGroupByLecturer($departmentId, $semesterId);
+    if ($departmentAssignedLecturers) $assignedLecturers = array_merge($assignedLecturers, $departmentAssignedLecturers);
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 

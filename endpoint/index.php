@@ -508,6 +508,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 }
                 break;
 
+            case 'program':
+                if (! isset($_POST["program"]) || empty($_POST["program"])) {
+                    die(json_encode(["success" => false, "message" => "Program is required!"]));
+                }
+                break;
+
             default:
                 die(json_encode(["success" => false, "message" => "Invalid action requested!"]));
                 break;
@@ -516,16 +522,29 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["courses"]) || empty($_POST["courses"])) {
             die(json_encode(["success" => false, "message" => "Select at least one course!"]));
         }
-        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
-            die(json_encode(["success" => false, "message" => "Semester is required!"]));
-        }
-        if (! isset($_POST["department"]) || empty($_POST["department"])) {
-            die(json_encode(["success" => false, "message" => "Department is required!"]));
+
+        if ($_POST["action"] !== "program") {
+            if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+                die(json_encode(["success" => false, "message" => "Semester is required!"]));
+            }
+            if (! isset($_POST["department"]) || empty($_POST["department"])) {
+                die(json_encode(["success" => false, "message" => "Department is required!"]));
+            }
         }
 
         $notes = isset($_POST["notes"]) ? $_POST["notes"] : null;
 
         die(json_encode($secretary->assignCourses($_POST)));
+    } elseif ($_GET["url"] == "archive-curriculum-course") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        }
+        $result = $program->archiveCurriculumCourse($_POST["program"], $_POST["course"]);
+        die(json_encode($result));
     }
 
     // Class

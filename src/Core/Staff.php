@@ -58,13 +58,14 @@ class Staff
 
         $params = $value ? [":v" => $value, ":ar" => $archived] : [":ar" => $archived];
         $staffData = $this->dm->getData($query, $params);
+        return $staffData;
 
         if (($includeCourses || $includeDeadlines) && !empty($staffData)) {
             foreach ($staffData as &$staff) {
                 if ($includeCourses) {
                     $courseQuery = "SELECT c.*
                         FROM `course` c
-                        JOIN `lecturer_course_assignments` lca ON lca.`fk_course` = c.`code`
+                        JOIN `lecturer_courses` lca ON lca.`fk_course` = c.`code`
                         JOIN `semester` sem ON sem.`id` = lca.`fk_semester`
                         JOIN `staff` sn ON sn.`number` = lca.`fk_staff`
                         WHERE lca.`fk_staff` = :sn AND sem.`active` = 1

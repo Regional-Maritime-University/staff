@@ -862,6 +862,11 @@ body {
 	color: white;
 }
 
+.list-item-btn.remove {
+	background-color: var(--danger-color);
+	color: white;
+}
+
 .list-item-btn:hover {
 	transform: translateY(-1px);
 }

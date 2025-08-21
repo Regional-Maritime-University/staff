@@ -1,6 +1,22 @@
+DROP TABLE IF EXISTS `course_registration`;
+CREATE TABLE `course_registration` (
+    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+    `fk_course` VARCHAR(10),
+    `fk_student` VARCHAR(10),
+    `fk_semester` INT(11),
+    `added_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL,
+    CONSTRAINT `fk_course_registration_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_course_registration_student` FOREIGN KEY (`fk_student`) REFERENCES `student` (`index_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_course_registration_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE INDEX `course_registration_added_at_idx1` ON `course_registration` (`added_at`);
+CREATE INDEX `course_registration_updated_at_idx1` ON `course_registration` (`updated_at`);
+
 ALTER TABLE staff ADD COLUMN `designation` VARCHAR(100) AFTER `gender`;
 
-CREATE TABLE IF NOT EXISTS `lecturer_course_assignments` (
+CREATE TABLE IF NOT EXISTS `lecturer_courses` (
     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
     `fk_department` INT(11),
     `fk_staff` VARCHAR(10),
@@ -9,14 +25,14 @@ CREATE TABLE IF NOT EXISTS `lecturer_course_assignments` (
     `notes` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_lecturer_course_assignments_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_lecturer_course_assignments_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `fk_lecturer_courses_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_courses_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_courses_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_lecturer_courses_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-CREATE INDEX `created_at_idx1` ON `lecturer_course_assignments` (`created_at`);
-CREATE INDEX `updated_at_idx1` ON `lecturer_course_assignments` (`updated_at`);
+CREATE INDEX `created_at_idx1` ON `lecturer_courses` (`created_at`);
+CREATE INDEX `updated_at_idx1` ON `lecturer_courses` (`updated_at`);
 
 ALTER TABLE `activity_logs` ADD COLUMN `type` VARCHAR(50) DEFAULT 'admin' AFTER `operation`;
 ALTER TABLE `activity_logs` ADD COLUMN `action` VARCHAR(100) AFTER `type`;
@@ -80,34 +96,34 @@ ADD CONSTRAINT `fk_activities_logs_department` FOREIGN KEY (`fk_department`) REF
 
 // remember to also alter the code to properly account for the department insertion into the activity logs table
 
-RENAME TABLE `assigned_courses` TO `student_course_assignments`;
-ALTER TABLE `student_course_assignments` ADD COLUMN `fk_semester` INT AFTER `fk_course`;
-ALTER TABLE `student_course_assignments` ADD CONSTRAINT `fk_student_course_assignments_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE `student_course_assignments` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
+RENAME TABLE `assigned_courses` TO `student_courses`;
+ALTER TABLE `student_courses` ADD COLUMN `fk_semester` INT AFTER `fk_course`;
+ALTER TABLE `student_courses` ADD CONSTRAINT `fk_student_courses_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `student_courses` ADD COLUMN `notes` TEXT DEFAULT NULL AFTER `fk_semester`;
 
-ALTER TABLE `student_course_assignments` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `semester`; -- will deferred or atcive
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_status_idx1` (`status`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `continues_assessments_score` DECIMAL(5,2) DEFAULT 0 AFTER `status`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_continues_assessments_score_idx1` (`continues_assessments_score`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `project_score` DECIMAL(5,2) DEFAULT 0 AFTER `continues_assessments_score`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_project_score_idx1` (`project_score`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `exam_score` DECIMAL(5,2) DEFAULT 0 AFTER `continues_assessments_score`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_exam_idx1` (`exam_score`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `final_score` DECIMAL(5,2) DEFAULT 0 AFTER `exam_score`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_final_score_idx1` (`final_score`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `grade` VARCHAR(5) DEFAULT NULL AFTER `final_score`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_grade_idx1` (`grade`);
-ALTER TABLE `student_course_assignments` ADD COLUMN `gpa` DECIMAL(4,2) DEFAULT NULL AFTER `grade`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_gpa_idx1` (`gpa`);
+ALTER TABLE `student_courses` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `semester`; -- will deferred or atcive
+ALTER TABLE `student_courses` ADD INDEX `student_courses_status_idx1` (`status`);
+ALTER TABLE `student_courses` ADD COLUMN `continues_assessments_score` DECIMAL(5,2) DEFAULT 0 AFTER `status`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_continues_assessments_score_idx1` (`continues_assessments_score`);
+ALTER TABLE `student_courses` ADD COLUMN `project_score` DECIMAL(5,2) DEFAULT 0 AFTER `continues_assessments_score`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_project_score_idx1` (`project_score`);
+ALTER TABLE `student_courses` ADD COLUMN `exam_score` DECIMAL(5,2) DEFAULT 0 AFTER `continues_assessments_score`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_exam_idx1` (`exam_score`);
+ALTER TABLE `student_courses` ADD COLUMN `final_score` DECIMAL(5,2) DEFAULT 0 AFTER `exam_score`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_final_score_idx1` (`final_score`);
+ALTER TABLE `student_courses` ADD COLUMN `grade` VARCHAR(5) DEFAULT NULL AFTER `final_score`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_grade_idx1` (`grade`);
+ALTER TABLE `student_courses` ADD COLUMN `gpa` DECIMAL(4,2) DEFAULT NULL AFTER `grade`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_gpa_idx1` (`gpa`);
 
 -- Trigger to calculate the final score and grade when a new record is inserted
 -- This trigger will automatically calculate the final score and grade based on the assessment scores and weights
 
-DROP TRIGGER IF EXISTS `student_course_assignments_insert_trigger`;
+DROP TRIGGER IF EXISTS `student_courses_insert_trigger`;
 DELIMITER //
 
-CREATE TRIGGER `student_course_assignments_insert_trigger`
-BEFORE INSERT ON `student_course_assignments`
+CREATE TRIGGER `student_courses_insert_trigger`
+BEFORE INSERT ON `student_courses`
 FOR EACH ROW
 BEGIN
     DECLARE final_score DECIMAL(5,2);
@@ -162,11 +178,11 @@ DELIMITER ;
 -- Trigger to update the final score and grade when the assessment scores or weights are updated
 -- This trigger will automatically calculate the final score and grade based on the assessment scores and weights
 
-DROP TRIGGER IF EXISTS `student_course_assignments_update_trigger`;
+DROP TRIGGER IF EXISTS `student_courses_update_trigger`;
 DELIMITER //
 
-CREATE TRIGGER `student_course_assignments_update_trigger`
-BEFORE UPDATE ON `student_course_assignments`
+CREATE TRIGGER `student_courses_update_trigger`
+BEFORE UPDATE ON `student_courses`
 FOR EACH ROW
 BEGIN
     DECLARE final_score DECIMAL(5,2);
@@ -226,11 +242,11 @@ DELIMITER ;
 
 
 -- Trigger to update the gpa field in the stduent course assignments table on update
-DROP TRIGGER IF EXISTS `student_course_assignments_update_gpa_trigger`;
+DROP TRIGGER IF EXISTS `student_courses_update_gpa_trigger`;
 DELIMITER //
 
-CREATE TRIGGER `student_course_assignments_update_gpa_trigger`
-AFTER UPDATE ON `student_course_assignments`
+CREATE TRIGGER `student_courses_update_gpa_trigger`
+AFTER UPDATE ON `student_courses`
 FOR EACH ROW
 BEGIN
     DECLARE gpa DECIMAL(4,2) DEFAULT 0.00;
@@ -239,13 +255,13 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
     INTO gpa
-    FROM student_course_assignments AS sca
+    FROM student_courses AS sca
     JOIN grade_points AS gp ON sca.grade = gp.grade
     WHERE sca.fk_student = NEW.fk_student AND sca.fk_semester = NEW.fk_semester;
 
     -- Optional: store per-row GPA if you insist on doing so (less common)
     -- Otherwise, this would be better stored in a `student_semester_gpa` summary table
-    UPDATE student_course_assignments
+    UPDATE student_courses
     SET gpa = gpa
     WHERE fk_student = NEW.fk_student AND fk_semester = NEW.fk_semester;
 END;
@@ -277,7 +293,7 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
     AS gpa
-    FROM student_course_assignments AS sca
+    FROM student_courses AS sca
     JOIN grade_points AS gp ON sca.grade = gp.grade
     WHERE sca.fk_student = in_student_id AND sca.fk_semester = in_semester_id;
 END;
@@ -293,7 +309,7 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / SUM(sca.credit_hours), 2)
     AS cgpa 
-    FROM student_course_assignments AS sca 
+    FROM student_courses AS sca 
     JOIN grade_points AS gp ON sca.grade = gp.grade 
     WHERE sca.fk_student = in_student_id;
 END;
@@ -314,7 +330,7 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
     INTO gpa
-    FROM student_course_assignments AS sca
+    FROM student_courses AS sca
     JOIN grade_points AS gp ON sca.grade = gp.grade
     WHERE sca.fk_student = in_student_id AND sca.fk_semester = in_semester_id;
 
@@ -322,7 +338,7 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
     INTO cgpa 
-    FROM student_course_assignments AS sca 
+    FROM student_courses AS sca 
     JOIN grade_points AS gp ON sca.grade = gp.grade 
     WHERE sca.fk_student = in_student_id;
 
@@ -330,14 +346,14 @@ BEGIN
     SELECT 
         SUM(credit_hours)
     INTO total_credits
-    FROM student_course_assignments
+    FROM student_courses
     WHERE fk_student = in_student_id;
 
     -- Total number of courses registered by student
     SELECT 
         COUNT(*)
     INTO total_courses
-    FROM student_course_assignments
+    FROM student_courses
     WHERE fk_student = in_student_id;
 
     -- Return all results
@@ -348,7 +364,6 @@ BEGIN
         total_courses AS total_courses;
 END;
 //
-
 DELIMITER ;
 
 
@@ -390,7 +405,7 @@ BEGIN
     SELECT 
         ROUND(SUM(gp.point * sca.credit_hours) / SUM(sca.credit_hours), 2)
     INTO cumulative_gpa 
-    FROM student_course_assignments AS sca 
+    FROM student_courses AS sca 
     JOIN grade_points AS gp ON sca.grade = gp.grade 
     WHERE sca.fk_student = in_student_id;
     SELECT cumulative_gpa AS cgpa;
@@ -411,7 +426,7 @@ BEGIN
             NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0), 2) AS gpa,
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
     FROM student AS s 
-    JOIN student_course_assignments AS sca ON s.index_number = sca.fk_student 
+    JOIN student_courses AS sca ON s.index_number = sca.fk_student 
     JOIN grade_points AS gp ON sca.grade = gp.grade 
     WHERE s.archived = 0 
     GROUP BY s.index_number;
@@ -432,7 +447,7 @@ BEGIN
             NULLIF(SUM(CASE WHEN sca.fk_semester = in_semester_id THEN sca.credit_hours ELSE 0 END), 0), 2) AS gpa,
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
     FROM student AS s 
-    JOIN student_course_assignments AS sca ON s.index_number = sca.fk_student 
+    JOIN student_courses AS sca ON s.index_number = sca.fk_student 
     JOIN grade_points AS gp ON sca.grade = gp.grade 
     JOIN department AS d ON s.fk_department = d.id 
     WHERE d.id = in_department_id AND s.archived = 0 
@@ -468,7 +483,7 @@ BEGIN
         ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
 
     FROM students s
-    JOIN student_course_assignments sca ON s.index_number = sca.fk_student
+    JOIN student_courses sca ON s.index_number = sca.fk_student
     JOIN grade_points gp ON sca.grade = gp.grade
     JOIN department d ON s.fk_department = d.id
     WHERE s.archived = 0 AND d.id = in_department_id
@@ -531,27 +546,27 @@ ALTER TABLE `staff` ADD INDEX `staff_phone_number_idx1` (`phone_number`);
 ALTER TABLE `staff` ADD COLUMN `availability` VARCHAR(50) DEFAULT 'available' AFTER `phone_number`;
 ALTER TABLE `staff` ADD INDEX `staff_availability_idx1` (`availability`);
 
-ALTER TABLE `lecturer_course_assignments` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `notes`;
-ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_status_idx1` (`status`);
-ALTER TABLE `lecturer_course_assignments` ADD COLUMN `submission_deadline` DATE DEFAULT NULL AFTER `notes`;
-ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_submission_deadline_idx1` (`submission_deadline`);
-ALTER TABLE `lecturer_course_assignments` ADD COLUMN `deadline_note` TEXT DEFAULT NULL AFTER `submission_deadline`;
-ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_deadline_note_idx1` (`deadline_note`);
-ALTER TABLE `lecturer_course_assignments` ADD COLUMN `deadline_status` VARCHAR(15) DEFAULT NULL AFTER `deadline_note`;
-ALTER TABLE `lecturer_course_assignments` ADD INDEX `lecturer_course_assignments_deadline_status_idx1` (`deadline_status`);
+ALTER TABLE `lecturer_courses` ADD COLUMN `status` VARCHAR(15) DEFAULT 'active' AFTER `notes`;
+ALTER TABLE `lecturer_courses` ADD INDEX `lecturer_courses_status_idx1` (`status`);
+ALTER TABLE `lecturer_courses` ADD COLUMN `submission_deadline` DATE DEFAULT NULL AFTER `notes`;
+ALTER TABLE `lecturer_courses` ADD INDEX `lecturer_courses_submission_deadline_idx1` (`submission_deadline`);
+ALTER TABLE `lecturer_courses` ADD COLUMN `deadline_note` TEXT DEFAULT NULL AFTER `submission_deadline`;
+ALTER TABLE `lecturer_courses` ADD INDEX `lecturer_courses_deadline_note_idx1` (`deadline_note`);
+ALTER TABLE `lecturer_courses` ADD COLUMN `deadline_status` VARCHAR(15) DEFAULT NULL AFTER `deadline_note`;
+ALTER TABLE `lecturer_courses` ADD INDEX `lecturer_courses_deadline_status_idx1` (`deadline_status`);
 
 DROP TABLE IF EXISTS `deadlines`;
 DROP TABLE IF EXISTS `class_advisor`;
 DROP TABLE IF EXISTS `departments`;
 
-ALTER TABLE `student_course_assignments` ADD COLUMN `registered` TINYINT(1) DEFAULT 0 AFTER `status`;
-ALTER TABLE `student_course_assignments` ADD INDEX `student_course_assignments_registered_idx1` (`registered`);
+ALTER TABLE `student_courses` ADD COLUMN `registered` TINYINT(1) DEFAULT 0 AFTER `status`;
+ALTER TABLE `student_courses` ADD INDEX `student_courses_registered_idx1` (`registered`);
 
 DROP TABLE IF EXISTS `exam_results`;
 CREATE TABLE IF NOT EXISTS `exam_results` (
     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
     `fk_class` VARCHAR(10),
-    `fk_semseter` INT(11),
+    `fk_semester` INT(11),
     `fk_staff` VARCHAR(10),
     `fk_course` VARCHAR(10),
     `project_based` TINYINT(1) DEFAULT 0,
@@ -564,7 +579,7 @@ CREATE TABLE IF NOT EXISTS `exam_results` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME,
     CONSTRAINT `fk_exam_results_class` FOREIGN KEY (`fk_class`) REFERENCES `class` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_exam_results_semester` FOREIGN KEY (`fk_semseter`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_exam_results_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_exam_results_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_exam_results_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -573,6 +588,8 @@ CREATE INDEX `exam_results_created_at_idx1` ON `exam_results` (`created_at`);
 CREATE INDEX `exam_results_updated_at_idx1` ON `exam_results` (`updated_at`);
 CREATE INDEX `exam_results_status_idx1` ON `exam_results` (`status`);
 CREATE INDEX `exam_results_file_name_idx1` ON `exam_results` (`file_name`);
+
+ALTER TABLE `curriculum` ADD COLUMN `archived` TINYINT(1) DEFAULT 0;
 
 
 

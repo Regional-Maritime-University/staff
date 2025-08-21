@@ -48,7 +48,7 @@ class Deadline
                 break;
         }
 
-        $query = "SELECT lca.`id`, lca.`fk_department` AS department_id, lca.`fk_staff` AS lecturer_id, lca.`fk_course` AS department_id, `archived` FROM `lecturer_course_assignments` lca WHERE `archived` = :ar $concat_stmt";
+        $query = "SELECT lca.`id`, lca.`fk_department` AS department_id, lca.`fk_staff` AS lecturer_id, lca.`fk_course` AS department_id, `archived` FROM `lecturer_courses` lca WHERE `archived` = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
     }
