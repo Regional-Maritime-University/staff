@@ -58,7 +58,9 @@ class Program
                 FROM `programs` AS p, `forms` AS f, `department` AS d 
                 WHERE p.`type` = f.`id` AND p.`department` = d.`id` AND p.`archived` = :ar $concat_stmt ORDER BY `updated_at` DESC";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+
+        $result = $this->dm->getData($query, $params);
+        return $result ? array("success" => true, "data" => $result) : array("success" => false, "message" => "No program found!");
     }
 
     public function add(array $data)

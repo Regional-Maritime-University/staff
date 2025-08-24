@@ -48,7 +48,9 @@ class Classes
                     WHERE c.`archived` = :ar $concat_stmt
                     ORDER BY c.`year` DESC, c.`code` ASC";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+
+        $result = $this->dm->getData($query, $params);
+        return $result ? array("success" => true, "data" => $result) : array("success" => false, "data" => "No classes found!");
     }
 
     public function assign(array $data)

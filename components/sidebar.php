@@ -49,10 +49,6 @@
                         <i class="fas fa-clipboard-check"></i>
                         <span>Exam Results</span>
                     </a>
-                    <a href="deadlines.php" class="menu-item <?= $activePage == 'deadlines' ? 'active' : '' ?>">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Deadlines</span>
-                    </a>
                 </div>
             <?php
             } else if ($_SESSION["staff"]["role"] == "lecturer") { ?>
@@ -80,10 +76,15 @@
         <div class="menu-group">
             <h3>Reports & Communication</h3>
             <div class="menu-items">
-                <a href="#" class="menu-item <?= $activePage == 'Reports' ? 'active' : '' ?>">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Reports</span>
-                </a>
+
+                <?php
+                if ($_SESSION["staff"]["role"] == "secretary" || $_SESSION["staff"]["role"] == "hod") {
+                ?>
+                    <a href="#" class="menu-item <?= $activePage == 'Reports' ? 'active' : '' ?>">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                <?php } ?>
                 <a href="messages.php" class="menu-item <?= $activePage == 'messages' ? 'active' : '' ?>">
                     <i class="fas fa-comments"></i>
                     <span>Messages</span>

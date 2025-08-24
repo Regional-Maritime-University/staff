@@ -68,6 +68,7 @@ class Student
                 s.`fk_academic_year` = ay.`id` AND s.`fk_department` = d.`id` AND 
                 s.`fk_program` = p.`id` AND s.`fk_class` = c.`code` AND s.`archived` = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
+
         $result = $this->dm->getData($query, $params);
         return $result ? array("success" => true, "data" => $result) : array("success" => false, "message" => "No students found!");
     }

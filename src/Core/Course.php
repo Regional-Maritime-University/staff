@@ -50,7 +50,9 @@ class Course
                 FROM `course` AS c, `course_category` AS cg, `department` AS d 
                 WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND c.`archived` = :ar $concat_stmt ORDER BY c.`code` ASC";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+
+        $result = $this->dm->getData($query, $params);
+        return $result ? array("success" => true, "data" => $result) : array("success" => false, "data" => "No courses found!");
     }
 
     public function add(array $data)
@@ -168,7 +170,7 @@ class Course
         }
         $query = "SELECT COUNT(c.`code`) AS total FROM `course` AS c, `course_category` AS cg, `department` AS d 
         WHERE c.`fk_category` = cg.`id` AND c.`fk_department` = d.`id` AND c.`archived` = :ar $concat_stmt";
-        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+        $params = $value && !empty($concat_stmt) ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
+        return $this->dm->getData($query, $params)[0]["total"];
     }
 }

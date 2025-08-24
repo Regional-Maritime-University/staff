@@ -43,11 +43,11 @@ $admin                  = new AdminController($db, $user, $pass);
 $program                = new Program($db, $user, $pass);
 $course                 = new Course($db, $user, $pass);
 $student                = new Student($db, $user, $pass);
-$class                 = new Classes($db, $user, $pass);
+$class                  = new Classes($db, $user, $pass);
 $staff                  = new Staff($db, $user, $pass);
 $secretary              = new SecretaryController($db, $user, $pass);
 $base                   = new Base($db, $user, $pass);
-$deadline                = new Deadline($db, $user, $pass);
+$deadline               = new Deadline($db, $user, $pass);
 
 $data   = [];
 $errors = [];
@@ -85,12 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else {
             $data["archived"] = false;
         }
-        $result = $class->fetch($data["key"], $data["value"], $data["archived"]);
-        if ($result) {
-            die(json_encode(["success" => true, "data" => $result]));
-        } else {
-            die(json_encode(["success" => false, "message" => "Failed to fetch classes!"]));
-        }
+        die(json_encode($class->fetch($data["key"], $data["value"], $data["archived"])));
     } elseif ($_GET["url"] == "fetch-staff") {
         if (isset($_GET["staff"]) && ! empty($_GET["staff"])) {
             $data["key"]   = "number";
@@ -116,14 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else {
             $data["archived"] = false;
         }
-
-        $result = $staff->fetch($data["key"], $data["value"], $data["archived"]);
-
-        if ($result) {
-            die(json_encode(["success" => true, "data" => $result]));
-        } else {
-            die(json_encode(["success" => false, "message" => "Failed to fetch lecturers data!"]));
-        }
+        die(json_encode($staff->fetch($data["key"], $data["value"], $data["archived"])));
     }
 
     // All POST request will be sent here
@@ -384,7 +372,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $_POST["key"]   = "";
             $_POST["value"] = "";
         }
-        die(json_encode(["success" => true, "data" => $course->fetch($_POST["key"], $_POST["value"])]));
+        die(json_encode($course->fetch($_POST["key"], $_POST["value"])));
     } elseif ($_GET["url"] == "fetch-assigned-courses-no-deadlines") {
         if (! isset($_POST["department"]) || empty($_POST["department"])) {
             die(json_encode(["success" => false, "message" => "Department is required!"]));
@@ -399,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester is required!"]));
         }
-        die(json_encode(["success" => true, "data" => $secretary->fetchSemesterCourses($_POST["semester"])]));
+        die(json_encode($secretary->fetchSemesterCourses($_POST["semester"])));
     } elseif ($_GET["url"] == "add-course") {
         if (! isset($_POST["courseCode"]) || empty($_POST["courseCode"])) {
             die(json_encode(["success" => false, "message" => "Course code is required!"]));
@@ -824,7 +812,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
         die(json_encode($secretary->fetchSemesterCourseResultsHeaders($_POST["semester"], $_POST["course"], $_POST["class"])));
     }
-
 
     // All PUT request will be sent here
 } else if ($_SERVER['REQUEST_METHOD'] == "PUT") {

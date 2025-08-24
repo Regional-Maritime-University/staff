@@ -58,7 +58,6 @@ class Staff
 
         $params = $value ? [":v" => $value, ":ar" => $archived] : [":ar" => $archived];
         $staffData = $this->dm->getData($query, $params);
-        return $staffData;
 
         if (($includeCourses || $includeDeadlines) && !empty($staffData)) {
             foreach ($staffData as &$staff) {
@@ -87,7 +86,7 @@ class Staff
 
         return [
             "success" => true,
-            "data" => $staffData,
+            "data" => $staffData ? $staffData : 0,
             "total" => $this->total($key, $value, $archived)
         ];
     }
@@ -208,7 +207,7 @@ class Staff
         }
         $query = "SELECT COUNT(s.`number`) AS total FROM `staff` AS s, `department` AS d 
                 WHERE d.`id` = s.`fk_department` AND s.`archived` = :ar $concat_stmt";
-        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
-        return $this->dm->getData($query, $params);
+        $params = $value && !empty($concat_stmt) ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
+        return $this->dm->getData($query, $params)[0]["total"];
     }
 }

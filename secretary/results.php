@@ -89,6 +89,17 @@ if ($deadlines && is_array($deadlines)) {
         <!-- Main Content -->
 
         <div class="results-content">
+
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <button class="action-btn" id="uploadResultsBtn">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload Results</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Results Filters -->
             <div class="results-filters">
                 <div class="filter-group">
@@ -111,11 +122,8 @@ if ($deadlines && is_array($deadlines)) {
                     </select>
                 </div>
                 <div class="filter-actions">
-                    <button class="filter-btn secondary" id="resetFiltersBtn">
+                    <button class="filter-btn primary" id="resetFiltersBtn">
                         <i class="fas fa-sync-alt"></i> Reset Filters
-                    </button>
-                    <button class="filter-btn primary" id="uploadResultsBtn">
-                        <i class="fas fa-upload"></i> Upload Results
                     </button>
                 </div>
             </div>

@@ -32,9 +32,8 @@ class LecturerController
     public function getLecturerClasses($lecturerId)
     {
         try {
-            $classes = (new Classes($this->db, $_SESSION['staff']['number'], $_SESSION['staff']['password']))
-                ->fetch('lecturer', $lecturerId);
-            return ['success' => true, 'data' => $classes];
+            return (new Classes($this->db, $_SESSION['staff']['number'], $_SESSION['staff']['password']))
+                ->fetch('lecturer', $lecturerId)["data"];
         } catch (Exception $e) {
             return ['success' => false, 'message' => 'Error fetching classes: ' . $e->getMessage()];
         }

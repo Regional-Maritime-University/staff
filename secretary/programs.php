@@ -597,9 +597,9 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     }).toString()
                 })
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        semesterCourses = data.data;
+                .then(result => {
+                    if (result.success) {
+                        semesterCourses = result.data;
                         console.log("Courses: ", semesterCourses);
                     }
                 })

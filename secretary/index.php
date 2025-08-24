@@ -153,6 +153,28 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
             </div>
 
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <button class="action-btn" id="assignCourseBtn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Assign Course</span>
+                    </button>
+                    <button class="action-btn" id="uploadCoursesBtn">
+                        <i class="fas fa-file-upload"></i>
+                        <span>Upload Courses</span>
+                    </button>
+                    <button class="action-btn" id="setDeadlineBtn">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Set Deadline</span>
+                    </button>
+                    <button class="action-btn" id="viewResultsBtn">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>View Results</span>
+                    </button>
+                </div>
+            </div>
+
             <div class="dashboard-grid">
                 <div class="upcoming-deadlines">
                     <div class="section-header">
@@ -263,7 +285,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                     <div class="activity-details">
                                         <h4><?= $activity_action ?></h4>
                                         <p><?= $activity_description ?></p>
-                                        <span class="activity-time"><?= $timeAgo ?></span>
+                                        <span class="activity-time"><i class="fas fa-clock"></i> <?= $timeAgo ?></span>
                                     </div>
                                 </div>
                             <?php
@@ -276,28 +298,6 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         }
                         ?>
                     </div>
-                </div>
-            </div>
-
-            <div class="quick-actions">
-                <h2>Quick Actions</h2>
-                <div class="action-buttons">
-                    <button class="action-btn" id="assignCourseBtn">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Assign Course</span>
-                    </button>
-                    <button class="action-btn" id="uploadCoursesBtn">
-                        <i class="fas fa-file-upload"></i>
-                        <span>Upload Courses</span>
-                    </button>
-                    <button class="action-btn" id="setDeadlineBtn">
-                        <i class="fas fa-calendar-plus"></i>
-                        <span>Set Deadline</span>
-                    </button>
-                    <button class="action-btn" id="viewResultsBtn">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span>View Results</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -372,13 +372,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             <label for="studentSelect">Student</label>
                             <select id="studentSelect" required>
                                 <option value="">-- Select Student --</option>
-                                <option value="all">All</option>
                                 <?php
                                 if (! $totalActiveStudents) {
                                     echo "<option value=''>No students available</option>";
                                 } else {
                                     foreach ($activeStudents as $student) {
-                                        echo "<option value='{$student['index_number']}'>{$student["prefix"]} {$student["first_name"]} {$student["last_name"]} {$student["suffix"]}</option>";
+                                        echo "<option value='{$student['index_number']}'>{$student['index_number']} - {$student["prefix"]} {$student["first_name"]} {$student["last_name"]} {$student["suffix"]}</option>";
                                     }
                                 }
                                 ?>

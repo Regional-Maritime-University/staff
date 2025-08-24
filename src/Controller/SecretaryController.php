@@ -447,9 +447,12 @@ class SecretaryController
 
         foreach ($data["courses"] as $course) {
             // Fetch lecturer details
-            $lecturerData = (new Staff($this->db, $this->user, $this->pass))->fetch(key: "number", value: $data["lecturer"], archived: false)[0];
+            $lecturerData = (new Staff($this->db, $this->user, $this->pass))->fetch(key: "number", value: $data["lecturer"], archived: false);
+            if ($lecturerData["success"]) $lecturerData = $lecturerData["data"][0];
+
             // Fetch course details
-            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false);
+            if ($courseData["success"]) $courseData = $courseData["data"][0];
 
             // Check if the course is already assigned to any lecturer or the same lecturer
             $query1 = "SELECT * FROM `lecturer_courses` WHERE `fk_department` = :dt AND `fk_course` = :cc AND `fk_semester` = :si";
@@ -498,9 +501,12 @@ class SecretaryController
 
         foreach ($data["courses"] as $course) {
             // Fetch student details
-            $studentData = (new Student($this->db, $this->user, $this->pass))->fetch(key: "index_number", value: $data["student"], archived: false)[0];
+            $studentData = (new Student($this->db, $this->user, $this->pass))->fetch(key: "index_number", value: $data["student"], archived: false);
+            if ($studentData["success"]) $studentData = $studentData["data"][0];
+
             // Fetch course details
-            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false);
+            if ($courseData["success"]) $courseData = $courseData["data"][0];
 
             // Check if the course is already assigned to any student or the same student
             $query1 = "SELECT * FROM `student_courses` WHERE `fk_student` = :st AND `fk_course` = :cc";
@@ -576,10 +582,12 @@ class SecretaryController
 
         foreach ($data["courses"] as $course) {
             // Fetch class details
-            $classData = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "code", value: $data["class"], archived: false)[0];
+            $classData = (new Classes($this->db, $this->user, $this->pass))->fetch(key: "code", value: $data["class"], archived: false);
+            if ($classData["success"]) $classData = $classData["data"][0];
 
             // Fetch course details
-            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false);
+            if ($courseData["success"]) $courseData = $courseData["data"][0];
 
             // Check if the course is already assigned to any class or the same class
             $query1 = "SELECT * FROM `section` WHERE `fk_class` = :cs AND `fk_course` = :cc";
@@ -603,30 +611,13 @@ class SecretaryController
                 continue;
             }
 
-            $query3 = "INSERT INTO `section` (`fk_class`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
-                        VALUES (:cc, :co, :st, :nt, :ch, :lv, :sm)";
-            $result3 = $this->dm->inputData(
-                $query3,
-                array(
-                    ":cc" => $data["class"],
-                    ":co" => $course,
-                    ":st" => $data["semester"],
-                    ":nt" => $data["notes"],
-                    ":ch" => $courseData["credit_hours"],
-                    ":lv" => $courseData["level"],
-                    ":sm" => $courseData["semester"]
-                )
-            );
-
-            if (!$result3) {
-                $errorEncountered++;
-                array_push($errors, "Fatal error occurred while in server!");
-            }
-
             // fetch all students in the class
-            $students = (new Student($this->db, $this->user, $this->pass))->fetch(key: "class", value: $data["class"], archived: false);
+            $studentData = (new Student($this->db, $this->user, $this->pass))->fetch(key: "class", value: $data["class"], archived: false);
+            if ($studentData["success"]) $studentData = $studentData["data"][0];
+            else return $studentData;
+
             // assign course and semester to all students in the class in the student_courses table
-            foreach ($students as $student) {
+            foreach ($studentData as $student) {
                 $query4 = "INSERT INTO `student_courses` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
                             VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
                 $result4 = $this->dm->inputData(
@@ -648,6 +639,26 @@ class SecretaryController
                 } else {
                     $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$courseData["name"]} ({$course}) to student {$student["index_number"]}.");
                 }
+            }
+
+            $query3 = "INSERT INTO `section` (`fk_class`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
+                        VALUES (:cc, :co, :st, :nt, :ch, :lv, :sm)";
+            $result3 = $this->dm->inputData(
+                $query3,
+                array(
+                    ":cc" => $data["class"],
+                    ":co" => $course,
+                    ":st" => $data["semester"],
+                    ":nt" => $data["notes"],
+                    ":ch" => $courseData["credit_hours"],
+                    ":lv" => $courseData["level"],
+                    ":sm" => $courseData["semester"]
+                )
+            );
+
+            if (!$result3) {
+                $errorEncountered++;
+                array_push($errors, "Fatal error occurred while in server!");
             }
 
             $successEncountered++;
@@ -675,9 +686,12 @@ class SecretaryController
 
         foreach ($data["courses"] as $course) {
             // Fetch lecturer details
-            $programData = (new Program($this->db, $this->user, $this->pass))->fetch(key: "id", value: $data["program"], archived: false)[0];
+            $programData = (new Program($this->db, $this->user, $this->pass))->fetch(key: "id", value: $data["program"], archived: false);
+            if ($programData["success"]) $programData = $programData["data"][0];
+
             // Fetch course details
-            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false)[0];
+            $courseData = (new Course($this->db, $this->user, $this->pass))->fetch(key: "code", value: $course, archived: false);
+            if ($courseData["success"]) $courseData = $courseData["data"][0];
 
             // Check if the course is already assigned to any lecturer or the same lecturer
             $query1 = "SELECT * FROM `curriculum` WHERE `fk_program` = :dt AND `fk_course` = :cc";
@@ -851,7 +865,8 @@ class SecretaryController
 
     public function fetchAllActiveStudents($departmentId = null, $archived = false)
     {
-        return (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        $result = (new Student($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        return $result["success"] ? $result["data"] : 0;
     }
 
     public function fetchAllActiveStudentsExamAndAssessment(array $students, $semesterId = null)
@@ -898,7 +913,7 @@ class SecretaryController
 
     public function fetchAllActiveClasses($departmentId = null, $archived = false)
     {
-        return (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived);
+        return (new Classes($this->db, $this->user, $this->pass))->fetch(key: "department", value: $departmentId, archived: $archived)["data"];
     }
 
     public function fetchAllCummulativeProgramsDetails($departmentId = null, $archived = false)

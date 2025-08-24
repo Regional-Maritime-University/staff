@@ -93,13 +93,13 @@ $totalActiveLecturers = count($activeLectuers);
                         <i class="fas fa-plus"></i>
                         Add New Lecturer
                     </button>
-                    <button class="action-btn" id="bulkUploadBtn">
+                    <!-- <button class="action-btn" id="bulkUploadBtn">
                         <i class="fas fa-upload"></i>
                         Bulk Upload Lecturers
-                    </button>
+                    </button> -->
                     <button class="action-btn" id="assignCoursesBtn">
                         <i class="fas fa-tasks"></i>
-                        Manage Course Assignments
+                        Course & Class Assignments
                     </button>
                     <button class="action-btn" id="lecturerContactsBtn">
                         <i class="fas fa-address-book"></i>
@@ -238,7 +238,7 @@ $totalActiveLecturers = count($activeLectuers);
                             <input type="file" id="lecturerPhoto" class="file-input" accept="image/*">
                             <label for="lecturerPhoto" class="file-label">Choose Photo</label>
                             <div id="photoPreview" class="file-preview" style="display: none;">
-                                <img src="/placeholder.svg" alt="Profile Preview" class="preview-img" id="previewImg">
+                                <img src="../assets/img/default-avatar.jpg" alt="Profile Preview" class="preview-img" id="previewImg">
                                 <div class="preview-details">
                                     <div class="preview-filename" id="previewFilename"></div>
                                     <div class="preview-filesize" id="previewFilesize"></div>
@@ -260,7 +260,7 @@ $totalActiveLecturers = count($activeLectuers);
     </div>
 
     <!-- Bulk Upload Modal -->
-    <div class="modal" id="bulkUploadModal">
+    <!-- <div class="modal" id="bulkUploadModal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -291,7 +291,7 @@ $totalActiveLecturers = count($activeLectuers);
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Assign Courses Modal -->
     <div class="modal" id="assignCoursesModal">
@@ -538,7 +538,7 @@ $totalActiveLecturers = count($activeLectuers);
             position: lecturer.designation,
             email: lecturer.email,
             phone: lecturer.phone_number || '',
-            photo: lecturer.avatar || 'placeholder.svg',
+            photo: lecturer.avatar || '../assets/img/default-avatar.jpg',
             availability: (lecturer.availability === 'available' || lecturer.availability === 'busy') ? lecturer.availability : 'unavailable',
             gender: lecturer.gender,
             department_id: lecturer.department_id,
@@ -559,7 +559,7 @@ $totalActiveLecturers = count($activeLectuers);
                 <div class="lecturer-header">
                     <div class="lecturer-info">
                         <div class="lecturer-avatar">
-                            <img src="../uploads/profiles/${lecturer.photo || 'placeholder.svg'}" alt="${lecturer.full_name}">
+                            <img src="../uploads/profiles/${lecturer.photo || '../assets/img/default-avatar.jpg'}" alt="${lecturer.full_name}">
                         </div>
                         <div class="lecturer-info-text">
                             <h3>${lecturer.full_name}</h3>
@@ -624,7 +624,7 @@ $totalActiveLecturers = count($activeLectuers);
         // Modal functionality
         const modals = {
             addLecturerModal: document.getElementById('addLecturerModal'),
-            bulkUploadModal: document.getElementById('bulkUploadModal'),
+            // bulkUploadModal: document.getElementById('bulkUploadModal'),
             assignCoursesModal: document.getElementById('assignCoursesModal'),
             lecturerContactsModal: document.getElementById('lecturerContactsModal'),
             archivedLecturersModal: document.getElementById('archivedLecturersModal'),
@@ -632,7 +632,7 @@ $totalActiveLecturers = count($activeLectuers);
 
         // Open modals
         document.getElementById('addLecturerBtn').addEventListener('click', () => openModal('addLecturerModal'));
-        document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
+        // document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
         document.getElementById('assignCoursesBtn').addEventListener('click', () => openModal('assignCoursesModal'));
         document.getElementById('lecturerContactsBtn').addEventListener('click', () => openModal('lecturerContactsModal'));
         document.getElementById('archivedLecturersBtn').addEventListener('click', () => openModal('archivedLecturersModal'));
@@ -658,16 +658,16 @@ $totalActiveLecturers = count($activeLectuers);
         }
 
         // File input handling for bulk upload
-        const fileInput = document.getElementById('lecturerFileInput');
-        const fileNameDisplay = document.getElementById('selectedFileName');
+        // const fileInput = document.getElementById('lecturerFileInput');
+        // const fileNameDisplay = document.getElementById('selectedFileName');
 
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-            } else {
-                fileNameDisplay.textContent = '';
-            }
-        });
+        // fileInput.addEventListener('change', function() {
+        //     if (this.files.length > 0) {
+        //         fileNameDisplay.textContent = this.files[0].name;
+        //     } else {
+        //         fileNameDisplay.textContent = '';
+        //     }
+        // });
 
         // Photo preview handling
         const photoInput = document.getElementById('lecturerPhoto');
@@ -766,17 +766,17 @@ $totalActiveLecturers = count($activeLectuers);
             }
         });
 
-        document.getElementById('uploadLecturersBtn').addEventListener('click', function() {
-            if (fileInput.files.length > 0) {
-                // Simulate file upload
-                alert('Lecturers uploaded successfully!');
-                modals.bulkUploadModal.classList.remove('active');
-                fileInput.value = '';
-                fileNameDisplay.textContent = '';
-            } else {
-                alert('Please select a file to upload.');
-            }
-        });
+        // document.getElementById('uploadLecturersBtn').addEventListener('click', function() {
+        //     if (fileInput.files.length > 0) {
+        //         // Simulate file upload
+        //         alert('Lecturers uploaded successfully!');
+        //         modals.bulkUploadModal.classList.remove('active');
+        //         fileInput.value = '';
+        //         fileNameDisplay.textContent = '';
+        //     } else {
+        //         alert('Please select a file to upload.');
+        //     }
+        // });
 
         document.getElementById('saveAssignmentsBtn').addEventListener('click', function() {
             const lecturer = document.getElementById('assignLecturer').value;
@@ -1021,7 +1021,7 @@ $totalActiveLecturers = count($activeLectuers);
                             <div class="lecturer-header">
                                 <div class="lecturer-info">
                                 <div class="lecturer-avatar">
-                                    <img src="../uploads/profiles/${lecturer.avatar || 'placeholder.svg'}" alt="${lecturer.full_name}">
+                                    <img src="../uploads/profiles/${lecturer.avatar || '../assets/img/default-avatar.jpg'}" alt="${lecturer.full_name}">
                                 </div>
                                 <div class="lecturer-info-text">
                                     <h3>${lecturer.full_name}</h3>
