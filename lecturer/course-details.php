@@ -29,16 +29,26 @@ if (isset($_GET['logout']) || !$isUser) {
 
 $_SESSION["lastAccessed"] = time();
 
+if (!isset($_GET["code"]) || empty($_GET["code"])) header('Location: courses.php');
+$selectedCourse = $_GET["code"];
+
 require_once('../bootstrap.php');
 
-use Src\Controller\SecretaryController;
+use Src\Controller\LecturerController;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$lecturer = new LecturerController($db, $user, $pass);
 
-$pageTitle = "Course Details - RMU Lecturer Portal";
-$activePage = "course details";
+$departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$lecturerId = $_SESSION["staff"]["number"];
+$semesterId = $_GET["semester"];
+$archived = false;
+
+$pageTitle = "Course Details";
+$activePage = "courses";
+
+$courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $semesterId);
 
 ?>
 
@@ -55,121 +65,35 @@ $activePage = "course details";
 </head>
 
 <body>
+
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <img src="logo.png" alt="RMU Logo" class="logo-img">
-            <h2>RMU Portal</h2>
-        </div>
-        <div class="user-profile">
-            <div class="avatar">
-                <img src="avatar.jpg" alt="User Avatar">
-            </div>
-            <div class="user-info">
-                <h3>Dr. John Doe</h3>
-                <p>Lecturer</p>
-            </div>
-        </div>
-        <div class="menu-groups">
-            <div class="menu-group">
-                <h3>Main Menu</h3>
-                <div class="menu-items">
-                    <a href="index.php" class="menu-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="courses.php" class="menu-item active">
-                        <i class="fas fa-book"></i>
-                        <span>My Courses</span>
-                    </a>
-                    <a href="results.php" class="menu-item">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Exam Results</span>
-                    </a>
-                    <a href="students.php" class="menu-item">
-                        <i class="fas fa-user-graduate"></i>
-                        <span>Students</span>
-                    </a>
-                </div>
-            </div>
-            <div class="menu-group">
-                <h3>Communication</h3>
-                <div class="menu-items">
-                    <a href="messages.php" class="menu-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>Messages</span>
-                        <span class="badge">3</span>
-                    </a>
-                    <a href="notifications.php" class="menu-item">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
-                        <span class="badge">7</span>
-                    </a>
-                </div>
-            </div>
-            <div class="menu-group">
-                <h3>Settings</h3>
-                <div class="menu-items">
-                    <a href="profile.php" class="menu-item">
-                        <i class="fas fa-user-cog"></i>
-                        <span>Profile</span>
-                    </a>
-                    <a href="change-password.php" class="menu-item">
-                        <i class="fas fa-key"></i>
-                        <span>Change Password</span>
-                    </a>
-                    <a href="login.php" class="menu-item">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <?php require_once '../components/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="header">
-            <div class="header-left">
-                <button class="toggle-sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1>Course Details</h1>
-            </div>
-            <div class="header-right">
-                <div class="header-actions">
-                    <button class="action-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">7</span>
-                    </button>
-                    <button class="action-btn">
-                        <i class="fas fa-envelope"></i>
-                        <span class="badge">3</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+
+        <?php require_once '../components/header.php'; ?>
 
         <div class="course-details-content">
             <!-- Course Header Card -->
             <div class="course-header-card">
                 <div class="course-header-info">
                     <div class="course-title-section">
-                        <h2 class="course-title">Introduction to Marine Engineering</h2>
-                        <div class="course-code">ME101</div>
+                        <h2 class="course-title"><?= $courseDetails[0]["course_name"] ?></h2>
+                        <div class="course-code"><?= $courseDetails[0]["course_code"] ?></div>
                     </div>
                     <div class="course-meta">
                         <div class="meta-item">
                             <i class="fas fa-building"></i>
-                            <span>Marine Engineering Department</span>
+                            <span><?= $courseDetails[0]["department_name"] ?></span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-layer-group"></i>
-                            <span>Level 100</span>
+                            <span>Level <?= $courseDetails[0]["course_level"] ?></span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-user-graduate"></i>
-                            <span>45 Students</span>
+                            <span><?= $courseDetails[0]["total_students"] ?> Students</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-clock"></i>
@@ -184,10 +108,10 @@ $activePage = "course details";
                     </button>
                     <button class="course-btn secondary" id="editCourseBtn">
                         <i class="fas fa-edit"></i> Edit Course
-                    </button> -->
+                    </button>
                     <button class="course-btn primary" id="emailStudentsBtn">
                         <i class="fas fa-envelope"></i> Email Students
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -195,8 +119,8 @@ $activePage = "course details";
             <div class="course-tabs">
                 <button class="course-tab active" data-tab="overview">Overview</button>
                 <button class="course-tab" data-tab="students">Students</button>
-                <button class="course-tab" data-tab="resources">Resources</button>
-                <button class="course-tab" data-tab="schedule">Schedule</button>
+                <!-- <button class="course-tab" data-tab="resources">Resources</button> -->
+                <!-- <button class="course-tab" data-tab="schedule">Schedule</button> -->
                 <button class="course-tab" data-tab="results">Results</button>
             </div>
 
@@ -269,15 +193,15 @@ $activePage = "course details";
                                 <option value="btec">BTech Naval Architecture</option>
                                 <option value="diploma">Diploma in Maritime Studies</option>
                             </select>
-                            <select class="filter-select" id="sortFilter">
+                            <!-- <select class="filter-select" id="sortFilter">
                                 <option value="name">Sort by Name</option>
                                 <option value="id">Sort by ID</option>
                                 <option value="program">Sort by Program</option>
-                            </select>
+                            </select> -->
                         </div>
-                        <button class="course-btn primary" id="downloadStudentListBtn">
+                        <!-- <button class="course-btn primary" id="downloadStudentListBtn">
                             <i class="fas fa-download"></i> Download List
-                        </button>
+                        </button> -->
                     </div>
                     <table class="students-table">
                         <thead>
@@ -371,7 +295,7 @@ $activePage = "course details";
                 </div>
 
                 <!-- Resources Tab -->
-                <div class="tab-pane" id="resources">
+                <!-- <div class="tab-pane" id="resources">
                     <div class="resources-actions">
                         <h3 class="section-title">Course Resources</h3>
                         <button class="course-btn primary" id="addResourceBtn">
@@ -440,10 +364,10 @@ $activePage = "course details";
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Schedule Tab -->
-                <div class="tab-pane" id="schedule">
+                <!-- <div class="tab-pane" id="schedule">
                     <h3 class="section-title">Course Schedule</h3>
                     <div class="schedule-grid">
                         <div class="day-header">Monday</div>
@@ -477,7 +401,7 @@ $activePage = "course details";
                         <div class="schedule-cell"></div>
                         <div class="schedule-cell"></div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Results Tab -->
                 <div class="tab-pane" id="results">
@@ -485,25 +409,25 @@ $activePage = "course details";
                         <h3 class="section-title">Exam Results</h3>
                         <div>
                             <button class="course-btn primary" id="saveResultsBtn">
-                                <i class="fas fa-save"></i> Save Changes
+                                <i class="fas fa-save"></i> Upload
                             </button>
-                            <button class="course-btn secondary" id="exportResultsBtn">
-                                <i class="fas fa-file-export"></i> Export Results
-                            </button>
+                            <!-- <button class="course-btn secondary" id="exportResultsBtn">
+                                <i class="fas fa-file-export"></i> Export
+                            </button> -->
                         </div>
                     </div>
                     <table class="results-table">
                         <thead>
                             <tr>
                                 <th>Student ID</th>
-                                <th>Name</th>
-                                <th>Assignment 1 (20%)</th>
+                                <!-- <th>Name</th> -->
+                                <!-- <th>Assignment 1 (20%)</th>
                                 <th>Assignment 2 (20%)</th>
                                 <th>Mid-Term (20%)</th>
                                 <th>Final Exam (40%)</th>
                                 <th>Total (100%)</th>
                                 <th>Grade</th>
-                                <th>Status</th>
+                                <th>Status</th> -->
                             </tr>
                         </thead>
                         <tbody>

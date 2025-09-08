@@ -9,8 +9,8 @@
             <img src="../uploads/profiles/me.jpg" alt="User Avatar">
         </div>
         <div class="user-info">
-            <h3><?= $_SESSION["staff"]["first_name"] . " " . $_SESSION["staff"]["last_name"] ?></h3>
-            <p>Secretary</p>
+            <h3><?= $_SESSION["staff"]["prefix"] . " " .  $_SESSION["staff"]["first_name"] . " " . $_SESSION["staff"]["last_name"] ?></h3>
+            <p><?= ucfirst($_SESSION["staff"]["role"]) ?></p>
         </div>
     </div>
 
@@ -64,10 +64,6 @@
                     <a href="results.php" class="menu-item <?= $activePage == 'results' ? 'active' : '' ?>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Exam Results</span>
-                    </a>
-                    <a href="students.php" class="menu-item <?= $activePage == 'students' ? 'active' : '' ?>">
-                        <i class="fas fa-user-graduate"></i>
-                        <span>Students</span>
                     </a>
                 </div>
             <?php } ?>

@@ -340,6 +340,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Program is required!"]));
         }
         die(json_encode(["success" => true, "data" => $secretary->fetchProgramCurriculum($programId = $_POST["program"], $departmentId = $_SESSION["staff"]["department_id"])]));
+    } elseif ($_GET["url"] == "fetch-courses-not-curriculum") {
+        if (! isset($_POST["program"]) || empty($_POST["program"])) {
+            die(json_encode(["success" => false, "message" => "Program is required!"]));
+        }
+        die(json_encode(["success" => true, "data" => $secretary->fetchCoursesNotInCurriculum($programId = $_POST["program"], $departmentId = $_SESSION["staff"]["department_id"])]));
     } elseif ($_GET["url"] == "fetch-program-classes") {
         if (! isset($_POST["program"]) || empty($_POST["program"])) {
             die(json_encode(["success" => false, "message" => "Program is required!"]));
@@ -551,6 +556,22 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             $_POST["value"] = "";
         }
         die(json_encode($class->fetch($_POST["key"], $_POST["value"], $_POST["archived"] ?? false)));
+    } elseif ($_GET["url"] == "fetch-class-courses") {
+        if (isset($_POST["code"]) && ! empty($_POST["code"])) {
+            $_POST["key"]   = "code";
+            $_POST["value"] = $_POST["code"];
+        } else {
+            die(json_encode(array("success" => false, "message" => "Class code is required!")));
+        }
+        die(json_encode($class->fetchClassCourses($_POST["code"])));
+    } elseif ($_GET["url"] == "fetch-class-students") {
+        if (isset($_POST["code"]) && ! empty($_POST["code"])) {
+            $_POST["key"]   = "code";
+            $_POST["value"] = $_POST["code"];
+        } else {
+            die(json_encode(array("success" => false, "message" => "Class code is required!")));
+        }
+        die(json_encode($class->fetchClassStudents($_POST["code"])));
     } elseif ($_GET["url"] == "assign-class") {
 
         if (! isset($_POST["action"]) || empty($_POST["action"])) {
@@ -797,7 +818,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     }
 
     // fetch semester course results headers
-    elseif ($_GET["url"] == "fetch-semester-course-results-headers") {
+    elseif ($_GET["url"] == "fetch-semester-course-results") {
         if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
             die(json_encode(["success" => false, "message" => "Semester is required!"]));
         }
@@ -810,7 +831,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "Class is required!"]));
         }
 
-        die(json_encode($secretary->fetchSemesterCourseResultsHeaders($_POST["semester"], $_POST["course"], $_POST["class"])));
+        die(json_encode($secretary->fetchSemesterCourseResults($_POST["semester"], $_POST["course"], $_POST["class"])));
     }
 
     // All PUT request will be sent here

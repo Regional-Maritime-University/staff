@@ -116,6 +116,11 @@
 	font-weight: 500;
 }
 
+.result-status.empty {
+	background-color: #fff3e0;
+	color: var(--danger-color);
+}
+
 .result-status.pending {
 	background-color: #fff3e0;
 	color: var(--warning-color);

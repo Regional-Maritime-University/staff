@@ -58,15 +58,11 @@ $archived = false;
 $activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
-$activeClass = $secretary->fetchAllActiveClasses($departmentId, $archived);
-// /dd($activeClass);
-$totalActiveClass = count($activeClass);
-
-$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId)["data"] ?? [];
-$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
-
 $activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
 $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
+
+$activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId) ?? [];
+$totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
 $current_year = date("Y");
 $years = range($current_year, ($current_year + 5));
 
@@ -139,10 +135,10 @@ $years = range($current_year, ($current_year + 5));
             <!-- Class Grid -->
             <div class="class-grid">
                 <?php
-                if ($totalActiveClass == 0) {
+                if ($totalActiveClasses == 0) {
                     echo "<div class='no-classes'>No classes available.</div>";
                 } else {
-                    foreach ($activeClass as $class) {
+                    foreach ($activeClasses as $class) {
                 ?>
                         <div class="class-card">
                             <div class="class-header">
@@ -169,8 +165,8 @@ $years = range($current_year, ($current_year + 5));
                                     <span class="info-value"><?= $class["category"] ?></span>
                                 </div>
                                 <div class="class-info">
-                                    <span class="info-label">Program:</span>
-                                    <span class="info-value"><?= $class["program_name"] ?></span>
+                                    <span class="info-label">Students:</span>
+                                    <span class="info-value"><?= $class["total_students"] ?></span>
                                 </div>
                                 <div class="class-info">
                                     <span class="info-label">Supervisor:</span>
@@ -603,11 +599,12 @@ $years = range($current_year, ($current_year + 5));
             });
 
             let semesterClass = null;
-            let activeClass = <?= json_encode($activeClass) ?>;
+            let activeClass = <?= json_encode($activeClasses) ?>;
             const user = <?= json_encode($staffData); ?>;
             const departmentId = user ? user.department_id : null;
             const userId = user ? user.number : null;
             let departmentStudents = <?= isset($activeStudents) && !empty($activeStudents) ? json_encode($activeStudents) : '[]' ?>;
+            console.log(departmentStudents);
 
             // Open modals
             document.getElementById('addClassBtn').addEventListener('click', () => openModal('addClassModal'));
@@ -788,6 +785,104 @@ $years = range($current_year, ($current_year + 5));
                             </div>
                         `;
                     });
+            });
+
+            // View class students
+            $(document).on("click", ".view-students", async function() {
+                const classCode = $(this).attr("id");
+
+                if (!classCode) {
+                    alert("Class code not found.");
+                    return;
+                }
+
+                // Create or get the modal for viewing students
+                let modal = document.getElementById("viewClassStudentsModal");
+                if (!modal) {
+                    modal = document.createElement("div");
+                    modal.className = "modal";
+                    modal.id = "viewClassStudentsModal";
+                    modal.innerHTML = `
+                        <div class="modal-dialog modal-md modal-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>${classCode} Students</h2>
+                                    <button class="close-btn" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="classStudentsList" style="min-height:100px;">
+                                        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading students...</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="cancel-btn" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    // Close modal on close/cancel
+                    modal.querySelectorAll('.close-btn, .cancel-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            modal.classList.remove('active');
+                            document.body.style.overflow = "auto";
+                        });
+                    });
+
+                    // Close modal when clicking outside
+                    modal.addEventListener("click", function(e) {
+                        if (e.target === modal) {
+                            modal.classList.remove("active");
+                            document.body.style.overflow = "auto";
+                        }
+                    });
+                }
+
+                // Show modal
+                modal.classList.add("active");
+                document.body.style.overflow = "hidden";
+
+                // Fetch students for the class
+                const studentsList = modal.querySelector("#classStudentsList");
+                studentsList.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading students...</div>`;
+
+                try {
+                    const response = await fetch('../endpoint/fetch-class-students', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            code: classCode
+                        })
+                    });
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        studentsList.innerHTML = `<div class="no-classes"><i class="fas fa-exclamation-triangle"></i> ${result.message || "Failed to load students."}</div>`;
+                        return;
+                    }
+
+                    const students = result.data || [];
+                    if (students.length === 0) {
+                        studentsList.innerHTML = `<div class="no-classes"><i class="fas fa-info-circle"></i> No students found for this class.</div>`;
+                        return;
+                    }
+
+                    // Build students list
+                    let html = `<ul class="students-list" style="list-style:none;padding:0;">`;
+                    students.forEach(student => {
+                        const name = [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" ");
+                        html += `<li style="padding:6px 0;border-bottom:1px solid #eee;">
+                            <strong>${student.index_number}</strong> - ${name}
+                        </li>`;
+                    });
+                    html += `</ul>`;
+                    studentsList.innerHTML = html;
+                } catch (error) {
+                    studentsList.innerHTML = `<div class="no-classes"><i class="fas fa-exclamation-triangle"></i> Error loading students.</div>`;
+                }
             });
 
             // Set the class code in the
@@ -1048,6 +1143,7 @@ $years = range($current_year, ($current_year + 5));
                                 student.remove();
                             });
                             document.getElementById("departmentNoStudentMessage").style.display = "block";
+                            window.location.reload();
                         } else {
                             alert(result['message']);
                         }

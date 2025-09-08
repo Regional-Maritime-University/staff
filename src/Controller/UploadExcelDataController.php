@@ -447,7 +447,7 @@ class UploadExcelDataController
                     continue;
                 }
 
-                $resultInsertQuery = "UPDATE `student_courses` SET 
+                $resultInsertQuery = "UPDATE `student_results` SET 
                                             `exam_score` = :es, 
                                             `project_score` = :ps, 
                                             `continues_assessments_score` = :cas 
@@ -476,7 +476,29 @@ class UploadExcelDataController
                 "errors" => $error_list
             );
 
-            return $output;
+            if ($this->successEncountered && !$this->errorsEncountered) {
+                $updateDeadlineQuery = "UPDATE `deadlines` SET `status`= 'submitted', `updated_at`= CURRENT_TIMESTAMP 
+                                        WHERE `fk_semester`=:sm AND `fk_course`=:cr AND `fk_class`=:cl AND `fk_staff`=:st";
+                $updateDeadlineParams = [':cl' => $data["class"], ':cr' => $data["course"], ':sm' => $data["semester"], ':st' => $data["staffId"]];
+                if ($this->dm->inputData($updateDeadlineQuery, $updateDeadlineParams)) {
+                    return array(
+                        "success" => true,
+                        "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! "
+                    );
+                } else {
+                    return array(
+                        "success" => false,
+                        "message" => "Failed to update deadline status " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+                        "errors" => $error_list
+                    );
+                }
+            } else {
+                return array(
+                    "success" => false,
+                    "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+                    "errors" => $error_list
+                );
+            }
         }
     }
 }

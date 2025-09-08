@@ -61,6 +61,11 @@ $activeLectuers = $departmentStaffs ? array_filter($departmentStaffs["data"], fu
 }) : [];
 $totalActiveLecturers = count($activeLectuers);
 
+$activeSemesters = $secretary->fetchActiveSemesters();
+$lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
+
+$activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
+$totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($activeClasses) : 0;
 
 ?>
 
@@ -73,6 +78,7 @@ $totalActiveLecturers = count($activeLectuers);
     <title>RMU Staff Portal - Lecturers</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/lecturers.css">
+    <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -298,60 +304,86 @@ $totalActiveLecturers = count($activeLectuers);
         <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Manage Course Assignments</h2>
+                    <h2>Assign Lecturer</h2>
                     <button class="close-btn" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="assignLecturerForm">
+                    <div class="assign-course-tabs">
+                        <button class="tab-btn active" data-tab="toCourse">To Course</button>
+                        <button class="tab-btn" data-tab="toClass">To Class</button>
+                    </div>
+                    <div class="tab-content active" id="toCourse">
                         <div class="form-group">
-                            <label for="assignLecturer">Select Lecturer</label>
-                            <select id="assignLecturer" required>
-                                <option value="">Select Lecturer</option>
-                                <option value="1">Dr. John Doe - Marine Engineering</option>
-                                <option value="2">Prof. Jane Smith - Nautical Science</option>
-                                <option value="3">Dr. Robert Johnson - Nautical Science</option>
-                                <option value="4">Prof. Emily Brown - Computer Science</option>
-                                <option value="5">Dr. Michael Wilson - Logistics Management</option>
-                                <option value="6">Prof. David Clark - Marine Engineering</option>
+                            <label for="semesterSelect">Semester</label>
+                            <select id="semesterSelect" required>
+                                <option value="">-- Select Semester --</option>
+                                <?php
+                                if ($activeSemesters) {
+                                    foreach ($activeSemesters as $semester) {
+                                        echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
+                                    }
+                                } else {
+                                    echo "<option value=''>No active semester</option>";
+                                }
+                                ?>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Select Courses to Assign</label>
-                            <div class="checkbox-list">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse1" value="ME101">
-                                    <label for="assignCourse1">ME101 - Introduction to Marine Engineering</label>
+                            <div class="course-selection-header">
+                                <label>Selected Courses</label>
+                                <button type="button" id="departmentSelectCoursesBtn">
+                                    <i class="fas fa-search"></i> Find Courses
+                                </button>
+                            </div>
+                            <div class="department-selected-courses-container">
+                                <div id="departmentSelectedCoursesList">
+                                    <!-- Selected courses will be added here dynamically -->
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse2" value="ML202">
-                                    <label for="assignCourse2">ML202 - Maritime Law and Regulations</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse3" value="NS305">
-                                    <label for="assignCourse3">NS305 - Ship Navigation Systems</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse4" value="CS304">
-                                    <label for="assignCourse4">CS304 - Database Management Systems</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse5" value="LM201">
-                                    <label for="assignCourse5">LM201 - Supply Chain Management</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="assignCourse6" value="ME302">
-                                    <label for="assignCourse6">ME302 - Marine Propulsion Systems</label>
+                                <div class="department-selected-courses-empty" id="departmentNoCoursesMessage">
+                                    No courses selected. Click "Find Courses" to add courses.
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="tab-content" id="toClass">
                         <div class="form-group">
-                            <label for="notifyLecturer">
-                                <input type="checkbox" id="notifyLecturer" checked>
-                                Notify lecturer about course assignment
-                            </label>
+                            <label for="classSelect">Class</label>
+                            <select id="classSelect" required>
+                                <option value="">-- Select Class --</option>
+                                <option value="all">All</option>
+                                <?php
+                                if (! $totalActiveClasses) {
+                                    echo "<option value=''>No students available</option>";
+                                } else {
+                                    foreach ($activeClasses as $class) {
+                                        echo "<option value='{$class['code']}'>{$class["code"]} ({$class["program_name"]})</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
                         </div>
-                        <input type="hidden" id="departmentId" value="<?php echo $departmentId; ?>">
-                    </form>
+                    </div>
+                    <div class="form-group">
+                        <label for="lecturerSelect">Lecturer</label>
+                        <select id="lecturerSelect" required>
+                            <option value="">-- Select Lecturer --</option>
+                            <?php
+                            if (! $lecturers) {
+                                echo "<option value=''>No lecturers available</option>";
+                            } else {
+                                foreach ($lecturers as $lecturer) {
+                                    echo "<option value='{$lecturer['number']}'>{$lecturer['prefix']} {$lecturer['first_name']} {$lecturer['last_name']}</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentNotes">Notes (Optional)</label>
+                        <textarea id="assignmentNotes" rows="3" placeholder="Add any additional notes about this assignment"></textarea>
+                    </div>
+                    <input type="hidden" id="departmentSelect" name="department" value="<?= $departmentId ?>">
+                    <input type="hidden" id="assignCourseActionSelect" name="action" value="toCourse">
                 </div>
                 <div class="modal-footer">
                     <button class="cancel-btn" data-dismiss="modal">Cancel</button>
@@ -520,6 +552,33 @@ $totalActiveLecturers = count($activeLectuers);
         </div>
     </div>
 
+    <!-- Course Selection Modal -->
+    <div class="modal" id="departmentCourseSelectionModal">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Select Courses</h2>
+                    <button class="close-btn" id="closeDepartmentCourseSelectionModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="department-course-search">
+                        <input type="text" id="departmentCourseSearchInput" placeholder="Search by course code or name">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="department-course-list" id="departmentCourseList">
+                        <!-- Course items will be added here dynamically -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" id="closeDepartmentCourseSelectionModal">Cancel</button>
+                    <button class="submit-btn" id="confirmDepartmentCourseSelectionBtn">Confirm Selection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const staticLecturersData = <?= json_encode($activeLectuers); ?>;
         const totalLecturers = <?= $totalActiveLecturers; ?>;
@@ -527,6 +586,7 @@ $totalActiveLecturers = count($activeLectuers);
         const semesterId = <?= json_encode($semesterId); ?>;
         const activeSemesters = <?= json_encode($activeSemesters); ?>;
         const baseUrl = '../endpoint/';
+        let departmentCourses = null;
 
         const lecturersData = Object.values(staticLecturersData).map(lecturer => ({
             number: lecturer.number,
@@ -564,7 +624,7 @@ $totalActiveLecturers = count($activeLectuers);
                         <div class="lecturer-info-text">
                             <h3>${lecturer.full_name}</h3>
                             <div class="lecturer-title">${lecturer.position}</div>
-                            <div class="lecturer-department">${lecturer.department_name}</div>
+                            <!--<div class="lecturer-department">${lecturer.department_name}</div>-->
                         </div>
                     </div>
                     <div class="lecturer-actions">
@@ -647,16 +707,6 @@ $totalActiveLecturers = count($activeLectuers);
             });
         });
 
-        function openModal(modalId) {
-            // Close all modals first
-            Object.values(modals).forEach(modal => {
-                modal.classList.remove('active');
-            });
-
-            // Open the requested modal
-            modals[modalId].classList.add('active');
-        }
-
         // File input handling for bulk upload
         // const fileInput = document.getElementById('lecturerFileInput');
         // const fileNameDisplay = document.getElementById('selectedFileName');
@@ -668,6 +718,239 @@ $totalActiveLecturers = count($activeLectuers);
         //         fileNameDisplay.textContent = '';
         //     }
         // });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove("active");
+            document.body.style.overflow = "auto";
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll(".modal").forEach((modal) => {
+            modal.addEventListener("click", function(e) {
+                if (e.target === this) {
+                    this.classList.remove("active");
+                    document.body.style.overflow = "auto";
+                }
+            });
+        });
+
+        document.getElementById("semesterSelect").addEventListener("change", function() {
+            if (departmentCourses !== null) {
+                return;
+            }
+
+            const selectedSemester = this.value;
+
+            if (selectedSemester) {
+                fetch(`../endpoint/fetch-semester-courses`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            semester: selectedSemester,
+                        }).toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            semesterCourses = departmentCourses = data.data;
+                        } else {
+                            alert("Failed to fetch courses for selected semester: ", data.message);
+                        }
+                    })
+                    .catch(error => console.error("Error fetching courses for selected semester:", error));
+            }
+        });
+
+        // Course Selection Modal
+        const departmentSelectCoursesBtn = document.getElementById("departmentSelectCoursesBtn");
+        const closeDepartmentCourseSelectionModal = document.getElementById("closeDepartmentCourseSelectionModal");
+        const confirmDepartmentCourseSelectionBtn = document.getElementById("confirmDepartmentCourseSelectionBtn");
+        const departmentCourseSearchInput = document.getElementById("departmentCourseSearchInput");
+
+        if (departmentSelectCoursesBtn) {
+            departmentSelectCoursesBtn.addEventListener("click", () => {
+                openModal("departmentCourseSelectionModal");
+            });
+        }
+
+        if (closeDepartmentCourseSelectionModal) {
+            closeDepartmentCourseSelectionModal.addEventListener("click", () => {
+                closeModal("departmentCourseSelectionModal");
+            });
+        }
+
+        if (confirmDepartmentCourseSelectionBtn) {
+            confirmDepartmentCourseSelectionBtn.addEventListener("click", () => {
+                closeModal("departmentCourseSelectionModal");
+            });
+        }
+
+        if (departmentCourseSearchInput) {
+            departmentCourseSearchInput.addEventListener("input", () => {
+                departmentSearchCourses();
+            });
+
+            // Initialize course list on modal open
+            departmentCourseSearchInput.addEventListener("focus", () => {
+                if (departmentCourseSearchInput.value === "") {
+                    departmentSearchCourses();
+                }
+            });
+        }
+
+        // Initialize course list when modal opens
+        if (departmentSelectCoursesBtn) {
+            departmentSelectCoursesBtn.addEventListener("click", () => {
+                setTimeout(() => {
+                    departmentSearchCourses();
+                }, 100);
+            });
+        }
+
+        function departmentSearchCourses() {
+            const searchTerm = document.getElementById("departmentCourseSearchInput").value.toLowerCase();
+            const courseList = document.getElementById("departmentCourseList");
+            courseList.innerHTML = "";
+
+            // Check if assignedCourses has data
+            if (!departmentCourses || departmentCourses.length === 0) {
+                courseList.innerHTML = `
+                        <div class="department-no-courses-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No courses are available.</p>
+                        </div>
+                    `;
+                return;
+            }
+
+            departmentCourses.forEach((course) => {
+                if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
+                    // Check if course is already selected
+                    const isSelected = document.querySelector(`.department-selected-course[data-code="${course.code}"]`) !== null;
+                    const courseItem = document.createElement("div");
+                    courseItem.className = "department-course-item";
+
+                    // Add a class if the course is selected
+                    if (isSelected) {
+                        courseItem.classList.add("department-course-selected");
+                    }
+
+                    courseItem.innerHTML = `
+                                <div class="department-course-info">
+                                    <strong>${course.code}</strong> - ${course.name}
+                                </div>
+                                <button class="department-add-course-btn ${isSelected ? "selected" : ""}" data-code="${course.code}" data-name="${course.name}" ${isSelected ? "disabled" : ""}>
+                                    <i class="fas ${isSelected ? "fa-check" : "fa-plus"}"></i>
+                                </button>
+                            `;
+                    courseList.appendChild(courseItem);
+                }
+            });
+
+            // Add event listeners to the add buttons
+            document.querySelectorAll(".department-add-course-btn:not(.selected)").forEach((btn) => {
+                btn.addEventListener("click", function() {
+                    const code = this.getAttribute("data-code");
+                    const name = this.getAttribute("data-name");
+                    departmentAddCourseToSelection(code, name);
+
+                    // Update the button to show it's selected
+                    this.classList.add("selected");
+                    this.disabled = true;
+                    this.querySelector("i").classList.remove("fa-plus");
+                    this.querySelector("i").classList.add("fa-check");
+                    this.closest(".department-course-item").classList.add("course-selected");
+                });
+            });
+        }
+
+        function departmentAddCourseToSelection(code, name) {
+            const selectedCoursesList = document.getElementById("departmentSelectedCoursesList");
+
+            // Check if course is already added
+            if (document.querySelector(`.department-selected-course[data-code="${code}"]`)) {
+                return;
+            }
+
+            const courseItem = document.createElement("div");
+            courseItem.className = "department-selected-course";
+            courseItem.setAttribute("data-code", code);
+            courseItem.innerHTML = `
+                    <div class="department-course-info">
+                        <strong>${code}</strong> - ${name}
+                    </div>
+                    <button class="department-remove-course-btn" data-code="${code}"">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="departmentSelectedCourses[]" value="${code}">
+                `;
+            selectedCoursesList.appendChild(courseItem);
+
+            // Add event listener to the remove button
+            courseItem.querySelector(".department-remove-course-btn").addEventListener("click", function() {
+                const code = this.getAttribute("data-code");
+                departmentRemoveFromSelection(code);
+            });
+        }
+
+        function departmentRemoveFromSelection(code) {
+            const courseItem = document.querySelector(`.department-selected-course[data-code="${code}"]`)
+            if (courseItem) {
+                courseItem.remove()
+
+                // Update the course in the search list if it's visible
+                const courseInList = document.querySelector(`.department-course-item .department-add-course-btn[data-code="${code}"]`)
+                if (courseInList) {
+                    courseInList.classList.remove("selected")
+                    courseInList.disabled = false
+                    courseInList.querySelector("i").classList.remove("fa-check")
+                    courseInList.querySelector("i").classList.add("fa-plus")
+                    courseInList.closest(".department-course-item").classList.remove("department-course-selected")
+
+                    // Re-add the click event listener
+                    courseInList.addEventListener("click", function() {
+                        const name = this.getAttribute("data-name")
+                        departmentAddCourseToSelection(code, name)
+
+                        // Update the button to show it's selected
+                        this.classList.add("selected")
+                        this.disabled = true
+                        this.querySelector("i").classList.remove("fa-plus")
+                        this.querySelector("i").classList.add("fa-check")
+                        this.closest(".department-course-item").classList.add("department-course-selected")
+                    });
+                }
+            }
+        }
+
+        // Tab functionality for Upload Courses Modal
+        const assignLecturerTabs = document.querySelectorAll(".assign-course-tabs .tab-btn")
+
+        assignLecturerTabs.forEach((btn) => {
+            btn.addEventListener("click", function() {
+                const tabId = this.getAttribute("data-tab");
+
+                // Remove active class from all tabs and contents
+                assignLecturerTabs.forEach((btn) => btn.classList.remove("active"));
+                document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+
+                // Add active class to clicked tab and corresponding content
+                this.classList.add("active");
+                document.getElementById(tabId).classList.add("active");
+
+                // add to actionSelect
+                document.getElementById("assignCourseActionSelect").value = tabId;
+                console.log(document.getElementById("assignCourseActionSelect").value);
+            });
+        });
 
         // Photo preview handling
         const photoInput = document.getElementById('lecturerPhoto');

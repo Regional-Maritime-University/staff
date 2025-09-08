@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-if (!isset($_SESSION["adminLogSuccess"]) || $_SESSION["adminLogSuccess"] == false || !isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
     header("Location: ../index.php");
 }
 
 $isUser = false;
-if (strtolower($_SESSION["role"]) == "admin" || strtolower($_SESSION["role"]) == "developers" || strtolower($_SESSION["role"]) == "secretary") $isUser = true;
+if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "lecturer") $isUser = true;
 
 if (isset($_GET['logout']) || !$isUser) {
     session_destroy();
@@ -31,11 +31,14 @@ $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
 
-use Src\Controller\SecretaryController;
+use Src\Controller\LecturerController;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$lecturer = new LecturerController($db, $user, $pass);
+
+$pageTitle = "Messages";
+$activePage = "messages";
 
 ?>
 
@@ -55,9 +58,13 @@ $admin = new SecretaryController($db, $user, $pass);
     <!-- Sidebar -->
     <?php require_once '../components/sidebar.php'; ?>
 
-    <?php require_once '../components/messages.php'; ?>
+    <div class="main-content">
+        <?php require_once '../components/header.php'; ?>
+        <?php require_once '../components/messages.php'; ?>
+    </div>
 
-    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/main.js">
+    </script>
     <script src="../assets/js/messages.js"></script>
 </body>
 

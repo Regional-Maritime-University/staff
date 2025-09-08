@@ -53,7 +53,10 @@ class AdminController
 
     public function verifyStaffLogin($email, $password)
     {
-        $sql = "SELECT s.*, d.`id` AS `department_id`, d.`name` AS `department_name`, d.fk_faculty AS `faculty_id`, f.`name` AS `faculty_name`  
+        $sql = "SELECT s.`number`, s.`email`, s.`password`, s.`phone_number`, s.`availability`, s.`avatar`, 
+                `first_name`, s.`middle_name`, s.`last_name`, s.`prefix`, s.`gender`, 
+                `designation`, s.`role`, s.`archived`, d.`id` AS `department_id`, 
+                d.`name` AS `department_name`, d.fk_faculty AS `faculty_id`, f.`name` AS `faculty_name`  
                 FROM `staff` AS s, department AS d, faculty AS f 
                 WHERE s.`email` = :u AND s.`fk_department` = d.`id` AND d.fk_faculty = f.id";
         $data = $this->dm->getData($sql, array(':u' => $email));
@@ -63,6 +66,7 @@ class AdminController
         }
 
         if (password_verify($password, $data[0]["password"])) {
+            unset($data[0]["password"]);
             return array("success" => true, "data" => $data[0]);
         }
 

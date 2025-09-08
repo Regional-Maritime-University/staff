@@ -31,14 +31,21 @@ $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
 
-use Src\Controller\SecretaryController;
+use Src\Controller\LecturerController;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$lecturer = new LecturerController($db, $user, $pass);
 
-$pageTitle = "Courses - RMU Lecturer Portal";
+$pageTitle = "Courses";
 $activePage = "courses";
+
+$departmentId = $_SESSION["staff"]["department_id"] ?? null;
+$lecturerId = $_SESSION["staff"]["number"];
+$semesterId = 2; //$_SESSION["semester"] ?? null;
+$archived = false;
+
+$activeCourses = $lecturer->getActiveCourses($lecturerId);
 
 ?>
 
@@ -78,216 +85,44 @@ $activePage = "courses";
             <!-- Course Grid -->
             <div class="course-grid">
                 <!-- Course Card 1 -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div class="course-title">Introduction to Marine Engineering</div>
-                        <div class="course-code">ME101</div>
-                        <span class="course-status active">Active</span>
-                    </div>
-                    <div class="course-body">
-                        <div class="course-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Department</div>
-                                <div class="detail-value">Marine Engineering</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Level</div>
-                                <div class="detail-value">100</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Students</div>
-                                <div class="detail-value">45</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Schedule</div>
-                                <div class="detail-value">Mon, Wed 9:00-10:30 AM</div>
-                            </div>
+                <?php foreach ($activeCourses as $course) { ?>
+                    <div class="course-card" data-course="<?= $course["course_code"] ?>" data-semester="<?= $course["semester_id"] ?>">
+                        <div class="course-header">
+                            <div class="course-title"><?= $course["course_name"] ?></div>
+                            <div class="course-code"><?= $course["course_code"] ?></div>
+                            <span class="course-status active">Active</span>
                         </div>
-                        <div class="course-progress">
-                            <div class="progress-label">
-                                <span>Course Progress</span>
-                                <span>60%</span>
+                        <div class="course-body">
+                            <div class="course-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Semester</div>
+                                    <div class="detail-value"><?= $course["semester_name"] ?></div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Level</div>
+                                    <div class="detail-value"><?= $course["course_code"] ?></div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Students</div>
+                                    <div class="detail-value"><?= $course["total_students"] ?></div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Classes</div>
+                                    <div class="detail-value"><?= $course["class_codes"] ? $course["class_codes"] : "None" ?></div>
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 60%;"></div>
+                            <div class="course-actions">
+                                <button class="course-btn primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="course-btn secondary">
+                                    <i class="fas fa-download"></i> Resources
+                                </button>
                             </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="course-btn primary">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="course-btn secondary">
-                                <i class="fas fa-download"></i> Resources
-                            </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Course Card 2 -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div class="course-title">Marine Propulsion Systems</div>
-                        <div class="course-code">ME302</div>
-                        <span class="course-status active">Active</span>
-                    </div>
-                    <div class="course-body">
-                        <div class="course-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Department</div>
-                                <div class="detail-value">Marine Engineering</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Level</div>
-                                <div class="detail-value">300</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Students</div>
-                                <div class="detail-value">32</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Schedule</div>
-                                <div class="detail-value">Tue, Thu 1:00-3:00 PM</div>
-                            </div>
-                        </div>
-                        <div class="course-progress">
-                            <div class="progress-label">
-                                <span>Course Progress</span>
-                                <span>45%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 45%;"></div>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="course-btn primary">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="course-btn secondary">
-                                <i class="fas fa-download"></i> Resources
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Card 3 -->
-                <div class="course-card">
-                    <div class="course-header">
-                        <div class="course-title">Ship Design and Construction</div>
-                        <div class="course-code">ME405</div>
-                        <span class="course-status active">Active</span>
-                    </div>
-                    <div class="course-body">
-                        <div class="course-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Department</div>
-                                <div class="detail-value">Marine Engineering</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Level</div>
-                                <div class="detail-value">400</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Students</div>
-                                <div class="detail-value">28</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Schedule</div>
-                                <div class="detail-value">Fri 9:00-12:00 PM</div>
-                            </div>
-                        </div>
-                        <div class="course-progress">
-                            <div class="progress-label">
-                                <span>Course Progress</span>
-                                <span>30%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 30%;"></div>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="course-btn primary">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="course-btn secondary">
-                                <i class="fas fa-download"></i> Resources
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Card 4 (Previous Semester) -->
-                <div class="course-card previous-semester" style="display: none;">
-                    <div class="course-header">
-                        <div class="course-title">Fluid Mechanics for Marine Engineers</div>
-                        <div class="course-code">ME203</div>
-                        <span class="course-status completed">Completed</span>
-                    </div>
-                    <div class="course-body">
-                        <div class="course-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Department</div>
-                                <div class="detail-value">Marine Engineering</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Level</div>
-                                <div class="detail-value">200</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Students</div>
-                                <div class="detail-value">38</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Semester</div>
-                                <div class="detail-value">2022/2023 Second</div>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="course-btn primary">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="course-btn secondary">
-                                <i class="fas fa-download"></i> Resources
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Card 5 (Upcoming Semester) -->
-                <div class="course-card upcoming-semester" style="display: none;">
-                    <div class="course-header">
-                        <div class="course-title">Advanced Marine Engineering</div>
-                        <div class="course-code">ME501</div>
-                        <span class="course-status upcoming">Upcoming</span>
-                    </div>
-                    <div class="course-body">
-                        <div class="course-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Department</div>
-                                <div class="detail-value">Marine Engineering</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Level</div>
-                                <div class="detail-value">500</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Students</div>
-                                <div class="detail-value">TBD</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Semester</div>
-                                <div class="detail-value">2023/2024 Second</div>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="course-btn primary">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                            <button class="course-btn secondary">
-                                <i class="fas fa-download"></i> Resources
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <?php
+                } ?>
             </div>
         </div>
     </div>
@@ -343,7 +178,8 @@ $activePage = "courses";
             button.addEventListener('click', function() {
                 const courseCard = this.closest('.course-card');
                 const courseCode = courseCard.querySelector('.course-code').textContent;
-                window.location.href = `course-details.php?code=${courseCode}`;
+                const semesterId = courseCard.getAttribute('data-semester');
+                window.location.href = `course-details.php?code=${courseCode}&semester=${semesterId}`;
             });
         });
 

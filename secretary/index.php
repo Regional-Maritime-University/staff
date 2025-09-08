@@ -73,7 +73,7 @@ foreach ($activeSemesters as $semester) {
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 
-$deadlines = $secretary->fetchPendingDeadlines($departmentId);
+$deadlines = $secretary->fetchPendingDeadlinesByCourse($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     foreach ($deadlines as $d) {
@@ -196,8 +196,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 $deadline_lectuer_name = $d["lecturer_name"];
                                 $deadline_status = $deadline_status_icon = $deadline_status_color = "";
 
-                                if ($d["submission_deadline"]) {
-                                    $deadlineDate = new DateTime($d["submission_deadline"]);
+                                if ($d["due_date"]) {
+                                    $deadlineDate = new DateTime($d["due_date"]);
                                     $currentDate = new DateTime();
                                     $interval = $currentDate->diff($deadlineDate);
                                     $daysLeft = $interval->days;

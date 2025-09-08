@@ -356,7 +356,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     <div class="form-group">
                         <div class="course-selection-header">
                             <label>Selected Courses</label>
-                            <button type="button" id="departmentSelectCoursesBtn">
+                            <button type="button" id="departmentSelectCoursesBtn" data-program="">
                                 <i class="fas fa-search"></i> Find Courses
                             </button>
                         </div>
@@ -427,7 +427,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
 
         // Sample data
         const staticProgramData = <?= json_encode($activeCummulativePrograms) ?>;
-        console.log('Programs Data:', staticProgramData);
         const programsData = staticProgramData.map(program => ({
             id: program.id,
             title: capitalizeWords(program.name),
@@ -451,7 +450,9 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
 
         let curriculumData = {};
 
-        let semesterCourses = null;
+        let notCurriculumCourses = [];
+
+        let curriculumCourses = null;
 
         let classesData = {};
 
@@ -462,7 +463,34 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         const user = <?= json_encode($staffData); ?>;
         const departmentId = user ? user.department_id : null;
 
-        document.getElementById('departmentSelectCoursesBtn').addEventListener('click', () => openModal('departmentCourseSelectionModal'));
+        async function fetchCoursesNotInCurriculum(programId) {
+            if (!programId) {
+                alert("Program ID is required to fetch curriculum.");
+                return;
+            }
+
+            try {
+                const response = await fetch('../endpoint/fetch-courses-not-curriculum', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'program': programId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error("Failed to fetch courses:", error);
+            }
+        }
 
         async function fetchProgramCurriculum(programId) {
             if (!programId) {
@@ -586,24 +614,6 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         document.addEventListener('DOMContentLoaded', async function() {
             renderPrograms();
             initializeEventListeners();
-
-            await fetch(`../endpoint/fetch-course`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        department: departmentId,
-                    }).toString()
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        semesterCourses = result.data;
-                        console.log("Courses: ", semesterCourses);
-                    }
-                })
-                .catch(error => console.error("Error fetching courses:", error));
         });
 
         const confirmDepartmentCourseSelectionBtn = document.getElementById("confirmDepartmentCourseSelectionBtn");
@@ -625,10 +635,20 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         });
 
         // Initialize course list when modal opens
-        departmentSelectCoursesBtn.addEventListener("click", () => {
-            setTimeout(() => {
-                departmentSearchCourses();
-            }, 100);
+        departmentSelectCoursesBtn.addEventListener("click", async () => {
+            const programId = document.getElementById('departmentSelectCoursesBtn').getAttribute("data-program");
+            const result = await fetchCoursesNotInCurriculum(programId); // <-- await here
+
+            console.log(result); // now you get { success: true, data: [...] }
+            if (result && result.success) {
+                console.log(result.data);
+                notCurriculumCourses = result.data;
+
+                setTimeout(() => {
+                    departmentSearchCourses();
+                }, 100);
+            }
+            openModal('departmentCourseSelectionModal');
         });
 
         function departmentSearchCourses() {
@@ -637,7 +657,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
             courseList.innerHTML = "";
 
             // Check if semester courses has data
-            if (!semesterCourses || semesterCourses.length === 0) {
+            if (!notCurriculumCourses || notCurriculumCourses.length === 0) {
                 courseList.innerHTML = `
                         <div class="department-no-courses-message">
                             <i class="fas fa-info-circle"></i>
@@ -647,7 +667,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                 return;
             }
 
-            semesterCourses.forEach((course) => {
+            notCurriculumCourses.forEach((course) => {
                 if (course.code.toLowerCase().includes(searchTerm) || course.name.toLowerCase().includes(searchTerm)) {
                     // Check if course is already selected
                     const isSelected = document.querySelector(`.department-selected-course[data-code="${course.code}"]`) !== null;
@@ -810,7 +830,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                     if (result.success) {
                         alert(result.message);
                         resetAssignCoursesModal();
-                        //closeModal("assignCoursesModal");
+                        window.location.reload();
                     } else {
                         alert(result['message']);
                     }
@@ -877,14 +897,14 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
                             <i class="fas fa-certificate"></i>
                             <span>${program.credits} Credits</span>
                         </div>
-                        <div class="info-item">
+                        <!--<div class="info-item">
                             <i class="fas fa-building"></i>
                             <span>${program.department.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                         </div>
                         <div class="info-item">
-                            <i class="fas fa-circle ${program.status === 'active' ? 'text-success' : 'text-danger'}"></i>
+                            <i class="fas fa-circle ${program.status ? 'text-success' : 'text-danger'}"></i>
                             <span>${program.status.charAt(0).toUpperCase() + program.status.slice(1)}</span>
-                        </div>
+                        </div>-->
                     </div>
                     <div class="program-actions">
                         <button class="program-btn primary" onclick="openCurriculumModal(${program.id})">
@@ -1041,8 +1061,9 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
         function openAssignCourseModal(programId) {
             const program = programsData.find(p => p.id === programId);
             document.getElementById('assignCourseModalTitle').textContent = `${program.title} - Assign Courses`;
-            document.getElementById('assignCourseModal').classList.add('active');
             document.getElementById("programSelect").value = programId;
+            document.getElementById('departmentSelectCoursesBtn').setAttribute('data-program', programId);
+            document.getElementById('assignCourseModal').classList.add('active');
         }
 
         function closeAllModals() {

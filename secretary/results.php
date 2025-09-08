@@ -55,7 +55,7 @@ $activeSemesters = $secretary->fetchActiveSemesters();
 
 $activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
 
-$deadlines = $secretary->fetchPendingDeadlines($departmentId);
+$deadlines = $secretary->fetchPendingDeadlinesByClass($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     foreach ($deadlines as $d) {
@@ -138,7 +138,7 @@ if ($deadlines && is_array($deadlines)) {
                             <div class="result-card">
                                 <div class="result-header">
                                     <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
-                                    <span class="result-status pending">Pending</span>
+                                    <span class="result-status <?= $deadline['deadline_status'] ?>"><?= ucfirst($deadline['deadline_status']) ?></span>
                                 </div>
                                 <div class="result-info">
                                     <div class="info-item">
@@ -151,7 +151,7 @@ if ($deadlines && is_array($deadlines)) {
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">Due Date</div>
-                                        <div class="info-value"><?= date('M d, Y', strtotime($deadline['submission_deadline'])) ?></div>
+                                        <div class="info-value"><?= date('M d, Y', strtotime($deadline['due_date'])) ?></div>
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">Lecturer</div>
@@ -187,6 +187,16 @@ if ($deadlines && is_array($deadlines)) {
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
+                            <label for="uploadSemester">Semester</label>
+                            <select id="uploadSemester" required>
+                                <option value="">Select a semester</option>
+                                <?php foreach ($activeSemesters as $semester) : ?>
+                                    <option value="<?= $semester['id'] ?>" data-academicYear="<?= $semester["academic_year_name"] ?>"><?= $semester['name'] == 1 ? 'First Semester' : ($semester['name'] == 2 ? 'Second Semester' : 'Summer Semester') ?> <?= $semester['academic_year_start_year'] . '/' . $semester['academic_year_end_year'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="uploadClass">Select Class</label>
                             <select id="uploadClass" required>
                                 <option value="">Select a class</option>
@@ -209,16 +219,6 @@ if ($deadlines && is_array($deadlines)) {
                                     }
                                 }
                                 ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="uploadSemester">Semester</label>
-                            <select id="uploadSemester" required>
-                                <option value="">Select a semester</option>
-                                <?php foreach ($activeSemesters as $semester) : ?>
-                                    <option value="<?= $semester['id'] ?>" data-academicYear="<?= $semester["academic_year_name"] ?>"><?= $semester['name'] == 1 ? 'First Semester' : ($semester['name'] == 2 ? 'Second Semester' : 'Summer Semester') ?> <?= $semester['academic_year_start_year'] . '/' . $semester['academic_year_end_year'] ?></option>
-                                <?php endforeach; ?>
                             </select>
                         </div>
 
@@ -377,7 +377,7 @@ if ($deadlines && is_array($deadlines)) {
                         return [];
                     }
 
-                    const resultsHeadersResponse = await fetch('../endpoint/fetch-semester-course-results-headers', {
+                    const response = await fetch('../endpoint/fetch-semester-course-results', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
@@ -389,41 +389,18 @@ if ($deadlines && is_array($deadlines)) {
                         })
                     });
 
-                    const resultsHeaders = await resultsHeadersResponse.json();
-                    console.log("resultsHeaders", resultsHeaders);
-                    if (!resultsHeaders.success) {
-                        alert('Error fetching course results headers: ' + resultsHeaders.message);
+                    const results = await response.json();
+                    console.log("results", results);
+                    if (!results.success) {
+                        alert(results.message);
                         return [];
                     }
 
-                    // fetch course results data
-                    const resultsBodyResponse = await fetch('../endpoint/fetch-semester-course-results', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            course: courseCode,
-                            semester: semesterId
-                        })
-                    });
-
-                    const resultsBody = await resultsBodyResponse.json();
-                    console.log("resultsBody", resultsBody);
-                    if (!resultsBody.success) {
-                        alert('Error fetching course results: ' + resultsBody.message);
-                        return [];
+                    return result = {
+                        headers: results.data.headers,
+                        headerValues: results.data.values,
+                        body: results.data.body
                     }
-
-                    const result = {
-                        success: true,
-                        data: {
-                            header: resultsHeaders.data,
-                            body: resultsBody.data
-                        }
-                    }
-
-                    return result;
                 } catch (error) {
                     console.error('Fetch error:', error);
                 }
@@ -435,7 +412,7 @@ if ($deadlines && is_array($deadlines)) {
                     const classCode = this.getAttribute('data-class');
                     const courseCode = this.getAttribute('data-course');
                     const semesterId = this.getAttribute('data-semester');
-                    console.log(classCode);
+                    console.log(classCode, courseCode, semesterId);
                     // fetch results data based on classCode, courseCode and semesterId
                     fetchCourseResults(classCode, courseCode, semesterId).then(result => {
                         if (result.success) {
@@ -493,12 +470,39 @@ if ($deadlines && is_array($deadlines)) {
             // File upload
             const resultsFile = document.getElementById('uploadResultsFile');
             const fileName = document.getElementById('fileName');
-
             resultsFile.addEventListener('change', function() {
                 if (this.files.length > 0) {
                     fileName.textContent = this.files[0].name;
                 } else {
                     fileName.textContent = 'No file chosen';
+                }
+            });
+
+            const uploadClassCode = document.getElementById("uploadClass");
+            uploadClassCode.addEventListener('change', async function() {
+
+                const response = await fetch('../endpoint/fetch-class-courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        code: this.value
+                    })
+                });
+
+                const result = await response.json();
+
+                // render select courses list
+                const uploadCourseSelect = document.getElementById('uploadCourse');
+                uploadCourseSelect.innerHTML = '<option value="">Select a course</option>';
+                if (result.success && Array.isArray(result.data)) {
+                    result.data.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.course_code;
+                        option.textContent = `${course.course_code} - ${course.course_name}`;
+                        uploadCourseSelect.appendChild(option);
+                    });
                 }
             });
 

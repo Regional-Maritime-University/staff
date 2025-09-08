@@ -207,4 +207,9 @@ class Student
         $params = array(":i" => $index_number);
         return $this->dm->getData($query, $params);
     }
+
+    public function fetchStudentCummulativeDetails() {
+        // fetch students total credits
+        // fetch total courses done or assign so far
+    }
 }

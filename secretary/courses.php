@@ -73,7 +73,7 @@ foreach ($activeSemesters as $semester) {
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
 
-$deadlines = $secretary->fetchPendingDeadlines($departmentId);
+$deadlines = $secretary->fetchPendingDeadlinesByCourse($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     foreach ($deadlines as $d) {
@@ -243,7 +243,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             data-semester="<?= $course["semester"] ?>"
                             data-level="<?= $course["level"] ?>"
                             data-lecturer-number="<?= $course["lecturer_number"] ?>"
-                            data-has-deadline="<?= $course["submission_deadline"] ? 'true' : 'false' ?>">
+                            data-has-deadline="<?= $course["deadline_date"] ? 'true' : 'false' ?>">
                             <div class="course-header">
                                 <div>
                                     <div class="course-title"><?= $course["name"] ?></div>
@@ -296,10 +296,10 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             </div>
                             <div class="deadline-info">
                                 <?php
-                                if ($course["submission_deadline"]) {
+                                if ($course["deadline_date"]) {
                                 ?>
                                     <i class="fas fa-clock"></i>
-                                    <div class="deadline-text">Deadline: <?= date('F j, Y', strtotime($course["submission_deadline"])) ?></div>
+                                    <div class="deadline-text">Deadline: <?= date('F j, Y', strtotime($course["deadline_date"])) ?></div>
                                 <?php
                                 } else {
                                     echo "No deadline set";

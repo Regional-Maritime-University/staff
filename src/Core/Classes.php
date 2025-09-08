@@ -38,19 +38,38 @@ class Classes
         }
 
         $query = "SELECT 
-                        c.`code`, c.`fk_staff` AS supervisor_id, CONCAT(s.`first_name`, ' ', s.`last_name`) AS supervisor_name, 
-                        c.year, c.`category`, c.`fk_program` AS program_id, p.`name` AS program_name, 
-                        p.`index_code` AS program_code, d.`id` AS department_id, d.`name` AS department_name 
-                    FROM class AS c
-                    JOIN programs AS p ON c.`fk_program` = p.`id`
-                    JOIN department AS d ON p.`department` = d.`id`
-                    LEFT JOIN staff AS s ON c.`fk_staff` = s.`number`
-                    WHERE c.`archived` = :ar $concat_stmt
-                    ORDER BY c.`year` DESC, c.`code` ASC";
-        $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
+                    c.`code`, 
+                    c.`fk_staff` AS supervisor_id, 
+                    CONCAT(s.`first_name`, ' ', s.`last_name`) AS supervisor_name, 
+                    c.`year`, 
+                    c.`category`, 
+                    c.`fk_program` AS program_id, 
+                    p.`name` AS program_name, 
+                    p.`index_code` AS program_code, 
+                    d.`id` AS department_id, 
+                    d.`name` AS department_name,
+
+                    -- Total students directly linked to this class
+                    (SELECT COUNT(*) 
+                     FROM student st
+                     WHERE st.`fk_class` = c.`code` 
+                       AND st.`archived` = 0) AS total_students
+
+                FROM class AS c
+                JOIN programs AS p ON c.`fk_program` = p.`id`
+                JOIN department AS d ON p.`department` = d.`id`
+                LEFT JOIN staff AS s ON c.`fk_staff` = s.`number`
+                WHERE c.`archived` = :ar $concat_stmt
+                ORDER BY c.`year` DESC, c.`code` ASC";
+
+        $params = $value
+            ? array(":v" => $value, ":ar" => $archived)
+            : array(":ar" => $archived);
 
         $result = $this->dm->getData($query, $params);
-        return $result ? array("success" => true, "data" => $result) : array("success" => false, "data" => "No classes found!");
+        return $result
+            ? array("success" => true, "data" => $result)
+            : array("success" => false, "data" => "No classes found!");
     }
 
     public function assign(array $data)
@@ -67,6 +86,7 @@ class Classes
                 $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Assign Class", "Assigned class {$data["code"]} to lecturer {$data["lecturer"]}");
                 $response = array("success" => true, "message" => "Class {$data["code"]} successfully assigned to lecturer {$data["lecturer"]}!");
                 break;
+
             case 'student':
                 $total = 0;
                 $query = "UPDATE `student` SET `fk_class` = :c WHERE `index_number` = :s";
@@ -81,6 +101,7 @@ class Classes
                 }
                 $response = array("success" => true, "message" => "{$total} students successfully assigned to class {$data["code"]}!");
                 break;
+
             default:
                 $response = array("success" => false, "message" => "Invalid action specified for class assignment!");
                 break;
@@ -209,5 +230,46 @@ class Classes
                 WHERE p.`type` = f.`id` AND p.`department` = d.`id` AND p.archived = :ar $concat_stmt";
         $params = $value ? array(":v" => $value, ":ar" => $archived) : array(":ar" => $archived);
         return $this->dm->getData($query, $params);
+    }
+
+    function fetchClassCourses($classCode)
+    {
+        // fetch courses from db for a class
+        $query = "SELECT DISTINCT 
+                    c.code AS course_code,
+                    c.name AS course_name,
+                    c.credit_hours,
+                    cl.code AS class_code,
+                    s.number AS lecturer_id,
+                    CONCAT(s.prefix, ' ', s.first_name, ' ', s.last_name) AS lecturer_name
+                FROM section sec
+                JOIN class cl 
+                    ON sec.fk_class = cl.code
+                JOIN course c 
+                    ON sec.fk_course = c.code
+                JOIN lecturer_courses lc 
+                    ON lc.fk_course = c.code
+                JOIN staff s 
+                    ON lc.fk_staff = s.number
+                WHERE cl.code = :code";
+        $params = array(":code" => $classCode);
+        $result = $this->dm->getData($query, $params);
+        return $result ? array("success" => true, "data" => $result) : array("success" => false, "message" => "No courses found for this class!");
+    }
+
+    function fetchClassStudents($classCode)
+    {
+        $query = "SELECT 
+                    st.`index_number`,
+                    st.`first_name`,
+                    st.`middle_name`,
+                    st.`last_name`,
+                    st.`email`,
+                    st.`phone_number` 
+                FROM `student` st
+                WHERE st.`fk_class` = :code AND st.`archived` = 0";
+        $params = array(":code" => $classCode);
+        $result = $this->dm->getData($query, $params);
+        return $result ? array("success" => true, "data" => $result) : array("success" => false, "message" => "No students found for this class!");
     }
 }
