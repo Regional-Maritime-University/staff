@@ -177,14 +177,18 @@ class Student
     public function fetchStudentGrades(string $index_number, int $semester)
     {
         $query = "SELECT 
-                    s.`index_number`, sca.`fk_semester` AS semester_id, sca.`fk_course` AS course_code, c.`name` AS course_name, 
-                    sca.`credit_hours` AS course_credit_hours, sca.`level` AS course_level, sca.`semester` AS course_semester, 
-                    sca.`continues_assessments_score`, sca.`exam_score`, sca.`final_score`, sca.`grade`, sca.`gpa`  
-                FROM `student_courses` AS sca 
-                JOIN `student` AS s ON sca.`fk_student` = s.`index_number` 
-                JOIN `course` AS c ON sca.`fk_course` = c.`code` 
-                JOIN `semester` AS m ON sca.`fk_semester` = m.`id` 
-                WHERE sca.`fk_student` = :i AND sca.`fk_semester` = :s";
+                    s.`index_number`, sc.`fk_semester` AS semester_id, sc.`fk_course` AS course_code, c.`name` AS course_name, 
+                    sc.`credit_hours` AS course_credit_hours, sc.`level` AS course_level, sc.`semester` AS course_semester, 
+                    sr.`continues_assessments_score`, sr.`exam_score`, sr.`final_score`, sr.`grade`, sr.`gpa`  
+                FROM `student_courses` AS sc 
+                JOIN `student` AS s ON sc.`fk_student` = s.`index_number` 
+                JOIN `course` AS c ON sc.`fk_course` = c.`code` 
+                JOIN `semester` AS m ON sc.`fk_semester` = m.`id` 
+                JOIN `student_results` AS sr 
+                    ON sr.`fk_student` = s.`index_number` 
+                    AND sr.`fk_course` = c.`code` 
+                    AND sr.`fk_semester` = m.`id` 
+                WHERE sc.`fk_student` = :i AND sc.`fk_semester` = :s";
         $params = array(":i" => $index_number, ":s" => $semester);
         $ressult = $this->dm->getData($query, $params);
         if (!$ressult) {
@@ -208,7 +212,8 @@ class Student
         return $this->dm->getData($query, $params);
     }
 
-    public function fetchStudentCummulativeDetails() {
+    public function fetchStudentCummulativeDetails()
+    {
         // fetch students total credits
         // fetch total courses done or assign so far
     }

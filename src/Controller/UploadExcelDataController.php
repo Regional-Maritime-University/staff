@@ -441,31 +441,32 @@ class UploadExcelDataController
                 // Check if student exists
                 $studentQuery = "SELECT `index_number` FROM `student` WHERE `index_number` = :si";
                 $studentData = $this->dm->getData($studentQuery, array(":si" => $result["student_id"]));
+
                 if (empty($studentData)) {
                     array_push($error_list, "Student with ID {$result['student_id']} does not exist!");
                     $this->errorsEncountered += 1;
                     continue;
                 }
 
-                $resultInsertQuery = "UPDATE `student_results` SET 
-                                            `exam_score` = :es, 
-                                            `project_score` = :ps, 
-                                            `continues_assessments_score` = :cas 
-                                            WHERE `fk_student` = :si AND `fk_course` = :cs AND `fk_semester` = :sm";
+                $resultInsertQuery = "UPDATE `student_results` SET `exam_score` = :es, `project_score` = :ps, `continues_assessments_score` = :cas 
+                                    WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
+
                 $params = array(
-                    ":si" => $result["student_id"],
-                    ":cs" => $data["course"],
-                    ":sm" => $data["semester"],
+                    ":i" => $result["student_id"],
+                    ":c" => $data["course"],
+                    ":s" => $data["semester"],
                     ":es" => $result["exam_score"],
                     ":ps" => $result["project_score"],
                     ":cas" => $result["assessment_score"]
                 );
 
-                if ($this->dm->inputData($resultInsertQuery, $params)) {
-                    $this->successEncountered += 1;
-                } else {
+                $resultInsertOutput = $this->dm->inputData($resultInsertQuery, $params);
+
+                if (!$resultInsertOutput) {
                     array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
                     $this->errorsEncountered += 1;
+                } else {
+                    $this->successEncountered += 1;
                 }
                 $count++;
             }
@@ -478,9 +479,14 @@ class UploadExcelDataController
 
             if ($this->successEncountered && !$this->errorsEncountered) {
                 $updateDeadlineQuery = "UPDATE `deadlines` SET `status`= 'submitted', `updated_at`= CURRENT_TIMESTAMP 
-                                        WHERE `fk_semester`=:sm AND `fk_course`=:cr AND `fk_class`=:cl AND `fk_staff`=:st";
-                $updateDeadlineParams = [':cl' => $data["class"], ':cr' => $data["course"], ':sm' => $data["semester"], ':st' => $data["staffId"]];
+                                        WHERE `fk_semester`=:sm AND `fk_course`=:cr AND `fk_class`=:cl";
+                $updateDeadlineParams = [':cl' => $data["class"], ':cr' => $data["course"], ':sm' => $data["semester"]];
                 if ($this->dm->inputData($updateDeadlineQuery, $updateDeadlineParams)) {
+                    $semesterId = $data["semester"];
+
+                    // Recalculate GPA for this semester
+                    $this->dm->inputData("CALL recalc_results_and_gpa(:sem)", [":sem" => $semesterId]);
+
                     return array(
                         "success" => true,
                         "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! "

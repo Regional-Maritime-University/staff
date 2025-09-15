@@ -84,10 +84,6 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                     </div>
                     <div class="course-meta">
                         <div class="meta-item">
-                            <i class="fas fa-building"></i>
-                            <span><?= $courseDetails[0]["department_name"] ?></span>
-                        </div>
-                        <div class="meta-item">
                             <i class="fas fa-layer-group"></i>
                             <span>Level <?= $courseDetails[0]["course_level"] ?></span>
                         </div>
@@ -100,7 +96,7 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                             <span>Mon, Wed 9:00-10:30 AM</span>
                         </div>
                     </div>
-                    <span class="course-status active">Active</span>
+                    <span class="course-status <?= $courseDetails[0]["course_status"] ?>"> <?= $courseDetails[0]["course_status"] ?></span>
                 </div>
                 <div class="course-header-actions">
                     <!-- <button class="course-btn primary" id="uploadResourceBtn">

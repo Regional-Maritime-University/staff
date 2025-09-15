@@ -834,6 +834,40 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode($secretary->fetchSemesterCourseResults($_POST["semester"], $_POST["course"], $_POST["class"])));
     }
 
+    // approve semester course results
+    elseif ($_GET["url"] == "approve-semester-course-results") {
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        }
+
+        if (! isset($_POST["class"]) || empty($_POST["class"])) {
+            die(json_encode(["success" => false, "message" => "Class is required!"]));
+        }
+
+        die(json_encode($secretary->approveSemesterCourseResults($_POST["semester"], $_POST["course"], $_POST["class"])));
+    }
+
+    // decline  semester course results
+    elseif ($_GET["url"] == "decline-semester-course-results") {
+        if (! isset($_POST["semester"]) || empty($_POST["semester"])) {
+            die(json_encode(["success" => false, "message" => "Semester is required!"]));
+        }
+
+        if (! isset($_POST["course"]) || empty($_POST["course"])) {
+            die(json_encode(["success" => false, "message" => "Course is required!"]));
+        }
+
+        if (! isset($_POST["class"]) || empty($_POST["class"])) {
+            die(json_encode(["success" => false, "message" => "Class is required!"]));
+        }
+
+        die(json_encode($secretary->fetchSemesterCourseResults($_POST["semester"], $_POST["course"], $_POST["class"])));
+    }
+
     // All PUT request will be sent here
 } else if ($_SERVER['REQUEST_METHOD'] == "PUT") {
     parse_str(file_get_contents("php://input"), $_PUT);

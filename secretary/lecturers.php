@@ -95,10 +95,10 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             <div class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="action-buttons">
-                    <button class="action-btn" id="addLecturerBtn">
+                    <!-- <button class="action-btn" id="addLecturerBtn">
                         <i class="fas fa-plus"></i>
                         Add New Lecturer
-                    </button>
+                    </button> -->
                     <!-- <button class="action-btn" id="bulkUploadBtn">
                         <i class="fas fa-upload"></i>
                         Bulk Upload Lecturers
@@ -162,7 +162,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             </div>
 
             <!-- Pagination -->
-            <div class="pagination">
+            <!-- <div class="pagination">
                 <div class="page-btn disabled">
                     <i class="fas fa-chevron-left"></i>
                 </div>
@@ -172,12 +172,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 <div class="page-btn">
                     <i class="fas fa-chevron-right"></i>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 
     <!-- Add Lecturer Modal -->
-    <div class="modal" id="addLecturerModal">
+    <!-- <div class="modal" id="addLecturerModal">
         <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -263,7 +263,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Bulk Upload Modal -->
     <!-- <div class="modal" id="bulkUploadModal">
@@ -691,7 +691,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         };
 
         // Open modals
-        document.getElementById('addLecturerBtn').addEventListener('click', () => openModal('addLecturerModal'));
+        // document.getElementById('addLecturerBtn').addEventListener('click', () => openModal('addLecturerModal'));
         // document.getElementById('bulkUploadBtn').addEventListener('click', () => openModal('bulkUploadModal'));
         document.getElementById('assignCoursesBtn').addEventListener('click', () => openModal('assignCoursesModal'));
         document.getElementById('lecturerContactsBtn').addEventListener('click', () => openModal('lecturerContactsModal'));

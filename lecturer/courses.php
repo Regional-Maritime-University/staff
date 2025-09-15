@@ -75,10 +75,10 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
             <div class="semester-selector">
                 <h3>Select Semester</h3>
                 <div class="semester-options">
-                    <div class="semester-option active" data-semester="current">First Semester 2023/2024</div>
-                    <div class="semester-option" data-semester="previous">Second Semester 2022/2023</div>
-                    <div class="semester-option" data-semester="upcoming">Second Semester 2023/2024</div>
-                    <div class="semester-option" data-semester="all">All Semesters</div>
+                    <div class="semester-option active" data-semester="all">All Courses</div>
+                    <div class="semester-option" data-semester="active">Active</div>
+                    <div class="semester-option" data-semester="marking">Marking</div>
+                    <div class="semester-option" data-semester="marked">Marked</div>
                 </div>
             </div>
 
@@ -86,11 +86,11 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
             <div class="course-grid">
                 <!-- Course Card 1 -->
                 <?php foreach ($activeCourses as $course) { ?>
-                    <div class="course-card" data-course="<?= $course["course_code"] ?>" data-semester="<?= $course["semester_id"] ?>">
+                    <div class="course-card <?= $course["status"] ?>" data-course="<?= $course["course_code"] ?>" data-semester="<?= $course["semester_id"] ?>">
                         <div class="course-header">
                             <div class="course-title"><?= $course["course_name"] ?></div>
                             <div class="course-code"><?= $course["course_code"] ?></div>
-                            <span class="course-status active">Active</span>
+                            <span class="course-status <?= $course["status"] ?>"><?= $course["status"] ?></span>
                         </div>
                         <div class="course-body">
                             <div class="course-details">
@@ -149,26 +149,26 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
                 const semester = this.getAttribute('data-semester');
 
                 // Show/hide courses based on selected semester
-                const currentCourses = document.querySelectorAll('.course-card:not(.previous-semester):not(.upcoming-semester)');
-                const previousCourses = document.querySelectorAll('.course-card.previous-semester');
-                const upcomingCourses = document.querySelectorAll('.course-card.upcoming-semester');
+                const activeCourses = document.querySelectorAll('.course-card:not(.marking):not(.marked)');
+                const markingCourses = document.querySelectorAll('.course-card.marking');
+                const markedCourses = document.querySelectorAll('.course-card.marked');
 
-                if (semester === 'current') {
-                    currentCourses.forEach(course => course.style.display = 'block');
-                    previousCourses.forEach(course => course.style.display = 'none');
-                    upcomingCourses.forEach(course => course.style.display = 'none');
-                } else if (semester === 'previous') {
-                    currentCourses.forEach(course => course.style.display = 'none');
-                    previousCourses.forEach(course => course.style.display = 'block');
-                    upcomingCourses.forEach(course => course.style.display = 'none');
-                } else if (semester === 'upcoming') {
-                    currentCourses.forEach(course => course.style.display = 'none');
-                    previousCourses.forEach(course => course.style.display = 'none');
-                    upcomingCourses.forEach(course => course.style.display = 'block');
+                if (semester === 'active') {
+                    activeCourses.forEach(course => course.style.display = 'block');
+                    markingCourses.forEach(course => course.style.display = 'none');
+                    markedCourses.forEach(course => course.style.display = 'none');
+                } else if (semester === 'marking') {
+                    activeCourses.forEach(course => course.style.display = 'none');
+                    markingCourses.forEach(course => course.style.display = 'block');
+                    markedCourses.forEach(course => course.style.display = 'none');
+                } else if (semester === 'marked') {
+                    activeCourses.forEach(course => course.style.display = 'none');
+                    markingCourses.forEach(course => course.style.display = 'none');
+                    markedCourses.forEach(course => course.style.display = 'block');
                 } else {
-                    currentCourses.forEach(course => course.style.display = 'block');
-                    previousCourses.forEach(course => course.style.display = 'block');
-                    upcomingCourses.forEach(course => course.style.display = 'block');
+                    activeCourses.forEach(course => course.style.display = 'block');
+                    markingCourses.forEach(course => course.style.display = 'block');
+                    markedCourses.forEach(course => course.style.display = 'block');
                 }
             });
         });

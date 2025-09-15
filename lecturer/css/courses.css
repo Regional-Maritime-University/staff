@@ -94,12 +94,12 @@
 	color: white;
 }
 
-.course-status.upcoming {
+.course-status.marking {
 	background-color: var(--warning-color);
 	color: white;
 }
 
-.course-status.completed {
+.course-status.marked {
 	background-color: var(--accent-color);
 	color: white;
 }

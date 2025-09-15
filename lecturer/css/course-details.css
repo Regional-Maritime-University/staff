@@ -64,18 +64,18 @@
 }
 
 .course-status.active {
-	background-color: #e8f5e9;
-	color: var(--success-color);
+	background-color: var(--success-color);
+	color: white;
 }
 
-.course-status.upcoming {
-	background-color: #fff3e0;
-	color: var(--warning-color);
+.course-status.marking {
+	background-color: var(--warning-color);
+	color: white;
 }
 
-.course-status.completed {
-	background-color: #e3f2fd;
-	color: var(--accent-color);
+.course-status.marked {
+	background-color: var(--accent-color);
+	color: white;
 }
 
 .course-header-actions {

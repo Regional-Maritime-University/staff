@@ -57,7 +57,7 @@ $activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
 $activePrograms = $secretary->fetchAllActivePrograms(departmentId: $departmentId);
-$totalActivePrograms = $activePrograms && is_array($activePrograms) ? count($activePrograms) : 0;
+$totalActivePrograms = is_array($activePrograms) && $activePrograms["success"]  ? count($activePrograms) : 0;
 
 $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId);
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
@@ -122,14 +122,6 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
             <!-- <div class="quick-actions">
                 <h2>Quick Actions</h2>
                 <div class="action-buttons">
-                    <button class="action-btn" id="addStudentBtn">
-                        <i class="fas fa-user-plus"></i>
-                        Add New Student
-                    </button>
-                    <button class="action-btn" id="importStudentsBtn">
-                        <i class="fas fa-file-import"></i>
-                        Import Students
-                    </button>
                     <button class="action-btn" id="registerCoursesBtn">
                         <i class="fas fa-clipboard-list"></i>
                         Course Registration
@@ -262,201 +254,8 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
         </div>
     </div>
 
-    <!-- Add Student Modal -->
-    <!-- <div class="modal" id="addStudentModal">
-        <div class="modal-dialog modal-lg modal-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Add New Student</h2>
-                    <button class="close-btn" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="addStudentForm">
-                        <div class="photo-upload">
-                            <div class="photo-preview">
-                                <img src="profile-placeholder.jpg" alt="Profile Photo" id="photoPreview">
-                            </div>
-                            <input type="file" id="studentPhoto" accept="image/*" style="display: none;">
-                            <label for="studentPhoto">Choose Photo</label>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="dateOfBirth">Date of Birth</label>
-                                <input type="date" id="dateOfBirth" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="gender">Gender</label>
-                                <select id="gender" required>
-                                    <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="program">Program</label>
-                                <select id="studentProgram" required>
-                                    <option value="">Select Program</option>
-                                    <option value="1">BSc. Marine Engineering</option>
-                                    <option value="2">BSc. Nautical Science</option>
-                                    <option value="3">BSc. Logistics Management</option>
-                                    <option value="4">BSc. Computer Science</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="level">Level</label>
-                                <select id="studentLevel" required>
-                                    <option value="">Select Level</option>
-                                    <option value="100">100</option>
-                                    <option value="200">200</option>
-                                    <option value="300">300</option>
-                                    <option value="400">400</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="entryYear">Entry Year</label>
-                                <select id="entryYear" required>
-                                    <option value="">Select Year</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
-                                    <option value="2019">2019</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="status">Status</label>
-                                <select id="studentStatus" required>
-                                    <option value="">Select Status</option>
-                                    <option value="active" selected>Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="on-leave">On Leave</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <textarea id="address" rows="3"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="guardianInfo">Guardian Information</label>
-                            <textarea id="guardianInfo" rows="3" placeholder="Name, Relationship, Contact"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="cancel-btn" data-dismiss="modal">Cancel</button>
-                    <button class="submit-btn" id="saveStudentBtn">Save Student</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
-    <!-- Import Students Modal -->
-    <!-- <div class="modal" id="importStudentsModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Import Students</h2>
-                    <button class="close-btn" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="import-options">
-                        <div class="import-option active" data-option="file">
-                            <div class="import-icon">
-                                <i class="fas fa-file-excel"></i>
-                            </div>
-                            <div class="import-title">Excel/CSV File</div>
-                            <div class="import-desc">Import students from a spreadsheet</div>
-                        </div>
-                        <div class="import-option" data-option="api">
-                            <div class="import-icon">
-                                <i class="fas fa-cloud-download-alt"></i>
-                            </div>
-                            <div class="import-title">API Integration</div>
-                            <div class="import-desc">Import from university system</div>
-                        </div>
-                    </div>
-
-                    <div id="fileImportSection">
-                        <div class="upload-area">
-                            <div class="upload-icon">
-                                <i class="fas fa-file-upload fa-3x"></i>
-                            </div>
-                            <h3>Upload Student List</h3>
-                            <p>Drag and drop your CSV or Excel file here, or click the button below to select a file.</p>
-                            <input type="file" id="studentFileInput" class="file-input" accept=".csv, .xlsx">
-                            <label for="studentFileInput" class="file-label">Choose File</label>
-                            <div class="selected-file-name" id="selectedFileName"></div>
-                            <div class="template-download">
-                                <a href="#" class="download-link">Download Template</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="apiImportSection" style="display: none;">
-                        <div class="form-group">
-                            <label for="apiEndpoint">API Endpoint</label>
-                            <input type="text" id="apiEndpoint" placeholder="https://api.university.edu/students">
-                        </div>
-                        <div class="form-group">
-                            <label for="apiKey">API Key</label>
-                            <input type="password" id="apiKey">
-                        </div>
-                        <div class="form-group">
-                            <label for="importFilters">Import Filters</label>
-                            <select id="importFilters" multiple>
-                                <option value="new">New Students Only</option>
-                                <option value="active">Active Students Only</option>
-                                <option value="program1">Marine Engineering</option>
-                                <option value="program2">Nautical Science</option>
-                                <option value="program3">Logistics Management</option>
-                                <option value="program4">Computer Science</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="cancel-btn" data-dismiss="modal">Cancel</button>
-                    <button class="submit-btn" id="importBtn">Import Students</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
     <!-- Course Registration Modal -->
-    <div class="modal" id="courseRegistrationModal">
+    <!-- <div class="modal" id="courseRegistrationModal">
         <div class="modal-dialog modal-lg modal-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -544,7 +343,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- View Grades Modal -->
     <div class="modal" id="viewGradesModal">
@@ -715,7 +514,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                 }
             }
 
-            // Add data attributes to student cardss for easier filtering
+            // Add data attributes to student cards for easier filtering
             function initializeDataAttributes() {
                 studentCards.forEach(card => {
                     // Extract course data from the card elements
@@ -777,22 +576,41 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
 
             // Modal functionality
             const modals = {
-                // addStudentModal: document.getElementById('addStudentModal'),
-                // importStudentsModal: document.getElementById('importStudentsModal'),
                 // courseRegistrationModal: document.getElementById('courseRegistrationModal'),
                 viewGradesModal: document.getElementById('viewGradesModal')
             };
 
             // Open modals
-            // document.getElementById('addStudentBtn').addEventListener('click', () => openModal('addStudentModal'));
-            // document.getElementById('importStudentsBtn').addEventListener('click', () => openModal('importStudentsModal'));
             // document.getElementById('registerCoursesBtn').addEventListener('click', () => openModal('courseRegistrationModal'));
 
             // Close modals
             document.querySelectorAll('.close-btn, .cancel-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const modal = this.closest('.modal');
-                    if (modal) modal.classList.remove('active');
+                    if (modal) {
+                        modal.classList.remove('active');
+                        if (modal.id === "viewGradesModal") {
+                            // Reset semester select to default option
+                            const semesterSelect = modal.querySelector('#gradeSemester');
+                            if (semesterSelect) semesterSelect.value = '';
+
+                            // Reset grades table body to default message row
+                            const tbody = modal.querySelector('.grades-table tbody');
+                            if (tbody) {
+                                tbody.innerHTML = `
+                                    <tr style="color: var(--accent-color);">
+                                        <td colspan="5">Choose a semester to see student's grades</td>
+                                    </tr>
+                                `;
+                            }
+
+                            const tfoot = modal.querySelector('.grades-table tfoot');
+                            if (tfoot) {
+                                tfoot.innerHTML = `<tfoot></tfoot>`;
+                            }
+                        }
+
+                    }
                 });
             });
 
@@ -1084,11 +902,11 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                             const footerRow = document.createElement('tr');
                             gradesTableFoot.innerHTML = ''; // Clear existing rows
                             footerRow.innerHTML = `
-                            <td colspan="2"><strong>Semester Total</strong></td>
-                            <td><strong>${totalCredits}</strong></td>
-                            <td></td>
-                            <td><strong>${averageGpa}</strong></td>
-                        `;
+                                <td colspan="2"><strong>Semester Total</strong></td>
+                                <td><strong>${totalCredits}</strong></td>
+                                <td></td>
+                                <td><strong>${averageGpa}</strong></td>
+                            `;
                             gradesTableFoot.appendChild(footerRow);
                         } else {
                             alert(result.message);

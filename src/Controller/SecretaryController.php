@@ -340,6 +340,9 @@ class SecretaryController
                 dl.`updated_at`, 
                 dl.`fk_semester` AS semester_id,
 
+                -- exam results info/status 
+                er.`status` AS result_status,
+
                 -- Lecturer info
                 dl.`fk_staff` AS staff_number, 
                 CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS lecturer_name, 
@@ -373,6 +376,9 @@ class SecretaryController
               JOIN `course` AS c ON dl.`fk_course` = c.`code`
               JOIN `semester` AS s ON dl.`fk_semester` = s.`id`
               JOIN `course_category` AS cg ON c.`fk_category` = cg.`id`
+              LEFT JOIN `exam_results` AS er 
+                    ON c.`code` = er.`fk_course` 
+                    AND s.`id` = er.`fk_semester` 
               LEFT JOIN `section` AS sec 
                      ON sec.`fk_course` = dl.`fk_course`
                     AND sec.`fk_semester` = dl.`fk_semester`
@@ -380,7 +386,6 @@ class SecretaryController
               LEFT JOIN `class` AS cl 
                      ON sec.`fk_class` = cl.`code`
                      AND dl.`fk_class` = cl.`code`
-              
               {$where}
               GROUP BY dl.`fk_course`, dl.`fk_class`
               ORDER BY (MAX(dl.`status`) = 'pending') DESC, MAX(dl.`due_date`) ASC";
@@ -801,24 +806,33 @@ class SecretaryController
             foreach ($studentData as $student) {
                 $query4 = "INSERT INTO `student_courses` (`fk_student`, `fk_course`, `fk_semester`, `notes`, `credit_hours`, `level`, `semester`) 
                             VALUES (:si, :co, :st, :nt, :ch, :lv, :sm)";
-                $result4 = $this->dm->inputData(
-                    $query4,
-                    array(
-                        ":si" => $student["index_number"],
-                        ":co" => $course,
-                        ":st" => $data["semester"],
-                        ":nt" => $data["notes"],
-                        ":ch" => $courseData[0]["credit_hours"],
-                        ":lv" => $courseData[0]["level"],
-                        ":sm" => $courseData[0]["semester"]
-                    )
+                $params4 = array(
+                    ":si" => $student["index_number"],
+                    ":co" => $course,
+                    ":st" => $data["semester"],
+                    ":nt" => $data["notes"],
+                    ":ch" => $courseData[0]["credit_hours"],
+                    ":lv" => $courseData[0]["level"],
+                    ":sm" => $courseData[0]["semester"]
                 );
+                $result4 = $this->dm->inputData($query4, $params4);
+
                 if (!$result4) {
                     $errorEncountered++;
-                    array_push($errors, "Failed to assign course {$courseData["name"]} ({$courseData["code"]}) to student {$student["index_number"]}.");
-                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Failed to assign {$courseData["name"]} ({$course}) to student {$student["index_number"]}.");
+                    array_push($errors, "Failed to assign course {$courseData[0]["name"]} ({$courseData[0]["code"]}) to student {$student["index_number"]}.1");
+                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Failed to assign {$courseData[0]["name"]} ({$course}) to student {$student["index_number"]}.1");
                 } else {
-                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$courseData["name"]} ({$course}) to student {$student["index_number"]}.");
+                    $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$courseData[0]["name"]} ({$course}) to student {$student["index_number"]}.1");
+                    $query5 = "INSERT INTO `student_results` (`fk_student`, `fk_course`, `fk_semester`) VALUES (:si, :co, :st)";
+                    $params5 = array(":si" => $student["index_number"], ":co" => $course, ":st" => $data["semester"]);
+                    $result5 = $this->dm->inputData($query5, $params5);
+                    if (!$result5) {
+                        $errorEncountered++;
+                        array_push($errors, "Failed to assign course {$courseData[0]["name"]} ({$courseData[0]["code"]}) to student {$student["index_number"]}.2");
+                        $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Failed to assign {$courseData[0]["name"]} ({$course}) to student {$student["index_number"]}.2");
+                    } else {
+                        $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$courseData[0]["name"]} ({$course}) to student {$student["index_number"]}.2");
+                    }
                 }
             }
 
@@ -831,9 +845,9 @@ class SecretaryController
                     ":co" => $course,
                     ":st" => $data["semester"],
                     ":nt" => $data["notes"],
-                    ":ch" => $courseData["credit_hours"],
-                    ":lv" => $courseData["level"],
-                    ":sm" => $courseData["semester"]
+                    ":ch" => $courseData[0]["credit_hours"],
+                    ":lv" => $courseData[0]["level"],
+                    ":sm" => $courseData[0]["semester"]
                 )
             );
 
@@ -844,7 +858,7 @@ class SecretaryController
 
             $successEncountered++;
             array_push($coursesAssigned, $course);
-            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$data["class"]} to {$courseData["name"]} ({$course})");
+            $this->log->activity($_SESSION["staff"]["number"], "INSERT", "secretary", "Course Assignment", "Assigned {$data["class"]} to {$courseData[0]["name"]} ({$course})");
         }
 
         $messageStatus = $successEncountered ? true : false;
@@ -1281,8 +1295,13 @@ class SecretaryController
         }
 
         // fetch results body
-        $query2 = "SELECT sc.* FROM student_courses AS sc, student AS st 
-                    WHERE sc.fk_student = st.index_number AND sc.fk_course = :cr AND sc.fk_semester = :sm AND st.fk_class = :cs";
+        $query2 = "SELECT sc.`fk_student` AS student_id, sc.`fk_course` AS course_code, sc.`credit_hours` AS course_credit_hours, 
+                    sc.`level` AS course_level, sc.`fk_semester` AS semester_id, sc.semester, sr.`continues_assessments_score` AS ass_score, 
+                    sr.`project_score`, sr.`exam_score`, sr.`final_score`, sr.`grade`, sr.`gpa` 
+                    FROM `student` AS st, `student_courses` AS sc, `student_results` AS sr 
+                    WHERE st.`index_number` = sc.`fk_student` AND st.`index_number` = sr.`fk_student` AND 
+                        sc.`fk_course` = sr.`fk_course` AND sc.`fk_semester` = sr.`fk_semester` AND 
+                        sc.`fk_course` = :cr AND sc.`fk_semester` = :sm AND st.`fk_class` = :cs";
         $params2 = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
         $results2 = $this->dm->getData($query2, $params2);
 
@@ -1298,16 +1317,47 @@ class SecretaryController
 
         if ($isProjectBased) {
             $response["data"] = [
+                "project_based" => true,
                 "headers" => ["Student ID", "Exam Score (40%)", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"]
             ];
         } else {
             $response["data"] = [
+                "project_based" => false,
                 "headers" => ["Student ID", "Exam Score (60%)", "Ass. Score (40%)", "ACH Mark", "Grade"]
             ];
         }
         $response["data"]["values"] = $results;
         $response["data"]["body"] = $results2;
         return $response;
+    }
+
+    public function approveSemesterCourseResults($semesterId, $courseCode, $classCode)
+    {
+        // fetch exam results and check if is project based
+        $query = "SELECT r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, 
+                    r.`project_based`, cr.`name` AS course, sm.`name` AS semester
+                    FROM `exam_results` AS r 
+                    JOIN `course` AS cr ON r.`fk_course` = cr.`code` 
+                    JOIN `class` AS cs ON r.`fk_class` = cs.`code` 
+                    JOIN `semester` AS sm ON r.`fk_semester` = sm.`id` 
+                    WHERE r.`fk_semester` = :sm AND r.`fk_course` = :cr AND r.`fk_class` = :cs";
+        $params = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
+        $results = $this->dm->getData($query, $params);
+
+        if (empty($results)) {
+            return ["success" => false, "message" => "No records found"];
+        }
+
+        // fetch results body
+        $query2 = "UPDATE `exam_results` SET `status` = 'approved' 
+                    WHERE `fk_course` = :cr AND `fk_semester` = :sm AND `fk_class` = :cs";
+        $params2 = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
+        $results2 = $this->dm->inputData($query2, $params2);
+
+        if (!$results2) {
+            return ["success" => false, "message" => "Failed to approve exam result!"];
+        }
+        return ["success" => true, "message" => "Successfully approved exam result!"];
     }
 
     // Create functions for to perform CRUD operations on lecturers. The adding of a lecturer should send an SMS and also email use the sms and email functions

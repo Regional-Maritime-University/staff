@@ -31,13 +31,17 @@ $_SESSION["lastAccessed"] = time();
 
 require_once('../bootstrap.php');
 
-use Src\Controller\SecretaryController;
+use Src\Controller\LecturerController;
 
 require_once('../inc/admin-database-con.php');
 
-$admin = new SecretaryController($db, $user, $pass);
+$lecturer = new LecturerController($db, $user, $pass);
+$lecturerId = $_SESSION["staff"]["number"] ?? null;
+$lecturerName = $_SESSION["staff"]["prefix"] . " " .  $_SESSION["staff"]["first_name"] . " " . $_SESSION["staff"]["last_name"];
 
-$pageTitle = "Profile - " . $_SESSION["lecturer"]["name"];
+$activeCourses = $lecturer->getActiveCourses($lecturerId);
+
+$pageTitle = "Profile - " . $lecturerName;
 $activePage = "profile";
 
 ?>
@@ -67,19 +71,23 @@ $activePage = "profile";
             <!-- Profile Header -->
             <div class="profile-header">
                 <div class="profile-image">
-                    <img src="lecturer1.jpg" alt="Dr. John Doe">
+                    <img src="../uploads/profiles/<?= $_SESSION["staff"]["avatar"] ?>" alt="<?= $lecturerName ?>">
                 </div>
                 <div class="profile-info">
-                    <h2 class="profile-name">Dr. John Doe</h2>
-                    <div class="profile-title">Associate Professor, Marine Engineering</div>
+                    <h2 class="profile-name"><?= $lecturerName ?></h2>
+                    <div class="profile-title"><?= $_SESSION["staff"]["designation"] . ", " . $_SESSION["staff"]["department_name"] ?></div>
                     <div class="profile-meta">
                         <div class="meta-item">
+                            <i class="fas fa-id-card"></i>
+                            <span><?= $_SESSION["staff"]["number"] ?></span>
+                        </div>
+                        <div class="meta-item">
                             <i class="fas fa-envelope"></i>
-                            <span>john.doe@rmu.edu</span>
+                            <span><?= $_SESSION["staff"]["email"] ?></span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-phone"></i>
-                            <span>+233 55 123 4567</span>
+                            <span><?= $_SESSION["staff"]["phone_number"] ?></span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-calendar-check"></i>
@@ -90,18 +98,18 @@ $activePage = "profile";
                         </div>
                     </div>
                     <div class="profile-actions">
-                        <button class="profile-btn primary">
+                        <!-- <button class="profile-btn primary">
                             <i class="fas fa-envelope"></i>
                             Send Message
-                        </button>
-                        <button class="profile-btn secondary">
+                        </button> -->
+                        <button class="profile-btn secondary" id="<?= $lecturerId ?>">
                             <i class="fas fa-edit"></i>
                             Edit Profile
                         </button>
-                        <button class="profile-btn secondary">
+                        <!-- <button class="profile-btn secondary" id="<?= $lecturerId ?>">
                             <i class="fas fa-print"></i>
                             Print Profile
-                        </button>
+                        </button> -->
                     </div>
                 </div>
             </div>
@@ -109,9 +117,9 @@ $activePage = "profile";
             <!-- Profile Tabs -->
             <div class="profile-tabs">
                 <button class="profile-tab active" data-tab="overview">Overview</button>
-                <button class="profile-tab" data-tab="courses">Courses</button>
+                <!-- <button class="profile-tab" data-tab="courses">Courses</button>
                 <button class="profile-tab" data-tab="performance">Performance</button>
-                <button class="profile-tab" data-tab="documents">Documents</button>
+                <button class="profile-tab" data-tab="documents">Documents</button> -->
             </div>
 
             <!-- Profile Content -->
@@ -144,7 +152,7 @@ $activePage = "profile";
                             <div class="info-label">Phone</div>
                             <div class="info-value">+233 55 123 4567</div>
                         </div>
-                        <div class="info-item">
+                        <!-- <div class="info-item">
                             <div class="info-label">Office</div>
                             <div class="info-value">Engineering Block, Room 205</div>
                         </div>
@@ -159,19 +167,19 @@ $activePage = "profile";
                         <div class="info-item">
                             <div class="info-label">Status</div>
                             <div class="info-value">Full-time</div>
-                        </div>
+                        </div> -->
                     </div>
 
-                    <h3 class="section-title">Areas of Specialization</h3>
+                    <!-- <h3 class="section-title">Areas of Specialization</h3>
                     <div class="specialization-list">
                         <span class="specialization-tag">Marine Propulsion</span>
                         <span class="specialization-tag">Ship Design</span>
                         <span class="specialization-tag">Naval Architecture</span>
                         <span class="specialization-tag">Maritime Engineering</span>
                         <span class="specialization-tag">Fluid Dynamics</span>
-                    </div>
+                    </div> -->
 
-                    <h3 class="section-title">Education</h3>
+                    <!-- <h3 class="section-title">Education</h3>
                     <div class="education-list">
                         <div class="education-item">
                             <div class="education-degree">Ph.D. in Marine Engineering</div>
@@ -197,9 +205,9 @@ $activePage = "profile";
                                 First Class Honors
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <h3 class="section-title">Professional Experience</h3>
+                    <!-- <h3 class="section-title">Professional Experience</h3>
                     <div class="experience-list">
                         <div class="experience-item">
                             <div class="experience-position">Associate Professor</div>
@@ -225,11 +233,11 @@ $activePage = "profile";
                                 Conducted research on fluid dynamics and ship design optimization.
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Courses Tab -->
-                <div class="tab-pane" id="courses">
+                <!-- <div class="tab-pane" id="courses">
                     <h3 class="section-title">Current Courses (2023/2024 First Semester)</h3>
                     <div class="course-grid">
                         <div class="course-card">
@@ -394,10 +402,10 @@ $activePage = "profile";
                             <span class="course-status upcoming">Upcoming</span>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Performance Tab -->
-                <div class="tab-pane" id="performance">
+                <!-- <div class="tab-pane" id="performance">
                     <h3 class="section-title">Performance Overview</h3>
                     <div class="performance-stats">
                         <div class="stat-box">
@@ -474,10 +482,10 @@ $activePage = "profile";
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Documents Tab -->
-                <div class="tab-pane" id="documents">
+                <!-- <div class="tab-pane" id="documents">
                     <h3 class="section-title">Personal Documents</h3>
                     <div class="document-list">
                         <div class="document-item">
@@ -618,7 +626,7 @@ $activePage = "profile";
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

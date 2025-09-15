@@ -212,6 +212,11 @@
 	transition: all var(--transition-speed);
 }
 
+.result-btn.success {
+	background-color: var(--success-color);
+	color: white;
+}
+
 .result-btn.primary {
 	background-color: var(--accent-color);
 	color: white;
@@ -224,6 +229,10 @@
 
 .result-btn:hover {
 	transform: translateY(-2px);
+}
+
+.result-btn.success:hover {
+	background-color: var(--success-color);
 }
 
 .result-btn.primary:hover {

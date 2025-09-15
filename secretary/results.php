@@ -58,11 +58,8 @@ $activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
 $deadlines = $secretary->fetchPendingDeadlinesByClass($departmentId);
 $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
-    foreach ($deadlines as $d) {
-        if ($d['deadline_status'] == 'pending') $totalPendingDeadlines++;
-    }
+    $totalPendingDeadlines = count($deadlines);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -134,40 +131,63 @@ if ($deadlines && is_array($deadlines)) {
                 <?php if ($totalPendingDeadlines > 0) : ?>
                     <!-- Display pending deadlines -->
                     <?php foreach ($deadlines as $deadline) : ?>
-                        <?php if ($deadline['deadline_status'] == 'pending') : ?>
-                            <div class="result-card">
-                                <div class="result-header">
-                                    <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
-                                    <span class="result-status <?= $deadline['deadline_status'] ?>"><?= ucfirst($deadline['deadline_status']) ?></span>
+                        <?php $status = $deadline['result_status'] === "approved" ? $deadline['result_status'] : $deadline['deadline_status'] ?>
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
+                                <span class="result-status <?= $status ?>"><?= ucfirst($status) ?></span>
+                            </div>
+                            <div class="result-info">
+                                <div class="info-item">
+                                    <div class="info-label">Semester</div>
+                                    <div class="info-value"><?= $deadline['semester_name'] ?></div>
                                 </div>
-                                <div class="result-info">
-                                    <div class="info-item">
-                                        <div class="info-label">Semester</div>
-                                        <div class="info-value"><?= $deadline['semester_name'] ?></div>
-                                    </div>
-                                    <div class="info-item">
-                                        <div class="info-label">Students</div>
-                                        <div class="info-value"><?= $deadline['total_registered_students'] ?? 0 ?></div>
-                                    </div>
-                                    <div class="info-item">
-                                        <div class="info-label">Due Date</div>
-                                        <div class="info-value"><?= date('M d, Y', strtotime($deadline['due_date'])) ?></div>
-                                    </div>
-                                    <div class="info-item">
-                                        <div class="info-label">Lecturer</div>
-                                        <div class="info-value"><?= $deadline['lecturer_name'] ?></div>
-                                    </div>
+                                <div class="info-item">
+                                    <div class="info-label">Students</div>
+                                    <div class="info-value"><?= $deadline['total_registered_students'] ?? 0 ?></div>
                                 </div>
-                                <div class="result-actions">
-                                    <button class="result-btn primary viewResultsBtn" data-class="<?= $deadline['class_code'] ?>" data-course="<?= $deadline['course_code'] ?>" data-semester="<?= $deadline['semester_id'] ?>">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="result-btn secondary downloadResultsBtn" data-class="<?= $deadline['class_code'] ?>" data-course="<?= $deadline['course_code'] ?>" data-semester="<?= $deadline['semester_id'] ?>">
-                                        <i class="fas fa-download"></i>
-                                    </button>
+                                <div class="info-item">
+                                    <div class="info-label">Due Date</div>
+                                    <div class="info-value"><?= date('M d, Y', strtotime($deadline['due_date'])) ?></div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Lecturer</div>
+                                    <div class="info-value"><?= $deadline['lecturer_name'] ?></div>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                            <div class="result-actions">
+                                <button class="result-btn primary viewResultsBtn"
+                                    data-class="<?= $deadline['class_code'] ?>"
+                                    data-course="<?= $deadline['course_code'] ?>"
+                                    data-semester="<?= $deadline['semester_id'] ?>"
+                                    title="View <?= $deadline['class_code'] ?> results">
+                                    <i class="fas fa-eye"></i> Open
+                                </button>
+                                <!-- <button class="result-btn secondary downloadResultsBtn"
+                                    data-class="<?= $deadline['class_code'] ?>"
+                                    data-course="<?= $deadline['course_code'] ?>"
+                                    data-semester="<?= $deadline['semester_id'] ?>"
+                                    title="Download <?= $deadline['class_code'] ?> results">
+                                    <i class="fas fa-download"></i>
+                                </button> -->
+                                <?php if ($status == "submitted") : ?>
+                                    <button class="result-btn success approveResultsBtn"
+                                        data-class="<?= $deadline['class_code'] ?>"
+                                        data-course="<?= $deadline['course_code'] ?>"
+                                        data-semester="<?= $deadline['semester_id'] ?>"
+                                        title="Approve <?= $deadline['class_code'] ?> results">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                    <button class="result-btn danger declineResultsBtn"
+                                        data-class="<?= $deadline['class_code'] ?>"
+                                        data-course="<?= $deadline['course_code'] ?>"
+                                        data-semester="<?= $deadline['semester_id'] ?>"
+                                        title="Decline <?= $deadline['class_code'] ?> results">
+                                        <i class="fas fa-check"></i> Decline
+                                    </button>
+                                <?php endif ?>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 <?php else : ?>
                     <div class="no-results">
@@ -285,7 +305,7 @@ if ($deadlines && is_array($deadlines)) {
 
         <!-- View Results Modal -->
         <div class="modal" id="viewResultsModal">
-            <div class="modal-dialog">
+            <div class="modal-dialog  modal-lg modal-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>View Exam Results</h2>
@@ -315,27 +335,8 @@ if ($deadlines && is_array($deadlines)) {
                         <!-- Results Table -->
                         <div class="results-table">
                             <table>
-                                <thead>
-                                    <tr>
-                                        <th>Student ID</th>
-                                        <th>Exam Score (40%)</th>
-                                        <th>Project Score (20%)</th>
-                                        <th>Ass. Score (40%)</th>
-                                        <th>ACH Mark</th>
-                                        <th>Grade</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>123456</td>
-                                        <td>30</td>
-                                        <td>16</td>
-                                        <td>30</td>
-                                        <td>80</td>
-                                        <td>A</td>
-                                    </tr>
-                                    <!-- More rows as needed -->
-                                </tbody>
+                                <thead></thead>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -353,6 +354,17 @@ if ($deadlines && is_array($deadlines)) {
         document.addEventListener('DOMContentLoaded', function() {
 
             const departmentId = <?= json_encode($departmentId) ?>;
+
+            // Modal Functions
+            function openModal(modalId) {
+                document.getElementById(modalId).classList.add("active");
+                document.body.style.overflow = "hidden";
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.remove("active");
+                document.body.style.overflow = "auto";
+            }
 
             // Toggle sidebar
             document.querySelector('.toggle-sidebar').addEventListener('click', function() {
@@ -389,74 +401,146 @@ if ($deadlines && is_array($deadlines)) {
                         })
                     });
 
-                    const results = await response.json();
-                    console.log("results", results);
-                    if (!results.success) {
-                        alert(results.message);
-                        return [];
-                    }
-
-                    return result = {
-                        headers: results.data.headers,
-                        headerValues: results.data.values,
-                        body: results.data.body
-                    }
+                    return await response.json();
                 } catch (error) {
                     console.error('Fetch error:', error);
                 }
             };
 
+            const approveCourseResults = async (classCode, courseCode, semesterId) => {
+                try {
+                    // fetch course results headers first
+                    if (!classCode || !courseCode || !semesterId) {
+                        alert('Class code, course code and semester ID are required to fetch results.');
+                        return [];
+                    }
+
+                    const response = await fetch('../endpoint/approve-semester-course-results', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            class: classCode,
+                            course: courseCode,
+                            semester: semesterId
+                        })
+                    });
+
+                    const results = await response.json();
+                    return results;
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                }
+            }
+
             // Open view results modal
             document.querySelectorAll('.result-btn.primary').forEach(button => {
+                button.addEventListener('click', async function() {
+
+                    const classCode = this.getAttribute('data-class');
+                    const courseCode = this.getAttribute('data-course');
+                    const semesterId = this.getAttribute('data-semester');
+
+                    // fetch results data based on classCode, courseCode and semesterId
+                    let result = await fetchCourseResults(classCode, courseCode, semesterId);
+
+                    if (result.success) {
+                        const modal = document.getElementById('viewResultsModal');
+                        const courseInfo = modal.querySelector('.course-info');
+                        const resultsTable = modal.querySelector('.results-table table tbody');
+
+                        // Clear previous results
+                        resultsTable.innerHTML = '';
+
+                        // Set course and semester info
+                        courseInfo.querySelector('.program-info span:nth-child(2)').textContent = 'BSc Marine Engineering';
+                        courseInfo.querySelector('.course-info span:nth-child(2)').textContent = courseCode;
+                        courseInfo.querySelector('.semester-info span:nth-child(2)').textContent = semesterId;
+
+                        // Define key mapping between header text and weight keys
+                        const headerWeightMap = {
+                            "Exam Score": "exam_score_weight",
+                            "Project Score": "project_score_weight",
+                            "Ass. Score": "assessment_score_weight"
+                        };
+
+                        const thead = modal.querySelector('.results-table table thead');
+                        thead.innerHTML = '';
+                        const headerRow = document.createElement('tr');
+
+                        // Extract weights
+                        const weights = result.data.values[0]; // assuming it's always there
+                        const projectBased = result.data.project_based;
+
+                        result.data.headers.forEach(header => {
+                            const baseHeader = header.split(' (')[0];
+
+                            // Skip "Project Score" header if not project-based
+                            if (baseHeader === "Project Score" && !projectBased) return;
+
+                            const th = document.createElement('th');
+
+                            if (baseHeader === "ACH Mark") {
+                                th.textContent = `${baseHeader} (100%)`;
+                            } else {
+                                const weightKey = headerWeightMap[baseHeader];
+                                const weight = weightKey && weights[weightKey] !== undefined ? ` (${weights[weightKey]}%)` : '';
+                                th.textContent = `${baseHeader}${weight}`;
+                            }
+
+                            headerRow.appendChild(th);
+                        });
+
+                        thead.appendChild(headerRow);
+
+                        // Populate results table
+                        result.data.body.forEach(row => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${row.student_id}</td>
+                                <td>${row.exam_score}</td>
+                                ${projectBased && row.project_score ? `<td>${row.project_score}</td>` : ''}
+                                <td>${row.ass_score}</td>
+                                <td>${row.final_score}</td>
+                                <td>${row.grade}</td>
+                            `;
+                            resultsTable.appendChild(tr);
+                        });
+
+                        modal.classList.add('active');
+                    } else {
+                        alert('Error fetching results: ' + result.message);
+                    }
+                });
+            });
+
+            // Download results
+            document.querySelectorAll('.result-btn.secondary').forEach(button => {
                 button.addEventListener('click', function() {
                     const classCode = this.getAttribute('data-class');
                     const courseCode = this.getAttribute('data-course');
                     const semesterId = this.getAttribute('data-semester');
-                    console.log(classCode, courseCode, semesterId);
-                    // fetch results data based on classCode, courseCode and semesterId
-                    fetchCourseResults(classCode, courseCode, semesterId).then(result => {
-                        if (result.success) {
-                            const modal = document.getElementById('viewResultsModal');
-                            const courseInfo = modal.querySelector('.course-info');
-                            const resultsTable = modal.querySelector('.results-table table tbody');
+                    // download results excel file from ../uploads/results/nameoffile.xlsx
 
-                            // Clear previous results
-                            resultsTable.innerHTML = '';
+                });
+            });
 
-                            // Set course and semester info
-                            courseInfo.querySelector('.program-info span:nth-child(2)').textContent = 'BSc Marine Engineering';
-                            courseInfo.querySelector('.course-info span:nth-child(2)').textContent = courseCode;
-                            courseInfo.querySelector('.semester-info span:nth-child(2)').textContent = semesterId;
-
-                            // Populate table headers
-                            const thead = modal.querySelector('.results-table table thead');
-                            thead.innerHTML = '';
-                            const headerRow = document.createElement('tr');
-                            result.data.header.forEach(header => {
-                                const th = document.createElement('th');
-                                th.textContent = `${header} (${header.weight}%)`;
-                                headerRow.appendChild(th);
-                            });
-
-                            // Populate results table
-                            result.data.body.forEach(row => {
-                                const tr = document.createElement('tr');
-                                tr.innerHTML = `
-                                        <td>${row.student_id}</td>
-                                        <td>${row.exam_score}</td>
-                                        ${row.isProjectBased ? `<td>${row.project_score}</td>` : ''}
-                                        <td>${row.assessment_score}</td>
-                                        <td>${row.ach_mark}</td>
-                                        <td>${row.grade}</td>
-                                    `;
-                                resultsTable.appendChild(tr);
-                            });
-
-                            modal.classList.add('active');
-                        } else {
-                            alert('Error fetching results: ' + result.message);
-                        }
-                    });
+            // Approve results
+            document.querySelectorAll('.result-btn.success').forEach(button => {
+                button.addEventListener('click', function() {
+                    const classCode = this.getAttribute('data-class');
+                    const courseCode = this.getAttribute('data-course');
+                    const semesterId = this.getAttribute('data-semester');
+                    // approve results
+                    if (confirm("Are you sure you want to approve this exam results?")) {
+                        approveCourseResults(classCode, courseCode, semesterId).then(result => {
+                            alert(result.message);
+                            if (result.success) {
+                                window.location.reload();
+                            }
+                        });
+                    }
                 });
             });
 
@@ -510,10 +594,8 @@ if ($deadlines && is_array($deadlines)) {
             document.getElementById('uploadSemester').addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
                 const academicYear = selectedOption.getAttribute('data-academicYear');
-                console.log('Selected academic year:', academicYear);
                 if (academicYear) {
                     document.getElementById('uploadSemester').setAttribute('data-academicYear', academicYear);
-                    console.log('Updated academic year:', academicYear);
                 }
             });
 
@@ -558,8 +640,9 @@ if ($deadlines && is_array($deadlines)) {
                     }
                 });
                 const result = await response.json();
+                alert(result.message);
+                if (result.success) window.location.reload();
 
-                console.log('Upload result:', result);
                 uploadResultsModal.classList.remove('active');
             });
 
@@ -577,11 +660,6 @@ if ($deadlines && is_array($deadlines)) {
                 const status = document.getElementById('statusFilter').value;
 
                 // In a real application, you would filter the results based on the selected filters
-                console.log('Filtering results:', {
-                    semester,
-                    course,
-                    status
-                });
             };
 
             document.getElementById('semesterFilter').addEventListener('change', filterResults);
@@ -596,7 +674,7 @@ if ($deadlines && is_array($deadlines)) {
                     const courseCode = row.cells[0].textContent;
                     const courseTitle = row.cells[1].textContent;
 
-                    alert(`${action} for ${courseCode} - ${courseTitle}`);
+                    //alert(`${action} for ${courseCode} - ${courseTitle}`);
                 });
             });
 
@@ -607,7 +685,7 @@ if ($deadlines && is_array($deadlines)) {
                     const card = this.closest('.result-card');
                     const courseTitle = card.querySelector('.result-title').textContent;
 
-                    alert(`${action} for ${courseTitle}`);
+                    //alert(`${action} for ${courseTitle}`);
                 });
             });
 
@@ -619,7 +697,6 @@ if ($deadlines && is_array($deadlines)) {
                         this.classList.add('active');
 
                         // In a real application, you would load the corresponding page
-                        console.log('Loading page:', this.textContent);
                     }
                 });
             });
