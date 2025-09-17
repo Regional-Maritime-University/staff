@@ -73,9 +73,9 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
         <div class="courses-content">
             <!-- Semester Selector -->
             <div class="semester-selector">
-                <h3>Select Semester</h3>
+                <h3>Select Status</h3>
                 <div class="semester-options">
-                    <div class="semester-option active" data-semester="all">All Courses</div>
+                    <div class="semester-option active" data-semester="all">All</div>
                     <div class="semester-option" data-semester="active">Active</div>
                     <div class="semester-option" data-semester="marking">Marking</div>
                     <div class="semester-option" data-semester="marked">Marked</div>
@@ -115,9 +115,9 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
                                 <button class="course-btn primary">
                                     <i class="fas fa-eye"></i> View Details
                                 </button>
-                                <button class="course-btn secondary">
+                                <!-- <button class="course-btn secondary">
                                     <i class="fas fa-download"></i> Resources
-                                </button>
+                                </button> -->
                             </div>
                         </div>
                     </div>
@@ -184,13 +184,13 @@ $activeCourses = $lecturer->getActiveCourses($lecturerId);
         });
 
         // Resources button functionality
-        document.querySelectorAll('.course-btn.secondary').forEach(button => {
-            button.addEventListener('click', function() {
-                const courseCard = this.closest('.course-card');
-                const courseCode = courseCard.querySelector('.course-code').textContent;
-                window.location.href = `course-resources.php?code=${courseCode}`;
-            });
-        });
+        // document.querySelectorAll('.course-btn.secondary').forEach(button => {
+        //     button.addEventListener('click', function() {
+        //         const courseCard = this.closest('.course-card');
+        //         const courseCode = courseCard.querySelector('.course-code').textContent;
+        //         window.location.href = `course-resources.php?code=${courseCode}`;
+        //     });
+        // });
     </script>
 </body>
 

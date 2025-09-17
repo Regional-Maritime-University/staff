@@ -6,6 +6,7 @@ use Exception;
 use Src\System\DatabaseMethods;
 use Src\Controller\ExposeDataController;
 use PhpOffice\PhpWord\TemplateProcessor;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Src\Base\Log;
 use Src\Core\Base;
 use Src\Core\Classes;
@@ -1331,11 +1332,169 @@ class SecretaryController
         return $response;
     }
 
+    public function extractResultExcelData($data)
+    {
+        // target Location
+        $targetPath = UPLOAD_DIR . "/results/" . $data["file_name"];
+        $endRow = 0;
+        $startRow = 13;
+
+        $Reader = new Xlsx();
+        $spreadSheet = $Reader->load($targetPath);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $spreadSheetArray = $excelSheet->toArray();
+
+        if ($endRow == 0) $endRow = count($spreadSheetArray);
+        if ($startRow > 1) $startRow -= 1;
+
+        $dataset = array();
+
+        for ($i = $startRow; $i <= $endRow - 1; $i++) {
+            $studentId = $spreadSheetArray[$i][0];
+            $examScore = $spreadSheetArray[$i][11];
+            $projectScore = $data["project_based"] ? $spreadSheetArray[$i][12] : 0;
+            $assessmentScore = $data["project_based"] ? $spreadSheetArray[$i][13] : $spreadSheetArray[$i][12];
+            // $final_score = $data["projectBased"] ? $spreadSheetArray[$i][14] : $spreadSheetArray[$i][13];
+
+            if (!$studentId || !$examScore || !$assessmentScore) {
+                continue;
+            }
+
+            array_push($dataset, array(
+                "student_id" => $studentId,
+                "exam_score" => $examScore,
+                "project_score" => $projectScore,
+                "assessment_score" => $assessmentScore,
+                // "final_score" => $final_score,
+            ));
+        }
+
+        return $dataset;
+    }
+
+    public function setApprovedStudentsSemesterCourseResults($data)
+    {
+        $extracted_data = $this->extractResultExcelData($data);
+        if (empty($extracted_data)) return array("success" => false, "message" => "No data found in the file!");
+
+        $error_list = [];
+        $errorsEncountered = 0;
+        $successEncountered = 0;
+
+        // Check if class exists
+        $classQuery = "SELECT `code` FROM `class` WHERE `code` = :ci";
+        $classData = $this->dm->getData($classQuery, array(":ci" => $data["class_code"]));
+        if (empty($classData)) {
+            array_push($error_list, "Class with code {$data['class']} does not exist!");
+            $errorsEncountered += 1;
+            return array("success" => false, "message" => implode(", ", $error_list));
+        }
+
+        // Check if course exists
+        $courseQuery = "SELECT `code` FROM `course` WHERE `code` = :ci";
+        $courseData = $this->dm->getData($courseQuery, array(":ci" => $data["course_code"]));
+        if (empty($courseData)) {
+            array_push($error_list, "Course with code {$data['course']} does not exist!");
+            $errorsEncountered += 1;
+            return array("success" => false, "message" => implode(", ", $error_list));
+        }
+
+        // Check if semester exists
+        $semesterQuery = "SELECT `id` FROM `semester` WHERE `id` = :si";
+        $semesterData = $this->dm->getData($semesterQuery, array(":si" => $data["semester_id"]));
+        if (empty($semesterData)) {
+            array_push($error_list, "Semester with ID {$data['semester']} does not exist!");
+            $errorsEncountered += 1;
+            return array("success" => false, "message" => implode(", ", $error_list));
+        }
+
+        // Check if staff exists
+        $staffQuery = "SELECT `number` FROM `staff` WHERE `number` = :si";
+        $staffData = $this->dm->getData($staffQuery, array(":si" => $_SESSION["staff"]["number"]));
+        if (empty($staffData)) {
+            array_push($error_list, "Staff with Number {$data['staffId']} does not exist!");
+            $errorsEncountered += 1;
+            return array("success" => false, "message" => implode(", ", $error_list));
+        }
+
+        // $error_list = [];
+
+        $output = [];
+        $count = 0;
+
+        // add results for each applicant to db
+        foreach ($extracted_data as $result) {
+            return array("success" => false, "message" => json_encode($result));
+            // Check if student exists
+            $studentQuery = "SELECT `index_number` FROM `student` WHERE `index_number` = :si";
+            $studentData = $this->dm->getData($studentQuery, array(":si" => $result["student_id"]));
+
+            if (empty($studentData)) {
+                array_push($error_list, "Student with ID {$result['student_id']} does not exist!");
+                $errorsEncountered += 1;
+                continue;
+            }
+            $resultInsertQuery = "";
+            $resultInsertParams = [];
+
+            // check if student result is project based and validate scores
+            if ($data["project_based"]) {
+                $resultInsertQuery = "UPDATE `student_results` SET `continues_assessments_score` = :cas, `project_score` = :ps, `exam_score` = :es 
+                                WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
+                $resultInsertParams = array(
+                    ":i" => $result["student_id"],
+                    ":c" => $data["course"],
+                    ":s" => $data["semester"],
+                    ":es" => $result["exam_score"],
+                    ":ps" => $result["project_score"],
+                    ":cas" => $result["assessment_score"]
+                );
+            } else {
+                $resultInsertQuery = "UPDATE `student_results` SET `continues_assessments_score` = :cas, `exam_score` = :es 
+                                WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
+                $resultInsertParams = array(
+                    ":i" => $result["student_id"],
+                    ":c" => $data["course"],
+                    ":s" => $data["semester"],
+                    ":es" => $result["exam_score"],
+                    ":cas" => $result["assessment_score"]
+                );
+            }
+
+            $resultInsertOutput = $this->dm->inputData($resultInsertQuery, $resultInsertParams);
+
+            if (!$resultInsertOutput) {
+                array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
+                $errorsEncountered += 1;
+            } else {
+                $successEncountered += 1;
+            }
+            $count++;
+        }
+
+        $output = array(
+            "success" => false,
+            "message" => "Successfully updated {$successEncountered} results and {$errorsEncountered} errors encountered! " . (($errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+            "errors" => $error_list
+        );
+
+        if ($successEncountered && !$errorsEncountered) {
+            $semesterId = $data["semester_id"];
+
+            // Recalculate GPA for this semester
+            $this->dm->inputData("CALL recalc_results_and_gpa(:sem)", [":sem" => $semesterId]);
+            $output["success"] = true;
+        }
+
+        return $output;
+    }
+
     public function approveSemesterCourseResults($semesterId, $courseCode, $classCode)
     {
         // fetch exam results and check if is project based
-        $query = "SELECT r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, 
-                    r.`project_based`, cr.`name` AS course, sm.`name` AS semester
+        $query = "SELECT r.`fk_course` AS course_code, r.`fk_semester` AS semester_id, r.`fk_class` AS class_code, 
+                    r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, 
+                    r.`project_based`, cr.`name` AS course, sm.`name` AS semester, r.`file_name` 
                     FROM `exam_results` AS r 
                     JOIN `course` AS cr ON r.`fk_course` = cr.`code` 
                     JOIN `class` AS cs ON r.`fk_class` = cs.`code` 
@@ -1357,7 +1516,11 @@ class SecretaryController
         if (!$results2) {
             return ["success" => false, "message" => "Failed to approve exam result!"];
         }
-        return ["success" => true, "message" => "Successfully approved exam result!"];
+        $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Exam Results", "Approved exam results for {$classCode} - {$courseCode} in {$results[0]['semester']}");
+
+        // set students semester course results
+        $approvedResults = $this->setApprovedStudentsSemesterCourseResults($results[0]);
+        return array("success" => true, "message" => "Successfully approved exam result!", "data" => $approvedResults);
     }
 
     // Create functions for to perform CRUD operations on lecturers. The adding of a lecturer should send an SMS and also email use the sms and email functions

@@ -509,7 +509,23 @@ ADD COLUMN `fk_semester_registered` INT AFTER `registered`;
 ALTER TABLE `student_courses` ADD 
 CONSTRAINT `fk_student_courses_semester_registered` FOREIGN KEY (`fk_semester_registered`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-
+CREATE TABLE `course_resources` (
+    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+    `fk_course` VARCHAR(10),
+    `fk_staff` VARCHAR(10),
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `file_name` VARCHAR(255) NOT NULL,
+    `file_type` VARCHAR(50) NOT NULL,
+    `file_size` INT NOT NULL,
+    `uploaded_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- identify if the resource is by a lecturer or by department
+    `type` VARCHAR(50) DEFAULT 'lecturer', -- lecturer or department
+    -- identity if the resource is public or private
+    `visibility` VARCHAR(50) DEFAULT 'private', -- public or private
+    CONSTRAINT `fk_course_resources_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_course_resources_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 
 

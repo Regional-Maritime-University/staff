@@ -217,6 +217,11 @@
 	color: white;
 }
 
+.result-btn.danger {
+	background-color: var(--danger-color);
+	color: white;
+}
+
 .result-btn.primary {
 	background-color: var(--accent-color);
 	color: white;
@@ -233,6 +238,10 @@
 
 .result-btn.success:hover {
 	background-color: var(--success-color);
+}
+
+.result-btn.danger:hover {
+	background-color: var(--danger-color);
 }
 
 .result-btn.primary:hover {

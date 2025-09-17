@@ -114,6 +114,18 @@ class UploadExcelDataController
 
     public function saveResultDataFile($data = null)
     {
+
+        // Check if a deadline has already been set for this class, course, and semester
+        $deadlineSet = "SELECT `id` FROM `deadlines` WHERE `fk_class` = :cs AND `fk_semester` = :sm AND `fk_course` = :cr";
+        $existingResult = $this->dm->getData($deadlineSet, array(":cs" => $data["class"], ":sm" => $data["semester"], ":cr" => $data["course"]));
+
+        if (empty($existingResult)) {
+            return array(
+                "success" => false,
+                "message" => "Deadline not set for selected class, course, and semester! Please contact the administrator. {$data['class']} - {$data['course']} - {$data['semester']}"
+            );
+        }
+
         $allowedFileType = [
             'application/vnd.ms-excel',
             'text/xls',
@@ -161,19 +173,14 @@ class UploadExcelDataController
 
             if (!empty($existingResult)) {
                 $inputQuery = "UPDATE `exam_results` SET 
-                                `fk_staff` = :sf, 
-                                `exam_score_weight` = :esw, 
-                                `project_score_weight` = :psw, 
-                                `assessment_score_weight` = :asw, 
-                                `project_based` = :pb, 
-                                `notes` = :nt, 
-                                `file_name` = :fn, 
-                                `status` = 'pending' 
+                                `fk_staff` = :sf, `exam_score_weight` = :esw, `project_score_weight` = :psw, 
+                                `assessment_score_weight` = :asw, `project_based` = :pb, `notes` = :nt, 
+                                `file_name` = :fn, `status` = 'submitted', `updated_at` = CURRENT_TIMESTAMP 
                             WHERE `fk_class` = :cs AND `fk_semester` = :sm AND `fk_course` = :cr";
             } else {
                 $inputQuery = "INSERT INTO `exam_results` 
                                 (`fk_class`, `fk_semester`, `fk_staff`, `fk_course`, `exam_score_weight`, `project_score_weight`, `assessment_score_weight`, `project_based`, `notes`, `file_name`, `status`) 
-                            VALUES (:cs, :sm, :sf, :cr, :esw, :psw, :asw, :pb, :nt, :fn, 'pending')";
+                            VALUES (:cs, :sm, :sf, :cr, :esw, :psw, :asw, :pb, :nt, :fn, 'submitted') ";
             }
 
             $params = array(
@@ -190,6 +197,10 @@ class UploadExcelDataController
             );
 
             if ($this->dm->inputData($inputQuery, $params)) {
+                $updateDeadlineStatusQuery = "UPDATE `deadlines` SET `status` = 'submitted', `updated_at` = CURRENT_TIMESTAMP 
+                            WHERE `fk_class` = :cs AND `fk_semester` = :sm AND `fk_course` = :cr";
+                $updateDeadlineStatusParams = array(":cs" => $data["class"], ":sm" => $data["semester"], ":cr" => $data["course"]);
+                $this->dm->inputData($updateDeadlineStatusQuery, $updateDeadlineStatusParams);
                 return array("success" => true, "message" => "File upload successful!");
             } else {
                 return array("success" => false, "message" => "Failed to upload file and save exam results!");
@@ -391,120 +402,120 @@ class UploadExcelDataController
 
             // save file to uploads folder
             $file_upload_msg = $this->saveResultDataFile($data);
-            if (!$file_upload_msg["success"]) return $file_upload_msg;
+            return $file_upload_msg;
 
-            $extracted_data = $this->extractResultExcelData($data);
-            if (empty($extracted_data)) return array("success" => false, "message" => "No data found in the file!");
+            // $extracted_data = $this->extractResultExcelData($data);
+            // if (empty($extracted_data)) return array("success" => false, "message" => "No data found in the file!");
 
-            // Check if class exists
-            $classQuery = "SELECT `code` FROM `class` WHERE `code` = :ci";
-            $classData = $this->dm->getData($classQuery, array(":ci" => $data["class"]));
-            if (empty($classData)) {
-                array_push($error_list, "Class with code {$data['class']} does not exist!");
-                $this->errorsEncountered += 1;
-                return array("success" => false, "message" => implode(", ", $error_list));
-            }
+            // // Check if class exists
+            // $classQuery = "SELECT `code` FROM `class` WHERE `code` = :ci";
+            // $classData = $this->dm->getData($classQuery, array(":ci" => $data["class"]));
+            // if (empty($classData)) {
+            //     array_push($error_list, "Class with code {$data['class']} does not exist!");
+            //     $this->errorsEncountered += 1;
+            //     return array("success" => false, "message" => implode(", ", $error_list));
+            // }
 
-            // Check if course exists
-            $courseQuery = "SELECT `code` FROM `course` WHERE `code` = :ci";
-            $courseData = $this->dm->getData($courseQuery, array(":ci" => $data["course"]));
-            if (empty($courseData)) {
-                array_push($error_list, "Course with code {$data['course']} does not exist!");
-                $this->errorsEncountered += 1;
-                return array("success" => false, "message" => implode(", ", $error_list));
-            }
+            // // Check if course exists
+            // $courseQuery = "SELECT `code` FROM `course` WHERE `code` = :ci";
+            // $courseData = $this->dm->getData($courseQuery, array(":ci" => $data["course"]));
+            // if (empty($courseData)) {
+            //     array_push($error_list, "Course with code {$data['course']} does not exist!");
+            //     $this->errorsEncountered += 1;
+            //     return array("success" => false, "message" => implode(", ", $error_list));
+            // }
 
-            // Check if semester exists
-            $semesterQuery = "SELECT `id` FROM `semester` WHERE `id` = :si";
-            $semesterData = $this->dm->getData($semesterQuery, array(":si" => $data["semester"]));
-            if (empty($semesterData)) {
-                array_push($error_list, "Semester with ID {$data['semester']} does not exist!");
-                $this->errorsEncountered += 1;
-                return array("success" => false, "message" => implode(", ", $error_list));
-            }
+            // // Check if semester exists
+            // $semesterQuery = "SELECT `id` FROM `semester` WHERE `id` = :si";
+            // $semesterData = $this->dm->getData($semesterQuery, array(":si" => $data["semester"]));
+            // if (empty($semesterData)) {
+            //     array_push($error_list, "Semester with ID {$data['semester']} does not exist!");
+            //     $this->errorsEncountered += 1;
+            //     return array("success" => false, "message" => implode(", ", $error_list));
+            // }
 
-            // Check if staff exists
-            $staffQuery = "SELECT `number` FROM `staff` WHERE `number` = :si";
-            $staffData = $this->dm->getData($staffQuery, array(":si" => $data["staffId"]));
-            if (empty($staffData)) {
-                array_push($error_list, "Staff with Number {$data['staffId']} does not exist!");
-                $this->errorsEncountered += 1;
-                return array("success" => false, "message" => implode(", ", $error_list));
-            }
+            // // Check if staff exists
+            // $staffQuery = "SELECT `number` FROM `staff` WHERE `number` = :si";
+            // $staffData = $this->dm->getData($staffQuery, array(":si" => $data["staffId"]));
+            // if (empty($staffData)) {
+            //     array_push($error_list, "Staff with Number {$data['staffId']} does not exist!");
+            //     $this->errorsEncountered += 1;
+            //     return array("success" => false, "message" => implode(", ", $error_list));
+            // }
 
-            $error_list = [];
-            $output = [];
-            $count = 0;
+            // $error_list = [];
+            // $output = [];
+            // $count = 0;
 
-            // add results for each applicant to db
-            foreach ($extracted_data as $result) {
-                // Check if student exists
-                $studentQuery = "SELECT `index_number` FROM `student` WHERE `index_number` = :si";
-                $studentData = $this->dm->getData($studentQuery, array(":si" => $result["student_id"]));
+            // // add results for each applicant to db
+            // foreach ($extracted_data as $result) {
+            //     // Check if student exists
+            //     $studentQuery = "SELECT `index_number` FROM `student` WHERE `index_number` = :si";
+            //     $studentData = $this->dm->getData($studentQuery, array(":si" => $result["student_id"]));
 
-                if (empty($studentData)) {
-                    array_push($error_list, "Student with ID {$result['student_id']} does not exist!");
-                    $this->errorsEncountered += 1;
-                    continue;
-                }
+            //     if (empty($studentData)) {
+            //         array_push($error_list, "Student with ID {$result['student_id']} does not exist!");
+            //         $this->errorsEncountered += 1;
+            //         continue;
+            //     }
 
-                $resultInsertQuery = "UPDATE `student_results` SET `exam_score` = :es, `project_score` = :ps, `continues_assessments_score` = :cas 
-                                    WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
+            //     $resultInsertQuery = "UPDATE `student_results` SET `exam_score` = :es, `project_score` = :ps, `continues_assessments_score` = :cas 
+            //                         WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
 
-                $params = array(
-                    ":i" => $result["student_id"],
-                    ":c" => $data["course"],
-                    ":s" => $data["semester"],
-                    ":es" => $result["exam_score"],
-                    ":ps" => $result["project_score"],
-                    ":cas" => $result["assessment_score"]
-                );
+            //     $params = array(
+            //         ":i" => $result["student_id"],
+            //         ":c" => $data["course"],
+            //         ":s" => $data["semester"],
+            //         ":es" => $result["exam_score"],
+            //         ":ps" => $result["project_score"],
+            //         ":cas" => $result["assessment_score"]
+            //     );
 
-                $resultInsertOutput = $this->dm->inputData($resultInsertQuery, $params);
+            //     $resultInsertOutput = $this->dm->inputData($resultInsertQuery, $params);
 
-                if (!$resultInsertOutput) {
-                    array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
-                    $this->errorsEncountered += 1;
-                } else {
-                    $this->successEncountered += 1;
-                }
-                $count++;
-            }
+            //     if (!$resultInsertOutput) {
+            //         array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
+            //         $this->errorsEncountered += 1;
+            //     } else {
+            //         $this->successEncountered += 1;
+            //     }
+            //     $count++;
+            // }
 
-            $output = array(
-                "success" => true,
-                "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
-                "errors" => $error_list
-            );
+            // $output = array(
+            //     "success" => true,
+            //     "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+            //     "errors" => $error_list
+            // );
 
-            if ($this->successEncountered && !$this->errorsEncountered) {
-                $updateDeadlineQuery = "UPDATE `deadlines` SET `status`= 'submitted', `updated_at`= CURRENT_TIMESTAMP 
-                                        WHERE `fk_semester`=:sm AND `fk_course`=:cr AND `fk_class`=:cl";
-                $updateDeadlineParams = [':cl' => $data["class"], ':cr' => $data["course"], ':sm' => $data["semester"]];
-                if ($this->dm->inputData($updateDeadlineQuery, $updateDeadlineParams)) {
-                    $semesterId = $data["semester"];
+            // if ($this->successEncountered && !$this->errorsEncountered) {
+            //     $updateDeadlineQuery = "UPDATE `deadlines` SET `status`= 'submitted', `updated_at`= CURRENT_TIMESTAMP 
+            //                             WHERE `fk_semester`=:sm AND `fk_course`=:cr AND `fk_class`=:cl";
+            //     $updateDeadlineParams = [':cl' => $data["class"], ':cr' => $data["course"], ':sm' => $data["semester"]];
+            //     if ($this->dm->inputData($updateDeadlineQuery, $updateDeadlineParams)) {
+            //         $semesterId = $data["semester"];
 
-                    // Recalculate GPA for this semester
-                    $this->dm->inputData("CALL recalc_results_and_gpa(:sem)", [":sem" => $semesterId]);
+            //         // Recalculate GPA for this semester
+            //         $this->dm->inputData("CALL recalc_results_and_gpa(:sem)", [":sem" => $semesterId]);
 
-                    return array(
-                        "success" => true,
-                        "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! "
-                    );
-                } else {
-                    return array(
-                        "success" => false,
-                        "message" => "Failed to update deadline status " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
-                        "errors" => $error_list
-                    );
-                }
-            } else {
-                return array(
-                    "success" => false,
-                    "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
-                    "errors" => $error_list
-                );
-            }
+            //         return array(
+            //             "success" => true,
+            //             "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! "
+            //         );
+            //     } else {
+            //         return array(
+            //             "success" => false,
+            //             "message" => "Failed to update deadline status " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+            //             "errors" => $error_list
+            //         );
+            //     }
+            // } else {
+            //     return array(
+            //         "success" => false,
+            //         "message" => "Successfully updated {$this->successEncountered} results and {$this->errorsEncountered} errors encountered! " . (($this->errorsEncountered > 0 && count($error_list) > 0) ? implode(",", $error_list) : "Check the error list for more details!"),
+            //         "errors" => $error_list
+            //     );
+            // }
         }
     }
 }

@@ -131,7 +131,7 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                         <p>Pending Results</p>
                     </div>
                 </div>
-                <div class="stat-card">
+                <!-- <div class="stat-card">
                     <div class="stat-icon messages">
                         <i class="fas fa-envelope"></i>
                     </div>
@@ -139,7 +139,7 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                         <h3>10</h3>
                         <p>New Messages</p>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Dashboard Grid -->
@@ -194,7 +194,7 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                 </div> -->
 
                 <!-- Notifications Section -->
-                <div class="notifications-section">
+                <!-- <div class="notifications-section">
                     <div class="section-header">
                         <h2>Recent Notifications</h2>
                         <button class="view-all-btn">View All</button>
@@ -231,10 +231,10 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Messages Section -->
-                <div class="messages-section">
+                <!-- <div class="messages-section">
                     <div class="section-header">
                         <h2>Recent Messages</h2>
                         <button class="view-all-btn">View All</button>
@@ -271,7 +271,7 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -311,13 +311,6 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                         <label for="uploadCourse">Select Course</label>
                         <select id="uploadCourse" required>
                             <option value="">Select a course</option>
-                            <?php
-                            foreach ($deadlines as $deadline) {
-                                if ($deadline['deadline_status'] == 'pending') {
-                                    echo '<option value="' . $deadline['course_code'] . '">' . $deadline['course_code'] . ' - ' . $deadline['course_name'] . '</option>';
-                                }
-                            }
-                            ?>
                         </select>
                     </div>
 
@@ -479,6 +472,8 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
 
         // Submit upload
         document.getElementById('submitUploadBtn').addEventListener('click', async function() {
+            // change button state
+            this.textContent = 'Uploading...';
             const classCode = document.getElementById('uploadClass').value;
             const courseCode = document.getElementById('uploadCourse').value;
             const semesterId = document.getElementById('uploadSemester').value;
@@ -517,9 +512,20 @@ $totalPendingResults = $lecturer->getTotalPendingResults($lecturerId);
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-            const result = await response.json();
 
-            console.log('Upload result:', result);
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            const results = await response.json();
+
+            if (!results.success && results.message == "logout") {
+                window.location.href = "?logout=true";
+            }
+
+            console.log('Upload result:', results);
+            alert(results.message);
+            if (results.success) window.location.reload();
             uploadResultsModal.classList.remove('active');
         });
     </script>

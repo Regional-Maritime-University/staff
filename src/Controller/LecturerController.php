@@ -217,8 +217,109 @@ class LecturerController
         return $result ? $result[0]['total_pending_results'] : 0;
     }
 
+    public function getCourseStudents($courseCode, $semesterId)
+    {
+        $query = "SELECT 
+                    s.`index_number` AS student_id, 
+                    CONCAT(s.`prefix`, ' ', s.`first_name`, ' ', s.`last_name`) AS student_name, 
+                    s.`email` AS student_email, s.`photo`, s.`fk_class` AS student_class_code, 
+                    sc.`registered` AS is_registered
+                FROM `student_courses` AS sc
+                JOIN `student` AS s ON sc.`fk_student` = s.`index_number`
+                WHERE sc.`fk_course` = :courseCode
+                    AND sc.`fk_semester` = :semesterId
+                ORDER BY s.`last_name`, s.`first_name`";
+        $params = [":courseCode" => $courseCode, ":semesterId" => $semesterId];
+        return $this->dm->getData($query, $params);
+    }
+
+    public function fetchCourseResources($courseCode, $lecturerId = null)
+    {
+        $query = "";
+        $params = [];
+
+        // If lecturerId is provided, fetch only resources uploaded by that lecturer
+        if (!$lecturerId) {
+            $query = "SELECT 
+                        cr.`id`, cr.`file_name`, cr.`file_type`, cr.`file_size`, cr.`uploaded_at`, cr.`description`, cr.`type`, cr.`visibility`, 
+                        CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS uploaded_by, c.`name` AS course_name 
+                    FROM `course_resources` AS cr 
+                    JOIN `staff` AS sf ON cr.`fk_staff` = sf.`number` 
+                    JOIN `course` AS c ON cr.`fk_course` = c.`code` 
+                    WHERE cr.`fk_course` = :courseCode AND cr.`type` = 'department' AND cr.`visibility` = 'public' 
+                    ORDER BY cr.`uploaded_at` DESC";
+            $params = [":courseCode" => $courseCode];
+        } else {
+            $query = "SELECT 
+                        cr.`id`, cr.`file_name`, cr.`file_type`, cr.`file_size`, cr.`uploaded_at`, cr.`description`, cr.`type`, cr.`visibility`, 
+                    CONCAT(sf.`prefix`, ' ', sf.`first_name`, ' ', sf.`last_name`) AS uploaded_by, c.`name` AS course_name 
+                FROM `course_resources` AS cr
+                JOIN `staff` AS sf ON cr.`fk_staff` = sf.`number`
+                JOIN `course` AS c ON cr.`fk_course` = c.`code`
+                WHERE cr.`fk_course` = :courseCode AND cr.`fk_staff` = :lecturerId
+                ORDER BY cr.`uploaded_at` DESC";
+            $params = [":courseCode" => $courseCode, ":lecturerId" => $lecturerId];
+        }
+        return $this->dm->getData($query, $params);
+    }
+
+    public function fetchCourseResults($courseCode, $semesterId)
+    {
+        // fetch exam results and check if is project based
+        $query = "SELECT r.`exam_score_weight`, r.`project_score_weight`, r.`assessment_score_weight`, r.`project_based`, 
+                    cr.`name` AS course, sm.`name` AS semester, cs.`code` AS class_code 
+                FROM `exam_results` AS r 
+                JOIN `course` AS cr ON r.`fk_course` = cr.`code` 
+                JOIN `class` AS cs ON r.`fk_class` = cs.`code` 
+                JOIN `semester` AS sm ON r.`fk_semester` = sm.`id` 
+                WHERE r.`fk_semester` = :sm AND r.`fk_course` = :cr";
+        $params = [":sm" => $semesterId, ":cr" => $courseCode];
+        $results = $this->dm->getData($query, $params);
+
+        if (empty($results)) {
+            return ["success" => false, "message" => "No results uploaded for this course."];
+        }
+
+        // fetch results body
+        $query2 = "SELECT sc.`fk_student` AS student_id, sc.`fk_course` AS course_code, sc.`credit_hours` AS course_credit_hours, 
+                    sc.`level` AS course_level, sc.`fk_semester` AS semester_id, sc.semester, sr.`continues_assessments_score` AS ass_score, 
+                    sr.`project_score`, sr.`exam_score`, sr.`final_score`, sr.`grade`, sr.`gpa` 
+                    FROM `student` AS st, `student_courses` AS sc, `student_results` AS sr 
+                    WHERE st.`index_number` = sc.`fk_student` AND st.`index_number` = sr.`fk_student` AND 
+                        sc.`fk_course` = sr.`fk_course` AND sc.`fk_semester` = sr.`fk_semester` AND 
+                        sc.`fk_course` = :cr AND sc.`fk_semester` = :sm";
+        $params2 = [":sm" => $semesterId, ":cr" => $courseCode];
+        $results2 = $this->dm->getData($query2, $params2);
+
+        if (empty($results2)) {
+            return ["success" => false, "message" => "No records found in uploaded data."];
+        }
+
+        // Determine if the course is project based (assume all results have the same course)
+        $isProjectBased = (bool) $results[0]['project_based'];
+
+        $response = [];
+        $response["success"] = true;
+
+        if ($isProjectBased) {
+            $response["data"] = [
+                "project_based" => true,
+                "headers" => ["Student ID", "Exam Score (40%)", "Project Score (20%)", "Ass. Score (40%)", "ACH Mark", "Grade"]
+            ];
+        } else {
+            $response["data"] = [
+                "project_based" => false,
+                "headers" => ["Student ID", "Exam Score (60%)", "Ass. Score (40%)", "ACH Mark", "Grade"]
+            ];
+        }
+        $response["data"]["values"] = $results;
+        $response["data"]["body"] = $results2;
+        return $response;
+    }
+
     public function getCourseDetails(string $lecturerId, string $courseCode, int $semesterId)
     {
+
         $query = "SELECT 
                   lc.`id`, 
                   lc.`status` AS course_status, 
@@ -250,6 +351,21 @@ class LecturerController
         ];
 
         return $this->dm->getData($query, $params);
+    }
+
+    public function getLecturerCourseDetails(string $lecturerId, string $courseCode, int $semesterId)
+    {
+        $response = ["success" => true, "data" => []];
+        $response["data"]["details"] = $this->getCourseDetails($lecturerId, $courseCode, $semesterId);
+        // fetch all students for this course
+        $response["data"]["students"] = $this->getCourseStudents($courseCode, $semesterId);
+        // fetch course outline for this course from course_resources
+        $response["data"]["outline"] = $this->fetchCourseResources($courseCode);
+        // fetch all resources for this course
+        $response["data"]["resources"] = $this->fetchCourseResources($courseCode, $lecturerId);
+        // fetch all results for this course by lecturer
+        $response["data"]["results"] = $this->fetchCourseResults($courseCode, $semesterId);
+        return $response;
     }
 
 

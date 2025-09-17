@@ -78,7 +78,8 @@
 	color: white;
 }
 
-.course-header-actions {
+.course-header-actions,
+.course-button-actions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;
@@ -101,6 +102,11 @@
 	color: white;
 }
 
+.course-btn.success {
+	background-color: var(--success-color);
+	color: white;
+}
+
 .course-btn.secondary {
 	background-color: var(--light-bg);
 	color: var(--primary-color);
@@ -117,6 +123,10 @@
 
 .course-btn.primary:hover {
 	background-color: var(--primary-color);
+}
+
+.course-btn.success:hover {
+	background-color: var(--success-color);
 }
 
 .course-btn.secondary:hover {
@@ -524,7 +534,8 @@
 		flex-direction: column;
 	}
 
-	.course-header-actions {
+	.course-header-actions,
+	.course-button-actions {
 		justify-content: flex-start;
 	}
 

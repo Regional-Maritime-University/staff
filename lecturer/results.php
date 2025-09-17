@@ -206,13 +206,6 @@ if ($deadlines && is_array($deadlines)) {
                             <label for="uploadCourse">Select Course</label>
                             <select id="uploadCourse" required>
                                 <option value="">Select a course</option>
-                                <?php
-                                foreach ($deadlines as $deadline) {
-                                    if ($deadline['deadline_status'] == 'pending') {
-                                        echo '<option value="' . $deadline['course_code'] . '">' . $deadline['course_code'] . ' - ' . $deadline['course_name'] . '</option>';
-                                    }
-                                }
-                                ?>
                             </select>
                         </div>
 
@@ -375,7 +368,17 @@ if ($deadlines && is_array($deadlines)) {
                         })
                     });
 
-                    return await response.json();
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+
+                    const results = await response.json();
+
+                    if (!results.success && results.message == "logout") {
+                        window.location.href = "?logout=true";
+                    }
+
+                    return results;
                 } catch (error) {
                     console.error('Fetch error:', error);
                 }
@@ -401,7 +404,16 @@ if ($deadlines && is_array($deadlines)) {
                         })
                     });
 
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+
                     const results = await response.json();
+
+                    if (!results.success && results.message == "logout") {
+                        window.location.href = "?logout=true";
+                    }
+
                     return results;
                 } catch (error) {
                     console.error('Fetch error:', error);
@@ -549,13 +561,21 @@ if ($deadlines && is_array($deadlines)) {
                     })
                 });
 
-                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const results = await response.json();
+
+                if (!results.success && results.message == "logout") {
+                    window.location.href = "?logout=true";
+                }
 
                 // render select courses list
                 const uploadCourseSelect = document.getElementById('uploadCourse');
                 uploadCourseSelect.innerHTML = '<option value="">Select a course</option>';
-                if (result.success && Array.isArray(result.data)) {
-                    result.data.forEach(course => {
+                if (results.success && Array.isArray(results.data)) {
+                    results.data.forEach(course => {
                         const option = document.createElement('option');
                         option.value = course.course_code;
                         option.textContent = `${course.course_code} - ${course.course_name}`;
@@ -613,9 +633,19 @@ if ($deadlines && is_array($deadlines)) {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-                const result = await response.json();
-                alert(result.message);
-                if (result.success) window.location.reload();
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const results = await response.json();
+
+                if (!results.success && results.message == "logout") {
+                    window.location.href = "?logout=true";
+                }
+
+                alert(results.message);
+                if (results.success) window.location.reload();
 
                 uploadResultsModal.classList.remove('active');
             });

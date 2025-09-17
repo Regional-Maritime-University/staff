@@ -48,8 +48,12 @@ $archived = false;
 $pageTitle = "Course Details";
 $activePage = "courses";
 
-$courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $semesterId);
-
+$lecturerCourseDetails = $lecturer->getLecturerCourseDetails($lecturerId, $selectedCourse, $semesterId);
+$courseDetails = $lecturerCourseDetails["data"]["details"] ?? [];
+$courseStudents = $lecturerCourseDetails["data"]["students"] ?? [];
+$courseOutline = $lecturerCourseDetails["data"]["outline"] ?? [];
+$courseResourses = $lecturerCourseDetails["data"]["resources"] ?? [];
+$courseResults = $lecturerCourseDetails["data"]["results"] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -98,8 +102,8 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                     </div>
                     <span class="course-status <?= $courseDetails[0]["course_status"] ?>"> <?= $courseDetails[0]["course_status"] ?></span>
                 </div>
-                <div class="course-header-actions">
-                    <!-- <button class="course-btn primary" id="uploadResourceBtn">
+                <!-- <div class="course-header-actions">
+                    <button class="course-btn primary" id="uploadResourceBtn" style="height: 50px;">
                         <i class="fas fa-upload"></i> Upload Resource
                     </button>
                     <button class="course-btn secondary" id="editCourseBtn">
@@ -107,15 +111,15 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                     </button>
                     <button class="course-btn primary" id="emailStudentsBtn">
                         <i class="fas fa-envelope"></i> Email Students
-                    </button> -->
-                </div>
+                    </button>
+                </div> -->
             </div>
 
             <!-- Course Tabs -->
             <div class="course-tabs">
                 <button class="course-tab active" data-tab="overview">Overview</button>
                 <button class="course-tab" data-tab="students">Students</button>
-                <!-- <button class="course-tab" data-tab="resources">Resources</button> -->
+                <button class="course-tab" data-tab="resources">Resources</button>
                 <!-- <button class="course-tab" data-tab="schedule">Schedule</button> -->
                 <button class="course-tab" data-tab="results">Results</button>
             </div>
@@ -184,10 +188,20 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                     <div class="students-actions">
                         <div class="students-filters">
                             <select class="filter-select" id="programFilter">
-                                <option value="all">All Programs</option>
-                                <option value="bsc">BSc Marine Engineering</option>
-                                <option value="btec">BTech Naval Architecture</option>
-                                <option value="diploma">Diploma in Maritime Studies</option>
+                                <option value="all">All Classes</option>
+                                <?php
+                                // group students by class code
+                                $classes = [];
+                                foreach ($courseStudents as $student) {
+                                    $classCode = $student["student_class_code"] ?: "Unassigned";
+                                    if (!in_array($classCode, $classes)) {
+                                        $classes[] = $classCode;
+                                    }
+                                }
+                                foreach ($classes as $class) {
+                                    echo "<option value='" . htmlspecialchars($class) . "'>" . htmlspecialchars($class) . "</option>";
+                                }
+                                ?>
                             </select>
                             <!-- <select class="filter-select" id="sortFilter">
                                 <option value="name">Sort by Name</option>
@@ -206,92 +220,51 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                                 <th>Name</th>
                                 <th>Program</th>
                                 <th>Email</th>
-                                <th>Attendance</th>
+                                <th>Registered</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>RMU/2023/001</td>
-                                <td class="student-name">
-                                    <div class="student-avatar">
-                                        <img src="student1.jpg" alt="Student">
-                                    </div>
-                                    <span>John Smith</span>
-                                </td>
-                                <td>BSc Marine Engineering</td>
-                                <td>john.smith@rmu.edu</td>
-                                <td>85%</td>
-                                <td>
-                                    <div class="student-actions">
-                                        <button class="student-action view" title="View Profile">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="student-action message" title="Send Message">
-                                            <i class="fas fa-envelope"></i>
-                                        </button>
-                                        <button class="student-action grade" title="Enter Grades">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>RMU/2023/002</td>
-                                <td class="student-name">
-                                    <div class="student-avatar">
-                                        <img src="student2.jpg" alt="Student">
-                                    </div>
-                                    <span>Sarah Johnson</span>
-                                </td>
-                                <td>BSc Marine Engineering</td>
-                                <td>sarah.johnson@rmu.edu</td>
-                                <td>92%</td>
-                                <td>
-                                    <div class="student-actions">
-                                        <button class="student-action view" title="View Profile">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="student-action message" title="Send Message">
-                                            <i class="fas fa-envelope"></i>
-                                        </button>
-                                        <button class="student-action grade" title="Enter Grades">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>RMU/2023/003</td>
-                                <td class="student-name">
-                                    <div class="student-avatar">
-                                        <img src="student3.jpg" alt="Student">
-                                    </div>
-                                    <span>Michael Brown</span>
-                                </td>
-                                <td>BTech Naval Architecture</td>
-                                <td>michael.brown@rmu.edu</td>
-                                <td>78%</td>
-                                <td>
-                                    <div class="student-actions">
-                                        <button class="student-action view" title="View Profile">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="student-action message" title="Send Message">
-                                            <i class="fas fa-envelope"></i>
-                                        </button>
-                                        <button class="student-action grade" title="Enter Grades">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            <?php
+                            if (empty($courseStudents)) {
+                                echo '<tr><td colspan="6" style="text-align: center;">No students enrolled in this course.</td></tr>';
+                            } else {
+                                foreach ($courseStudents as $student) { ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($student["student_id"]) ?></td>
+                                        <td class="student-name">
+                                            <div class="student-avatar">
+                                                <img src="<?= getenv("DOMAIN_APPLICANT") . "apply/photos/" . htmlspecialchars($student["photo"] ?: 'default-avatar.png') ?>" alt="Student">
+                                            </div>
+                                            <span><?= htmlspecialchars($student["student_name"]) ?></span>
+                                        </td>
+                                        <td><?= $student["student_class_code"] ?: "Unassigned" ?></td>
+                                        <td><?= htmlspecialchars($student["student_email"]) ?></td>
+                                        <td><?= $student["is_registered"] ? "Yes" : "No" ?></td>
+                                        <td>
+                                            <div class="student-actions">
+                                                <!-- <button class="student-action view" title="View Profile">
+                                                    <i class="fas fa-eye"></i>
+                                                </button> -->
+                                                <button class="student-action message" title="Send Message">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+                                                <!-- <button class="student-action grade" title="Enter Grades">
+                                                    <i class="fas fa-edit"></i>
+                                                </button> -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                            <?php
+                                }
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Resources Tab -->
-                <!-- <div class="tab-pane" id="resources">
+                <div class="tab-pane" id="resources">
                     <div class="resources-actions">
                         <h3 class="section-title">Course Resources</h3>
                         <button class="course-btn primary" id="addResourceBtn">
@@ -299,68 +272,71 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                         </button>
                     </div>
                     <div class="resources-grid">
-                        <div class="resource-card">
-                            <div class="resource-icon">
-                                <i class="fas fa-file-pdf"></i>
-                            </div>
-                            <div class="resource-title">Course Syllabus</div>
-                            <div class="resource-info">PDF, 2.3 MB, Uploaded: Sep 5, 2023</div>
-                            <div class="resource-actions">
-                                <button class="resource-btn">
-                                    <i class="fas fa-download"></i> Download
-                                </button>
-                                <button class="resource-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
-                        <div class="resource-card">
-                            <div class="resource-icon">
-                                <i class="fas fa-file-powerpoint"></i>
-                            </div>
-                            <div class="resource-title">Lecture 1: Introduction</div>
-                            <div class="resource-info">PPTX, 5.7 MB, Uploaded: Sep 10, 2023</div>
-                            <div class="resource-actions">
-                                <button class="resource-btn">
-                                    <i class="fas fa-download"></i> Download
-                                </button>
-                                <button class="resource-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
-                        <div class="resource-card">
-                            <div class="resource-icon">
-                                <i class="fas fa-file-word"></i>
-                            </div>
-                            <div class="resource-title">Assignment 1</div>
-                            <div class="resource-info">DOCX, 1.2 MB, Uploaded: Sep 15, 2023</div>
-                            <div class="resource-actions">
-                                <button class="resource-btn">
-                                    <i class="fas fa-download"></i> Download
-                                </button>
-                                <button class="resource-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
-                        <div class="resource-card">
-                            <div class="resource-icon">
-                                <i class="fas fa-file-pdf"></i>
-                            </div>
-                            <div class="resource-title">Textbook Chapter 1</div>
-                            <div class="resource-info">PDF, 8.5 MB, Uploaded: Sep 20, 2023</div>
-                            <div class="resource-actions">
-                                <button class="resource-btn">
-                                    <i class="fas fa-download"></i> Download
-                                </button>
-                                <button class="resource-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                            </div>
-                        </div>
+                        <?php
+                        if (empty($courseResourses)) {
+                            echo '<p style="text-align: center; width: 100%;">No resources uploaded for this course.</p>';
+                        } else foreach ($courseResourses as $resource) {
+                            $iconClass = "fas fa-file";
+                            $fileType = strtolower(pathinfo($resource["file_name"], PATHINFO_EXTENSION));
+                            switch ($fileType) {
+                                case 'pdf':
+                                    $iconClass = "fas fa-file-pdf";
+                                    break;
+                                case 'doc':
+                                case 'docx':
+                                    $iconClass = "fas fa-file-word";
+                                    break;
+                                case 'ppt':
+                                case 'pptx':
+                                    $iconClass = "fas fa-file-powerpoint";
+                                    break;
+                                case 'xls':
+                                case 'xlsx':
+                                    $iconClass = "fas fa-file-excel";
+                                    break;
+                                case 'zip':
+                                case 'rar':
+                                    $iconClass = "fas fa-file-archive";
+                                    break;
+                                case 'jpg':
+                                case 'jpeg':
+                                case 'png':
+                                case 'gif':
+                                    $iconClass = "fas fa-file-image";
+                                    break;
+                                case 'mp4':
+                                case 'avi':
+                                case 'mov':
+                                    $iconClass = "fas fa-file-video";
+                                    break;
+                                case 'mp3':
+                                case 'wav':
+                                    $iconClass = "fas fa-file-audio";
+                                    break;
+                                default:
+                                    $iconClass = "fas fa-file";
+                            }
+
+                            $fileSize = number_format($resource["file_size"] / (1024 * 1024), 2) . " MB";
+                            echo '<div class="resource-card">
+                                    <div class="resource-icon">
+                                        <i class="' . $iconClass . '"></i>
+                                    </div>
+                                    <div class="resource-title">' . htmlspecialchars($resource["title"]) . '</div>
+                                    <div class="resource-info">' . strtoupper($fileType) . ', ' . $fileSize . ', Uploaded: ' . date("M d, Y", strtotime($resource["uploaded_at"])) . '</div>
+                                    <div class="resource-actions">
+                                        <button class="resource-btn">
+                                            <i class="fas fa-download"></i> Download
+                                        </button>
+                                        <button class="resource-btn">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>';
+                        }
+                        ?>
                     </div>
-                </div> -->
+                </div>
 
                 <!-- Schedule Tab -->
                 <!-- <div class="tab-pane" id="schedule">
@@ -403,65 +379,72 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
                 <div class="tab-pane" id="results">
                     <div class="results-actions">
                         <h3 class="section-title">Exam Results</h3>
-                        <div>
+                        <div class="course-button-actions">
                             <button class="course-btn primary" id="saveResultsBtn">
                                 <i class="fas fa-save"></i> Upload
                             </button>
-                            <!-- <button class="course-btn secondary" id="exportResultsBtn">
+                            <button class="course-btn success" id="exportResultsBtn">
                                 <i class="fas fa-file-export"></i> Export
-                            </button> -->
+                            </button>
                         </div>
                     </div>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <!-- <th>Name</th> -->
-                                <!-- <th>Assignment 1 (20%)</th>
-                                <th>Assignment 2 (20%)</th>
-                                <th>Mid-Term (20%)</th>
-                                <th>Final Exam (40%)</th>
-                                <th>Total (100%)</th>
-                                <th>Grade</th>
-                                <th>Status</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>RMU/2023/001</td>
-                                <td>John Smith</td>
-                                <td><input type="number" class="grade-input" value="16" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="15" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="17" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="32" min="0" max="40"></td>
-                                <td>80</td>
-                                <td>A</td>
-                                <td><span class="grade-status pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td>RMU/2023/002</td>
-                                <td>Sarah Johnson</td>
-                                <td><input type="number" class="grade-input" value="18" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="19" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="18" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="36" min="0" max="40"></td>
-                                <td>91</td>
-                                <td>A+</td>
-                                <td><span class="grade-status pending">Pending</span></td>
-                            </tr>
-                            <tr>
-                                <td>RMU/2023/003</td>
-                                <td>Michael Brown</td>
-                                <td><input type="number" class="grade-input" value="14" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="13" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="15" min="0" max="20"></td>
-                                <td><input type="number" class="grade-input" value="28" min="0" max="40"></td>
-                                <td>70</td>
-                                <td>B</td>
-                                <td><span class="grade-status pending">Pending</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <?php
+                    if (empty($courseResults)) {
+                        echo '<p style="text-align: center; width: 100%;">No results available for this course.</p>';
+                    } else if ($courseResults["success"] === false) {
+                        echo '<p style="text-align: center; width: 100%;">' . htmlspecialchars($courseResults["message"]) . '</p>';
+                    } else if (empty($courseResults["data"])) {
+                        echo '<p style="text-align: center; width: 100%;">No students\'s results uploaded for this course.</p>';
+                    } else {
+                        // Define key mapping between header text and weight keys
+                        $headerWeightMap = [
+                            "Exam Score" => "exam_score_weight",
+                            "Project Score" => "project_score_weight",
+                            "Ass. Score" => "assessment_score_weight"
+                        ];
+
+                        // Extract weights
+                        $weights = $courseResults["data"]["values"][0] ?? []; // assuming it's always there
+                        $projectBased = $courseResults["data"]["project_based"] ?? false;
+
+                        echo '<table class="results-table">';
+                        echo '<thead><tr>';
+                        foreach ($courseResults["data"]["headers"] as $header) {
+                            $baseHeader = explode(' (', $header)[0];
+
+                            // Skip "Project Score" header if not project-based
+                            if ($baseHeader === "Project Score" && !$projectBased) {
+                                continue;
+                            }
+
+                            if ($baseHeader === "ACH Mark") {
+                                echo '<th>' . htmlspecialchars($baseHeader) . ' (100%)</th>';
+                            } else {
+                                $weightKey = $headerWeightMap[$baseHeader] ?? null;
+                                $weight = $weightKey && isset($weights[$weightKey]) ? ' (' . htmlspecialchars($weights[$weightKey]) . '%)' : '';
+                                echo '<th>' . htmlspecialchars($baseHeader) . htmlspecialchars($weight) . '</th>';
+                            }
+                        }
+                        echo '</tr></thead>';
+
+                        // Populate results table
+                        echo '<tbody>';
+                        foreach ($courseResults["data"]["body"] as $row) {
+                            echo '<tr>';
+                            echo '<td>' . htmlspecialchars($row["student_id"]) . '</td>';
+                            echo '<td>' . htmlspecialchars($row["exam_score"]) . '</td>';
+                            if ($projectBased && isset($row["project_score"])) {
+                                echo '<td>' . htmlspecialchars($row["project_score"]) . '</td>';
+                            }
+                            echo '<td>' . htmlspecialchars($row["ass_score"]) . '</td>';
+                            echo '<td>' . htmlspecialchars($row["final_score"]) . '</td>';
+                            echo '<td>' . htmlspecialchars($row["grade"]) . '</td>';
+                            echo '</tr>';
+                        }
+                        echo '</tbody>';
+                        echo '</table>';
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -541,9 +524,9 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
         const uploadResourceModal = document.getElementById('uploadResourceModal');
 
         // Open modal
-        document.getElementById('uploadResourceBtn').addEventListener('click', function() {
-            uploadResourceModal.classList.add('active');
-        });
+        // document.getElementById('uploadResourceBtn').addEventListener('click', function() {
+        //     uploadResourceModal.classList.add('active');
+        // });
 
         document.getElementById('addResourceBtn').addEventListener('click', function() {
             uploadResourceModal.classList.add('active');
@@ -620,10 +603,10 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
         });
 
         // Download student list
-        document.getElementById('downloadStudentListBtn').addEventListener('click', function() {
-            // In a real application, you would generate a CSV or Excel file
-            alert('Downloading student list...');
-        });
+        // document.getElementById('downloadStudentListBtn').addEventListener('click', function() {
+        //     // In a real application, you would generate a CSV or Excel file
+        //     alert('Downloading student list...');
+        // });
 
         // Student actions
         document.querySelectorAll('.student-action').forEach(action => {
@@ -651,14 +634,14 @@ $courseDetails = $lecturer->getCourseDetails($lecturerId, $selectedCourse, $seme
         });
 
         // Edit course button
-        document.getElementById('editCourseBtn').addEventListener('click', function() {
-            alert('Edit course functionality would open a form to edit course details.');
-        });
+        // document.getElementById('editCourseBtn').addEventListener('click', function() {
+        //     alert('Edit course functionality would open a form to edit course details.');
+        // });
 
         // Email students button
-        document.getElementById('emailStudentsBtn').addEventListener('click', function() {
-            alert('Email students functionality would open a form to send an email to all students.');
-        });
+        // document.getElementById('emailStudentsBtn').addEventListener('click', function() {
+        //     alert('Email students functionality would open a form to send an email to all students.');
+        // });
     </script>
 </body>
 

@@ -60,6 +60,7 @@ $totalPendingDeadlines = 0;
 if ($deadlines && is_array($deadlines)) {
     $totalPendingDeadlines = count($deadlines);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -131,7 +132,9 @@ if ($deadlines && is_array($deadlines)) {
                 <?php if ($totalPendingDeadlines > 0) : ?>
                     <!-- Display pending deadlines -->
                     <?php foreach ($deadlines as $deadline) : ?>
-                        <?php $status = $deadline['result_status'] === "approved" ? $deadline['result_status'] : $deadline['deadline_status'] ?>
+                        <?php
+                        $status = $deadline['deadline_status'] === "pending" ? $deadline['deadline_status'] : ($deadline['result_status'] === "pending" && $deadline['deadline_status'] === "submitted" ? $deadline['deadline_status'] : ($deadline['result_status'] === "approved" && $deadline['deadline_status'] === "submitted" ? $deadline['result_status'] : $deadline['result_status']));
+                        ?>
                         <div class="result-card">
                             <div class="result-header">
                                 <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
@@ -161,7 +164,7 @@ if ($deadlines && is_array($deadlines)) {
                                     data-course="<?= $deadline['course_code'] ?>"
                                     data-semester="<?= $deadline['semester_id'] ?>"
                                     title="View <?= $deadline['class_code'] ?> results">
-                                    <i class="fas fa-eye"></i> Open
+                                    <i class="fas fa-eye"></i>
                                 </button>
                                 <!-- <button class="result-btn secondary downloadResultsBtn"
                                     data-class="<?= $deadline['class_code'] ?>"
@@ -176,14 +179,14 @@ if ($deadlines && is_array($deadlines)) {
                                         data-course="<?= $deadline['course_code'] ?>"
                                         data-semester="<?= $deadline['semester_id'] ?>"
                                         title="Approve <?= $deadline['class_code'] ?> results">
-                                        <i class="fas fa-check"></i> Approve
+                                        <i class="fas fa-check"></i>
                                     </button>
                                     <button class="result-btn danger declineResultsBtn"
                                         data-class="<?= $deadline['class_code'] ?>"
                                         data-course="<?= $deadline['course_code'] ?>"
                                         data-semester="<?= $deadline['semester_id'] ?>"
                                         title="Decline <?= $deadline['class_code'] ?> results">
-                                        <i class="fas fa-check"></i> Decline
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 <?php endif ?>
                             </div>
