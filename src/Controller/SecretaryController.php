@@ -1349,24 +1349,44 @@ class SecretaryController
 
         $dataset = array();
 
-        for ($i = $startRow; $i <= $endRow - 1; $i++) {
-            $studentId = $spreadSheetArray[$i][0];
-            $examScore = $spreadSheetArray[$i][11];
-            $projectScore = $data["project_based"] ? $spreadSheetArray[$i][12] : 0;
-            $assessmentScore = $data["project_based"] ? $spreadSheetArray[$i][13] : $spreadSheetArray[$i][12];
-            // $final_score = $data["projectBased"] ? $spreadSheetArray[$i][14] : $spreadSheetArray[$i][13];
+        if ($data["project_based"] == 0) {
+            for ($i = $startRow; $i <= $endRow - 1; $i++) {
+                $studentId = $spreadSheetArray[$i][0];
+                $examScore = $spreadSheetArray[$i][11];
+                $assessmentScore = $spreadSheetArray[$i][12];
+                $final_score = $spreadSheetArray[$i][13];
 
-            if (!$studentId || !$examScore || !$assessmentScore) {
-                continue;
+                if (!$studentId || !$examScore || !$assessmentScore) {
+                    continue;
+                }
+
+                array_push($dataset, array(
+                    "student_id" => $studentId,
+                    "exam_score" => $examScore,
+                    "assessment_score" => $assessmentScore,
+                    "final_score" => $final_score,
+                ));
             }
+        } else {
+            for ($i = $startRow; $i <= $endRow - 1; $i++) {
+                $studentId = $spreadSheetArray[$i][0];
+                $examScore = $spreadSheetArray[$i][11];
+                $projectScore = $spreadSheetArray[$i][12];
+                $assessmentScore = $spreadSheetArray[$i][13];
+                $final_score = $spreadSheetArray[$i][14];
 
-            array_push($dataset, array(
-                "student_id" => $studentId,
-                "exam_score" => $examScore,
-                "project_score" => $projectScore,
-                "assessment_score" => $assessmentScore,
-                // "final_score" => $final_score,
-            ));
+                if (!$studentId || !$examScore || !$assessmentScore) {
+                    continue;
+                }
+
+                array_push($dataset, array(
+                    "student_id" => $studentId,
+                    "exam_score" => $examScore,
+                    "project_score" => $projectScore,
+                    "assessment_score" => $assessmentScore,
+                    "final_score" => $final_score,
+                ));
+            }
         }
 
         return $dataset;
@@ -1385,7 +1405,7 @@ class SecretaryController
         $classQuery = "SELECT `code` FROM `class` WHERE `code` = :ci";
         $classData = $this->dm->getData($classQuery, array(":ci" => $data["class_code"]));
         if (empty($classData)) {
-            array_push($error_list, "Class with code {$data['class']} does not exist!");
+            array_push($error_list, "Class with code {$data['class_code']} does not exist!");
             $errorsEncountered += 1;
             return array("success" => false, "message" => implode(", ", $error_list));
         }
@@ -1394,7 +1414,7 @@ class SecretaryController
         $courseQuery = "SELECT `code` FROM `course` WHERE `code` = :ci";
         $courseData = $this->dm->getData($courseQuery, array(":ci" => $data["course_code"]));
         if (empty($courseData)) {
-            array_push($error_list, "Course with code {$data['course']} does not exist!");
+            array_push($error_list, "Course with code {$data['course_code']} does not exist!");
             $errorsEncountered += 1;
             return array("success" => false, "message" => implode(", ", $error_list));
         }
@@ -1403,7 +1423,7 @@ class SecretaryController
         $semesterQuery = "SELECT `id` FROM `semester` WHERE `id` = :si";
         $semesterData = $this->dm->getData($semesterQuery, array(":si" => $data["semester_id"]));
         if (empty($semesterData)) {
-            array_push($error_list, "Semester with ID {$data['semester']} does not exist!");
+            array_push($error_list, "Semester with ID {$data['semester_id']} does not exist!");
             $errorsEncountered += 1;
             return array("success" => false, "message" => implode(", ", $error_list));
         }
@@ -1412,7 +1432,7 @@ class SecretaryController
         $staffQuery = "SELECT `number` FROM `staff` WHERE `number` = :si";
         $staffData = $this->dm->getData($staffQuery, array(":si" => $_SESSION["staff"]["number"]));
         if (empty($staffData)) {
-            array_push($error_list, "Staff with Number {$data['staffId']} does not exist!");
+            array_push($error_list, "Staff with Number {$_SESSION["staff"]["number"]} does not exist!");
             $errorsEncountered += 1;
             return array("success" => false, "message" => implode(", ", $error_list));
         }
@@ -1424,7 +1444,6 @@ class SecretaryController
 
         // add results for each applicant to db
         foreach ($extracted_data as $result) {
-            return array("success" => false, "message" => json_encode($result));
             // Check if student exists
             $studentQuery = "SELECT `index_number` FROM `student` WHERE `index_number` = :si";
             $studentData = $this->dm->getData($studentQuery, array(":si" => $result["student_id"]));
@@ -1434,38 +1453,49 @@ class SecretaryController
                 $errorsEncountered += 1;
                 continue;
             }
+
+            // Prepare insert query and params
             $resultInsertQuery = "";
             $resultInsertParams = [];
 
             // check if student result is project based and validate scores
-            if ($data["project_based"]) {
-                $resultInsertQuery = "UPDATE `student_results` SET `continues_assessments_score` = :cas, `project_score` = :ps, `exam_score` = :es 
-                                WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
+            if ($data["project_based"] == 1) {
+                $resultInsertQuery = "UPDATE `student_results` SET 
+                                    `continues_assessments_score` = :cas, 
+                                    `project_score` = :ps, 
+                                    `exam_score` = :es,
+                                    `final_score` = :fs 
+                                    WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
                 $resultInsertParams = array(
                     ":i" => $result["student_id"],
-                    ":c" => $data["course"],
-                    ":s" => $data["semester"],
+                    ":c" => $data["course_code"],
+                    ":s" => $data["semester_id"],
                     ":es" => $result["exam_score"],
                     ":ps" => $result["project_score"],
-                    ":cas" => $result["assessment_score"]
+                    ":cas" => $result["assessment_score"],
+                    ":fs" => $result["final_score"]
                 );
             } else {
-                $resultInsertQuery = "UPDATE `student_results` SET `continues_assessments_score` = :cas, `exam_score` = :es 
+                $resultInsertQuery = "UPDATE `student_results` SET 
+                                        `continues_assessments_score` = :cas, 
+                                        `exam_score` = :es, 
+                                        `final_score` = :fs  
                                 WHERE `fk_student` = :i AND `fk_course` = :c AND `fk_semester` = :s";
                 $resultInsertParams = array(
                     ":i" => $result["student_id"],
-                    ":c" => $data["course"],
-                    ":s" => $data["semester"],
+                    ":c" => $data["course_code"],
+                    ":s" => $data["semester_id"],
                     ":es" => $result["exam_score"],
-                    ":cas" => $result["assessment_score"]
+                    ":cas" => $result["assessment_score"],
+                    ":fs" => $result["final_score"]
                 );
             }
 
-            $resultInsertOutput = $this->dm->inputData($resultInsertQuery, $resultInsertParams);
+            $resultInsertOutput = $this->dm->getData($resultInsertQuery, $resultInsertParams);
 
             if (!$resultInsertOutput) {
-                array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
                 $errorsEncountered += 1;
+                array_push($error_list, "Failed to add result for student ID {$result['student_id']} in course {$result['course_code']}!");
             } else {
                 $successEncountered += 1;
             }
@@ -1478,11 +1508,12 @@ class SecretaryController
             "errors" => $error_list
         );
 
-        if ($successEncountered && !$errorsEncountered) {
-            $semesterId = $data["semester_id"];
-
+        if ($successEncountered) {
             // Recalculate GPA for this semester
-            $this->dm->inputData("CALL recalc_results_and_gpa(:sem)", [":sem" => $semesterId]);
+            $this->dm->inputData(
+                "CALL recalc_grades_by_semester_course(:sem, :coc)",
+                [":sem" => $data["semester_id"], ":coc" => $data["course_code"]]
+            );
             $output["success"] = true;
         }
 
@@ -1508,18 +1539,19 @@ class SecretaryController
         }
 
         // fetch results body
-        $query2 = "UPDATE `exam_results` SET `status` = 'approved' 
-                    WHERE `fk_course` = :cr AND `fk_semester` = :sm AND `fk_class` = :cs";
+        $query2 = "UPDATE `exam_results` SET `status` = 'approved' WHERE `fk_course` = :cr AND `fk_semester` = :sm AND `fk_class` = :cs";
         $params2 = [":sm" => $semesterId, ":cr" => $courseCode, ":cs" => $classCode];
         $results2 = $this->dm->inputData($query2, $params2);
 
         if (!$results2) {
             return ["success" => false, "message" => "Failed to approve exam result!"];
         }
+
         $this->log->activity($_SESSION["staff"]["number"], "UPDATE", "secretary", "Exam Results", "Approved exam results for {$classCode} - {$courseCode} in {$results[0]['semester']}");
 
         // set students semester course results
         $approvedResults = $this->setApprovedStudentsSemesterCourseResults($results[0]);
+        return $approvedResults;
         return array("success" => true, "message" => "Successfully approved exam result!", "data" => $approvedResults);
     }
 

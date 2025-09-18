@@ -159,13 +159,6 @@ if ($deadlines && is_array($deadlines)) {
                                 </div>
                             </div>
                             <div class="result-actions">
-                                <button class="result-btn primary viewResultsBtn"
-                                    data-class="<?= $deadline['class_code'] ?>"
-                                    data-course="<?= $deadline['course_code'] ?>"
-                                    data-semester="<?= $deadline['semester_id'] ?>"
-                                    title="View <?= $deadline['class_code'] ?> results">
-                                    <i class="fas fa-eye"></i>
-                                </button>
                                 <!-- <button class="result-btn secondary downloadResultsBtn"
                                     data-class="<?= $deadline['class_code'] ?>"
                                     data-course="<?= $deadline['course_code'] ?>"
@@ -187,6 +180,14 @@ if ($deadlines && is_array($deadlines)) {
                                         data-semester="<?= $deadline['semester_id'] ?>"
                                         title="Decline <?= $deadline['class_code'] ?> results">
                                         <i class="fas fa-times"></i>
+                                    </button>
+                                <?php elseif ($status == "approved") : ?>
+                                    <button class="result-btn primary viewResultsBtn"
+                                        data-class="<?= $deadline['class_code'] ?>"
+                                        data-course="<?= $deadline['course_code'] ?>"
+                                        data-semester="<?= $deadline['semester_id'] ?>"
+                                        title="View <?= $deadline['class_code'] ?> results">
+                                        <i class="fas fa-eye"></i>
                                     </button>
                                 <?php endif ?>
                             </div>

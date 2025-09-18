@@ -120,67 +120,164 @@ ALTER TABLE `student_courses` ADD INDEX `student_courses_grade_idx1` (`grade`);
 ALTER TABLE `student_courses` ADD COLUMN `gpa` DECIMAL(4,2) DEFAULT NULL AFTER `grade`;
 ALTER TABLE `student_courses` ADD INDEX `student_courses_gpa_idx1` (`gpa`);
 
-DROP PROCEDURE IF EXISTS recalc_results_and_gpa;
+-- DROP PROCEDURE IF EXISTS recalc_results_and_gpa;
+-- DELIMITER //
+-- CREATE PROCEDURE recalc_results_and_gpa(IN in_semester_id INT)
+-- BEGIN
+--     -- First, recalc final_score and grade for each student result in this semester
+--     UPDATE student_results sr
+--     JOIN course c ON sr.fk_course = c.code
+--     LEFT JOIN grade_points gp ON 1=0 -- placeholder for mapping later
+--     SET 
+--         sr.final_score = COALESCE(sr.continues_assessments_score, 0) +
+--                          COALESCE(sr.project_score, 0) +
+--                          COALESCE(sr.exam_score, 0),
+--         sr.grade = CASE
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 80 THEN 'A'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 75 THEN 'A-'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 70 THEN 'B+'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 65 THEN 'B'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 60 THEN 'C+'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 55 THEN 'C'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 50 THEN 'D'
+--             WHEN (COALESCE(sr.continues_assessments_score, 0) +
+--                   COALESCE(sr.project_score, 0) +
+--                   COALESCE(sr.exam_score, 0)) >= 45 THEN 'E'
+--             ELSE 'F'
+--         END
+--     WHERE sr.fk_semester = in_semester_id;
+
+--     -- Next, update GPA points per course based on grade_points table
+--     UPDATE student_results sr
+--     JOIN grade_points gp ON sr.grade = gp.grade
+--     SET sr.gpa = gp.point
+--     WHERE sr.fk_semester = in_semester_id;
+
+--     -- Finally, update GPA per semester for each student
+--     UPDATE student_results sr
+--     JOIN (
+--         SELECT sr.fk_student, sr.fk_semester,
+--                ROUND(SUM(gp.point * c.credit_hours) / NULLIF(SUM(c.credit_hours), 0), 2) AS gpa
+--         FROM student_results sr
+--         JOIN grade_points gp ON sr.grade = gp.grade
+--         JOIN course c ON sr.fk_course = c.code
+--         WHERE sr.fk_semester = in_semester_id
+--         GROUP BY sr.fk_student, sr.fk_semester
+--     ) gpa_calc
+--     ON sr.fk_student = gpa_calc.fk_student
+--    AND sr.fk_semester = gpa_calc.fk_semester
+--     SET sr.gpa = gpa_calc.gpa;
+-- END;
+-- //
+-- DELIMITER ;
+
+DROP PROCEDURE IF EXISTS recalc_grades_by_semester;
 DELIMITER //
-CREATE PROCEDURE recalc_results_and_gpa(IN in_semester_id INT)
+CREATE PROCEDURE recalc_grades_by_semester(IN in_semester_id INT)
 BEGIN
-    -- First, recalc final_score and grade for each student result in this semester
+    -- Step 1: Update grade based on final_score
     UPDATE student_results sr
-    JOIN course c ON sr.fk_course = c.code
-    LEFT JOIN grade_points gp ON 1=0 -- placeholder for mapping later
-    SET 
-        sr.final_score = COALESCE(sr.continues_assessments_score, 0) +
-                         COALESCE(sr.project_score, 0) +
-                         COALESCE(sr.exam_score, 0),
-        sr.grade = CASE
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 80 THEN 'A'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 75 THEN 'A-'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 70 THEN 'B+'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 65 THEN 'B'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 60 THEN 'C+'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 55 THEN 'C'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 50 THEN 'D'
-            WHEN (COALESCE(sr.continues_assessments_score, 0) +
-                  COALESCE(sr.project_score, 0) +
-                  COALESCE(sr.exam_score, 0)) >= 45 THEN 'E'
-            ELSE 'F'
-        END
+    SET sr.grade = CASE
+        WHEN sr.final_score >= 80 THEN 'A'
+        WHEN sr.final_score >= 75 THEN 'A-'
+        WHEN sr.final_score >= 70 THEN 'B+'
+        WHEN sr.final_score >= 65 THEN 'B'
+        WHEN sr.final_score >= 60 THEN 'C+'
+        WHEN sr.final_score >= 55 THEN 'C'
+        WHEN sr.final_score >= 50 THEN 'D'
+        WHEN sr.final_score >= 45 THEN 'E'
+        ELSE 'F'
+    END
     WHERE sr.fk_semester = in_semester_id;
 
-    -- Next, update GPA points per course based on grade_points table
+    -- Step 2: Update GPA points
     UPDATE student_results sr
     JOIN grade_points gp ON sr.grade = gp.grade
     SET sr.gpa = gp.point
     WHERE sr.fk_semester = in_semester_id;
 
-    -- Finally, update GPA per semester for each student
+    -- Step 3: Calculate semester GPA using credit_hours from student_courses
     UPDATE student_results sr
     JOIN (
-        SELECT sr.fk_student, sr.fk_semester,
-               ROUND(SUM(gp.point * c.credit_hours) / NULLIF(SUM(c.credit_hours), 0), 2) AS gpa
+        SELECT sr.fk_student,
+               sr.fk_semester,
+               ROUND(SUM(sr.gpa * sc.credit_hours) / NULLIF(SUM(sc.credit_hours),0), 2) AS semester_gpa
         FROM student_results sr
-        JOIN grade_points gp ON sr.grade = gp.grade
-        JOIN course c ON sr.fk_course = c.code
+        JOIN student_courses sc 
+          ON sr.fk_student = sc.fk_student
+         AND sr.fk_course  = sc.fk_course
+         AND sr.fk_semester = sc.fk_semester
         WHERE sr.fk_semester = in_semester_id
         GROUP BY sr.fk_student, sr.fk_semester
-    ) gpa_calc
-    ON sr.fk_student = gpa_calc.fk_student
-   AND sr.fk_semester = gpa_calc.fk_semester
-    SET sr.gpa = gpa_calc.gpa;
+    ) AS gpa_calc
+      ON sr.fk_student = gpa_calc.fk_student
+     AND sr.fk_semester = gpa_calc.fk_semester
+    SET sr.gpa = gpa_calc.semester_gpa;
+END;
+//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS recalc_grades_by_semester_course;
+DELIMITER //
+CREATE PROCEDURE recalc_grades_by_semester_course(
+    IN in_semester_id INT,
+    IN in_course_code VARCHAR(10)
+)
+BEGIN
+    -- Step 1: Update grade based on final_score
+    UPDATE student_results sr
+    SET sr.grade = CASE
+        WHEN sr.final_score >= 80 THEN 'A'
+        WHEN sr.final_score >= 75 THEN 'A-'
+        WHEN sr.final_score >= 70 THEN 'B+'
+        WHEN sr.final_score >= 65 THEN 'B'
+        WHEN sr.final_score >= 60 THEN 'C+'
+        WHEN sr.final_score >= 55 THEN 'C'
+        WHEN sr.final_score >= 50 THEN 'D'
+        WHEN sr.final_score >= 45 THEN 'E'
+        ELSE 'F'
+    END
+    WHERE sr.fk_semester = in_semester_id
+      AND sr.fk_course = in_course_code;
+
+    -- Step 2: Update GPA points
+    UPDATE student_results sr
+    JOIN grade_points gp ON sr.grade = gp.grade
+    SET sr.gpa = gp.point
+    WHERE sr.fk_semester = in_semester_id
+      AND sr.fk_course = in_course_code;
+
+    -- Step 3: Calculate semester GPA using credit_hours from student_courses
+    UPDATE student_results sr
+    JOIN (
+        SELECT sr.fk_student,
+               sr.fk_semester,
+               ROUND(SUM(sr.gpa * sc.credit_hours) / NULLIF(SUM(sc.credit_hours),0), 2) AS semester_gpa
+        FROM student_results sr
+        JOIN student_courses sc 
+          ON sr.fk_student = sc.fk_student
+         AND sr.fk_course  = sc.fk_course
+         AND sr.fk_semester = sc.fk_semester
+        WHERE sr.fk_semester = in_semester_id
+        GROUP BY sr.fk_student, sr.fk_semester
+    ) AS gpa_calc
+      ON sr.fk_student = gpa_calc.fk_student
+     AND sr.fk_semester = gpa_calc.fk_semester
+    SET sr.gpa = gpa_calc.semester_gpa;
 END;
 //
 DELIMITER ;
