@@ -598,7 +598,7 @@ class SecretaryController
 
     public function assignCourses($data)
     {
-        $result = array();
+        $result = [];
 
         switch ($data["action"]) {
             case 'lecturer':
@@ -949,6 +949,26 @@ class SecretaryController
     {
         $query = "SELECT * FROM `lecturer_courses` WHERE `fk_course` = :cc AND `fk_semester` = :si";
         return $this->dm->getData($query, array(":cc" => $courseCode, ":si" => $semesterId));
+    }
+
+    public function fetchSubmittedCourseResults($departmentId, $semesterId)
+    {
+        $submittedCourseResults = [];
+        // fetch the courses submitted by a lecturer for the semester
+        if (!is_array($semesterId)) {
+            $query = "SELECT * `lecturer_courses` FROM  `fk_department` = :dp AND `fk_semester` = :si";
+            $params = [":dp" => $departmentId, ":si" => $semesterId];
+            $results = $this->dm->getData($query, $params);
+            $submittedCourseResults[$semesterId] = $results;
+        } else {
+            foreach ($semesterId as $id) {
+                $query = "SELECT * `lecturer_courses` FROM  `fk_department` = :dp AND `fk_semester` = :si";
+                $params = [":dp" => $departmentId, ":si" => $semesterId];
+                $results = $this->dm->getData($query, $params);
+                $submittedCourseResults[$id] = $results;
+            }
+        }
+        return $submittedCourseResults;
     }
 
     public function fetchSemesterCourseAssignmentsGroupByCourse($courseCode, $semesterId)
@@ -1347,7 +1367,7 @@ class SecretaryController
         if ($endRow == 0) $endRow = count($spreadSheetArray);
         if ($startRow > 1) $startRow -= 1;
 
-        $dataset = array();
+        $dataset = [];
 
         if ($data["project_based"] == 0) {
             for ($i = $startRow; $i <= $endRow - 1; $i++) {

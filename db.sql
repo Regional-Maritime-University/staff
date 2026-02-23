@@ -1,18 +1,18 @@
 DROP TABLE IF EXISTS `course_registration`;
-CREATE TABLE `course_registration` (
-    `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
-    `fk_course` VARCHAR(10),
-    `fk_student` VARCHAR(10),
-    `fk_semester` INT(11),
-    `added_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT NULL,
-    CONSTRAINT `fk_course_registration_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_course_registration_student` FOREIGN KEY (`fk_student`) REFERENCES `student` (`index_number`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_course_registration_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- CREATE TABLE `course_registration` (
+--     `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+--     `fk_course` VARCHAR(10),
+--     `fk_student` VARCHAR(10),
+--     `fk_semester` INT(11),
+--     `added_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     `updated_at` DATETIME DEFAULT NULL,
+--     CONSTRAINT `fk_course_registration_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
+--     CONSTRAINT `fk_course_registration_student` FOREIGN KEY (`fk_student`) REFERENCES `student` (`index_number`) ON DELETE CASCADE ON UPDATE CASCADE,
+--     CONSTRAINT `fk_course_registration_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-CREATE INDEX `course_registration_added_at_idx1` ON `course_registration` (`added_at`);
-CREATE INDEX `course_registration_updated_at_idx1` ON `course_registration` (`updated_at`);
+-- CREATE INDEX `course_registration_added_at_idx1` ON `course_registration` (`added_at`);
+-- CREATE INDEX `course_registration_updated_at_idx1` ON `course_registration` (`updated_at`);
 
 ALTER TABLE staff ADD COLUMN `designation` VARCHAR(100) AFTER `gender`;
 
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `lecturer_courses` (
     `fk_semester` INT(11),
     `notes` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL,
     CONSTRAINT `fk_lecturer_courses_department` FOREIGN KEY (`fk_department`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_lecturer_courses_semester` FOREIGN KEY (`fk_semester`) REFERENCES `semester` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_lecturer_courses_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -83,14 +83,11 @@ CREATE TABLE IF NOT EXISTS `deadlines` (
     CONSTRAINT `fk_deadlines_course` FOREIGN KEY (`fk_course`) REFERENCES `course` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-ALTER TABLE `deadlines` ADD COLUMN `fk_class` VARCHAR(10) AFTER `fk_course`;
-ALTER TABLE `deadlines` ADD CONSTRAINT `fk_deadlines_class` FOREIGN KEY (`fk_class`) REFERENCES `class` (`code`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 CREATE INDEX `deadlines_date_idx1` ON `deadlines` (`date`);
 CREATE INDEX `deadlines_created_at_idx1` ON `deadlines` (`created_at`);
 CREATE INDEX `deadlines_updated_at_idx1` ON `deadlines` (`updated_at`);
 ALTER TABLE `deadlines` ADD COLUMN `fk_class` VARCHAR(10) AFTER `fk_course`;
-ALTER TABLE `deadlines` ADD CONSTRAINT `fk_deadlines_class` FOREIGN KEY (`fk_class`) REFERENCES `class` (`code`) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE `deadlines` ADD CONSTRAINT `fk_deadlines_class` FOREIGN KEY (`fk_class`) REFERENCES `class` (`code`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `deadlines` ADD COLUMN `status` VARCHAR(15) DEFAULT 'pending' AFTER `note`;
 ALTER TABLE `deadlines` ADD INDEX `deadlines_status_idx1` (`status`);
 
@@ -119,71 +116,6 @@ ALTER TABLE `student_courses` ADD COLUMN `grade` VARCHAR(5) DEFAULT NULL AFTER `
 ALTER TABLE `student_courses` ADD INDEX `student_courses_grade_idx1` (`grade`);
 ALTER TABLE `student_courses` ADD COLUMN `gpa` DECIMAL(4,2) DEFAULT NULL AFTER `grade`;
 ALTER TABLE `student_courses` ADD INDEX `student_courses_gpa_idx1` (`gpa`);
-
--- DROP PROCEDURE IF EXISTS recalc_results_and_gpa;
--- DELIMITER //
--- CREATE PROCEDURE recalc_results_and_gpa(IN in_semester_id INT)
--- BEGIN
---     -- First, recalc final_score and grade for each student result in this semester
---     UPDATE student_results sr
---     JOIN course c ON sr.fk_course = c.code
---     LEFT JOIN grade_points gp ON 1=0 -- placeholder for mapping later
---     SET 
---         sr.final_score = COALESCE(sr.continues_assessments_score, 0) +
---                          COALESCE(sr.project_score, 0) +
---                          COALESCE(sr.exam_score, 0),
---         sr.grade = CASE
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 80 THEN 'A'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 75 THEN 'A-'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 70 THEN 'B+'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 65 THEN 'B'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 60 THEN 'C+'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 55 THEN 'C'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 50 THEN 'D'
---             WHEN (COALESCE(sr.continues_assessments_score, 0) +
---                   COALESCE(sr.project_score, 0) +
---                   COALESCE(sr.exam_score, 0)) >= 45 THEN 'E'
---             ELSE 'F'
---         END
---     WHERE sr.fk_semester = in_semester_id;
-
---     -- Next, update GPA points per course based on grade_points table
---     UPDATE student_results sr
---     JOIN grade_points gp ON sr.grade = gp.grade
---     SET sr.gpa = gp.point
---     WHERE sr.fk_semester = in_semester_id;
-
---     -- Finally, update GPA per semester for each student
---     UPDATE student_results sr
---     JOIN (
---         SELECT sr.fk_student, sr.fk_semester,
---                ROUND(SUM(gp.point * c.credit_hours) / NULLIF(SUM(c.credit_hours), 0), 2) AS gpa
---         FROM student_results sr
---         JOIN grade_points gp ON sr.grade = gp.grade
---         JOIN course c ON sr.fk_course = c.code
---         WHERE sr.fk_semester = in_semester_id
---         GROUP BY sr.fk_student, sr.fk_semester
---     ) gpa_calc
---     ON sr.fk_student = gpa_calc.fk_student
---    AND sr.fk_semester = gpa_calc.fk_semester
---     SET sr.gpa = gpa_calc.gpa;
--- END;
--- //
--- DELIMITER ;
 
 DROP PROCEDURE IF EXISTS recalc_grades_by_semester;
 DELIMITER //
@@ -298,158 +230,6 @@ CREATE TABLE `grade_points` (
 INSERT INTO `grade_points` VALUES
 ('A', 4.0), ('A-', 3.85), ('B+', 3.0), ('B', 2.85),
 ('C+', 2.5), ('C', 2.0), ('D', 1.5), ('E', 1.0), ('F', 0.0);
-
--- Calculate GPA for a specific student in a specific semester
--- This procedure will return the GPA for a specific student in a given semester
-DROP PROCEDURE IF EXISTS calculate_gpa;
-DELIMITER //
-CREATE PROCEDURE calculate_gpa(IN in_student_id VARCHAR(10), IN in_semester_id INT)
-BEGIN
-    SELECT 
-        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS gpa
-    FROM student_results AS sr
-    JOIN student_courses AS sca 
-        ON sr.fk_student = sca.fk_student 
-       AND sr.fk_course = sca.fk_course 
-       AND sr.fk_semester = sca.fk_semester
-    JOIN grade_points AS gp ON sr.grade = gp.grade
-    WHERE sr.fk_student = in_student_id 
-      AND sr.fk_semester = in_semester_id;
-END;
-//
-DELIMITER ;
-
--- Calculate CGPA for a specific student in a specific semester
--- This procedure will return the CGPA for a specific student in a given semester
-DROP PROCEDURE IF EXISTS calculate_cgpa;
-DELIMITER //
-CREATE PROCEDURE calculate_cgpa(IN in_student_id VARCHAR(10))
-BEGIN
-    SELECT 
-        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
-    FROM student_results AS sr
-    JOIN student_courses AS sca 
-        ON sr.fk_student = sca.fk_student 
-       AND sr.fk_course = sca.fk_course 
-       AND sr.fk_semester = sca.fk_semester
-    JOIN grade_points AS gp ON sr.grade = gp.grade
-    WHERE sr.fk_student = in_student_id;
-END;
-//
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS calculate_gpa_cgpa;
-DELIMITER //
-CREATE PROCEDURE calculate_gpa_cgpa(IN in_student_id VARCHAR(10), IN in_semester_id INT)
-BEGIN
-    DECLARE gpa DECIMAL(4,2);
-    DECLARE cgpa DECIMAL(4,2);
-    DECLARE total_credits INT;
-    DECLARE total_courses INT;
-
-    -- GPA
-    SELECT 
-        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
-    INTO gpa
-    FROM student_results AS sr
-    JOIN student_courses AS sca 
-        ON sr.fk_student = sca.fk_student 
-       AND sr.fk_course = sca.fk_course 
-       AND sr.fk_semester = sca.fk_semester
-    JOIN grade_points AS gp ON sr.grade = gp.grade
-    WHERE sr.fk_student = in_student_id 
-      AND sr.fk_semester = in_semester_id;
-
-    -- CGPA
-    SELECT 
-        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2)
-    INTO cgpa
-    FROM student_results AS sr
-    JOIN student_courses AS sca 
-        ON sr.fk_student = sca.fk_student 
-       AND sr.fk_course = sca.fk_course 
-       AND sr.fk_semester = sca.fk_semester
-    JOIN grade_points AS gp ON sr.grade = gp.grade
-    WHERE sr.fk_student = in_student_id;
-
-    -- Total credits
-    SELECT SUM(credit_hours)
-    INTO total_credits
-    FROM student_courses
-    WHERE fk_student = in_student_id;
-
-    -- Total registered courses
-    SELECT COUNT(*)
-    INTO total_courses
-    FROM student_courses
-    WHERE fk_student = in_student_id;
-
-    -- Final Output
-    SELECT gpa, cgpa, total_credits, total_courses;
-END;
-//
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS calculate_students_gpa_cgpa;
-DELIMITER //
-CREATE PROCEDURE calculate_students_gpa_cgpa(IN in_semester_id INT)
-BEGIN
-    SELECT 
-        s.index_number,
-        ROUND(SUM(CASE WHEN sr.fk_semester = in_semester_id 
-                       THEN gp.point * sca.credit_hours ELSE 0 END) /
-              NULLIF(SUM(CASE WHEN sr.fk_semester = in_semester_id 
-                              THEN sca.credit_hours ELSE 0 END), 0), 2) AS gpa,
-        ROUND(SUM(gp.point * sca.credit_hours) / NULLIF(SUM(sca.credit_hours), 0), 2) AS cgpa
-    FROM student AS s
-    JOIN student_results AS sr ON s.index_number = sr.fk_student
-    JOIN student_courses AS sca 
-        ON sr.fk_student = sca.fk_student 
-       AND sr.fk_course = sca.fk_course 
-       AND sr.fk_semester = sca.fk_semester
-    JOIN grade_points AS gp ON sr.grade = gp.grade
-    WHERE s.archived = 0
-    GROUP BY s.index_number;
-END;
-//
-DELIMITER ;
-
-DROP PROCEDURE IF EXISTS calculate_all_students_gpa_cgpa_in_department;
-DELIMITER //
-CREATE PROCEDURE calculate_all_students_gpa_cgpa_in_department(
-    IN in_department_id INT,
-    IN in_semester_id INT
-)
-BEGIN
-    SELECT 
-        s.index_number,
-        -- GPA for this semester
-        ROUND(
-            SUM(CASE 
-                WHEN sr.fk_semester = in_semester_id 
-                THEN gp.point * sc.credit_hours 
-                ELSE 0 
-            END) / NULLIF(SUM(CASE 
-                WHEN sr.fk_semester = in_semester_id 
-                THEN sc.credit_hours 
-                ELSE 0 
-            END), 0), 
-        2) AS gpa,
-        -- CGPA overall
-        ROUND(SUM(gp.point * sc.credit_hours) / NULLIF(SUM(sc.credit_hours), 0), 2) AS cgpa
-    FROM student s
-    JOIN student_results sr ON s.index_number = sr.fk_student
-    JOIN student_courses sc 
-        ON sr.fk_student = sc.fk_student 
-       AND sr.fk_course = sc.fk_course 
-       AND sr.fk_semester = sc.fk_semester
-    JOIN grade_points gp ON sr.grade = gp.grade
-    JOIN department d ON s.fk_department = d.id
-    WHERE s.archived = 0 AND d.id = in_department_id
-    GROUP BY s.index_number;
-END;
-//
-DELIMITER ;
 
 ALTER TABLE `class` ADD COLUMN `fk_staff` VARCHAR(10) AFTER `fk_program`;
 ALTER TABLE `class` ADD CONSTRAINT `fk_class_staff` FOREIGN KEY (`fk_staff`) REFERENCES `staff` (`number`) ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 
 $_SESSION["lastAccessed"] = time();

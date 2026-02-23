@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 
 if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {

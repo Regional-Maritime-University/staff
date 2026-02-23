@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 //echo $_SERVER["HTTP_USER_AGENT"];
 if (isset($_SESSION["adminLogSuccess"]) && $_SESSION["adminLogSuccess"] == true && isset($_SESSION["role"]) && !empty($_SESSION["role"])) {

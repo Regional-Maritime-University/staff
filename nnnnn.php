@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 if (!isset($_GET['status']) || !isset($_GET['exttrid'])) header('Location: index.php?status=invalid');
 if (isset($_GET['status']) && empty($_GET['status'])) header('Location: index.php?status=invalid');
@@ -92,18 +93,18 @@ if (isset($_GET['exttrid']) && empty($_GET['exttrid'])) header('Location: index.
                                     console.log(result);
                                     var parsedResult = JSON.parse(result);
                                     console.log(parsedResult);
-									
-									if (parsedResult.success) {
-                                    	$(".pay-status").html("").append(parsedResult.message + '<br><div><a href="../assign_room/">Go back</a></div>');
-										setTimeout(function() {
-											window.location.href = '../assign_room/'
-										}, 5000);
-									} else {
-										//HJ changed assign_room to dashboard, 09/05/2024
-										setTimeout(function() {
-											window.location.href = '../dashboard/'
-										}, 5000);
-									}
+
+                                    if (parsedResult.success) {
+                                        $(".pay-status").html("").append(parsedResult.message + '<br><div><a href="../assign_room/">Go back</a></div>');
+                                        setTimeout(function() {
+                                            window.location.href = '../assign_room/'
+                                        }, 5000);
+                                    } else {
+                                        //HJ changed assign_room to dashboard, 09/05/2024
+                                        setTimeout(function() {
+                                            window.location.href = '../dashboard/'
+                                        }, 5000);
+                                    }
                                 },
                                 error: function(error) {
                                     console.log(error.statusText);

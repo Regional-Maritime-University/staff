@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 /*if (!isset($_GET['status']) || !isset($_GET['exttrid'])) header('Location: index.php?status=invalid');
 if (isset($_GET['status']) && empty($_GET['status'])) header('Location: index.php?status=invalid');

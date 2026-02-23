@@ -138,7 +138,7 @@ class LecturerController
               ORDER BY (lca.`deadline_status` = 'pending') DESC, lca.`submission_deadline` ASC";
         return $this->dm->getData($query, $params);
     }
-
+     
     public function getActiveCourses(string $lecturerId)
     {
         $query = "SELECT 

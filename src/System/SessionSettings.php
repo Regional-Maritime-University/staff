@@ -27,7 +27,8 @@ class SessionSettings
                 session_commit();
                 session_id($_SESSION['new_session_id']);
                 // New session ID should exist
-                //session_start();
+                //session_name("rmu_staff_portal");
+                session_start();
                 return;
             }
         }
@@ -39,6 +40,7 @@ class SessionSettings
         // Call session_create_id() while session is active to 
         // make sure collision free.
         if (session_status() != PHP_SESSION_ACTIVE) {
+            session_name("rmu_staff_portal");
             session_start();
         }
         // WARNING: Never use confidential strings for prefix!
@@ -54,7 +56,8 @@ class SessionSettings
         // Set new custom session ID
         session_id($newid);
         // Start with custom session ID
-        //session_start();
+        //session_name("rmu_staff_portal");
+        session_start();
 
         // New session does not need them
         //unset($_SESSION['destroyed']);

@@ -1,4 +1,5 @@
 <?php
+session_name("rmu_staff_portal");
 session_start();
 
 if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
@@ -72,6 +73,8 @@ foreach ($activeSemesters as $semester) {
     if ($departmentAssignedLecturers) $assignedLecturers = array_merge($assignedLecturers, $departmentAssignedLecturers);
 }
 $totalAssignedLecturers = $assignedLecturers && is_array($assignedLecturers) ? count($assignedLecturers) : 0;
+
+$submittedExamCourses = $secretary->fetchSubmittedCourseResults($departmentId, $semesterId);
 
 $deadlines = $secretary->fetchPendingDeadlinesByCourse($departmentId);
 $totalPendingDeadlines = 0;
