@@ -39,12 +39,13 @@ class UploadExcelDataController
     {
         $allowedFileType = [
             'application/vnd.ms-excel',
-            'text/xls',
-            'text/xlsx',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/zip',
         ];
 
-        if (!in_array($this->fileObj["type"], $allowedFileType)) {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detectedType = $finfo->file($this->fileObj["tmp_name"]);
+        if (!in_array($detectedType, $allowedFileType)) {
             return array("success" => false, "message" => "Invalid file type. Please choose an excel file!");
         }
 
@@ -56,12 +57,12 @@ class UploadExcelDataController
             if ($this->type == "course") {
                 // Create the full path to the file
                 if (!is_dir(UPLOAD_DIR . "/documents/")) {
-                    mkdir(UPLOAD_DIR . "/documents/", 0777, true);
+                    mkdir(UPLOAD_DIR . "/documents/", 0755, true);
                 }
             } else if ($this->type == "result") {
                 // Create the full path to the file
                 if (!is_dir(UPLOAD_DIR . "/results/")) {
-                    mkdir(UPLOAD_DIR . "/results/", 0777, true);
+                    mkdir(UPLOAD_DIR . "/results/", 0755, true);
                 }
             } else {
                 return array("success" => false, "message" => "Invalid type specified for file upload!");
@@ -128,12 +129,13 @@ class UploadExcelDataController
 
         $allowedFileType = [
             'application/vnd.ms-excel',
-            'text/xls',
-            'text/xlsx',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/zip',
         ];
 
-        if (!in_array($this->fileObj["type"], $allowedFileType)) {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detectedType = $finfo->file($this->fileObj["tmp_name"]);
+        if (!in_array($detectedType, $allowedFileType)) {
             return array("success" => false, "message" => "Invalid file type. Please choose an excel file!");
         }
 
@@ -145,7 +147,7 @@ class UploadExcelDataController
             if ($this->type == "result") {
                 // Create the full path to the file
                 if (!is_dir(UPLOAD_DIR . "/results/")) {
-                    mkdir(UPLOAD_DIR . "/results/", 0777, true);
+                    mkdir(UPLOAD_DIR . "/results/", 0755, true);
                 }
             } else {
                 return array("success" => false, "message" => "Invalid type specified for file upload! Please specify 'result'.");

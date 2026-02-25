@@ -1,5 +1,12 @@
 <?php
 session_name("rmu_staff_portal");
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
 session_start();
 
 if (! isset($_SESSION["lastAccessed"])) {
@@ -17,7 +24,16 @@ if ($diff > 1800) {
 * @Author: Francis A. Anlimah
 */
 
-header("Access-Control-Allow-Origin: *");
+$allowedOrigins = [
+    getenv('DOMAIN_ADMIN') ? rtrim(getenv('DOMAIN_ADMIN'), '/') : '',
+    getenv('DOMAIN_OFFICE') ? rtrim(getenv('DOMAIN_OFFICE'), '/') : '',
+];
+$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: " . $origin);
+} else {
+    header("Access-Control-Allow-Origin: " . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+}
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
@@ -146,26 +162,48 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         die(json_encode(["success" => true, "message" => $result["data"]["role"]]));
     }
 
-    // backup database
+    // backup database (admin-only, authenticated)
     elseif ($_GET["url"] == "backup-data") {
-        $dbs  = ["rmu_admissions"];
-        $user = "root";
-        $pass = "";
-        $host = "localhost";
-
-        if (! file_exists("../Backups")) {
-            mkdir("../Backups");
+        if (
+            !isset($_SESSION["staffLoginSuccess"]) ||
+            $_SESSION["staffLoginSuccess"] !== true ||
+            !isset($_SESSION["staff"]["role"]) ||
+            !in_array(strtolower($_SESSION["staff"]["role"]), ['admin', 'developers'])
+        ) {
+            die(json_encode(["success" => false, "message" => "Unauthorized: Admin access required."]));
         }
 
-        foreach ($dbs as $db) {
-            if (! file_exists("../Backups/$db")) {
-                mkdir("../Backups/$db");
-            }
+        $dbHost = getenv('DB_HOST') ?: 'localhost';
+        $dbUser = getenv('DB_USERNAME');
+        $dbPass = getenv('DB_PASSWORD');
+        $dbName = getenv('DB_DATABASE');
 
-            $file_name = $db . "_" . date("F_d_Y") . "@" . date("g_ia") . uniqid("_", false);
-            $folder    = "../Backups/$db/$file_name" . ".sql";
-            $d         = exec("mysqldump --user={$user} --password={$pass} --host={$host} {$db} --result-file={$folder}", $output);
-            die(json_encode(["success" => true, "message" => $output]));
+        if (!$dbUser || !$dbName) {
+            die(json_encode(["success" => false, "message" => "Database configuration missing."]));
+        }
+
+        $backupDir = ROOT_DIR . "/Backups/" . basename($dbName);
+        if (!is_dir($backupDir)) {
+            mkdir($backupDir, 0750, true);
+        }
+
+        $file_name = basename($dbName) . "_" . date("Y-m-d_His") . "_" . bin2hex(random_bytes(4));
+        $folder    = $backupDir . "/" . $file_name . ".sql";
+
+        $cmd = sprintf(
+            "mysqldump --user=%s --password=%s --host=%s %s --result-file=%s 2>&1",
+            escapeshellarg($dbUser),
+            escapeshellarg($dbPass),
+            escapeshellarg($dbHost),
+            escapeshellarg($dbName),
+            escapeshellarg($folder)
+        );
+        exec($cmd, $output, $returnCode);
+
+        if ($returnCode === 0) {
+            die(json_encode(["success" => true, "message" => "Database backup created successfully."]));
+        } else {
+            die(json_encode(["success" => false, "message" => "Database backup failed."]));
         }
     }
 
@@ -472,7 +510,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "File size is too large!"]));
         }
 
-        if ($_FILES["courseFile"]['type'] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $detectedType = $finfo->file($_FILES["courseFile"]['tmp_name']);
+        $allowedMimeTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'application/zip', // .xlsx files are ZIP archives
+        ];
+        if (!in_array($detectedType, $allowedMimeTypes)) {
             die(json_encode(["success" => false, "message" => "Invalid file type!"]));
         }
 
@@ -758,7 +803,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             die(json_encode(["success" => false, "message" => "File size is too large!"]));
         }
 
-        if ($_FILES["resultsFile"]['type'] != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $detectedType = $finfo->file($_FILES["resultsFile"]['tmp_name']);
+        $allowedMimeTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'application/zip',
+        ];
+        if (!in_array($detectedType, $allowedMimeTypes)) {
             die(json_encode(["success" => false, "message" => "Invalid file type!"]));
         }
 

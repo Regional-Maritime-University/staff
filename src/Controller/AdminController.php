@@ -3291,7 +3291,8 @@ class AdminController
         if (!$appDetails) return array("success" => false, "message" => "Failed to fetch applicant's background information!");
         //$appDetails = $app_details_rslt["message"];
 
-        $password = password_hash("123@Password", PASSWORD_BCRYPT);
+        $defaultPassword = bin2hex(random_bytes(8)); // Secure random 16-char password
+        $password = password_hash($defaultPassword, PASSWORD_BCRYPT);
         $data = array_merge(
             [
                 "email_generated" => $emailGenerated,

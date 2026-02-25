@@ -1,5 +1,12 @@
 <?php
 session_name("rmu_staff_portal");
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
 session_start();
 
 $_SESSION["lastAccessed"] = time();

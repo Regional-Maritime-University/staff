@@ -38,7 +38,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if (empty($input)) die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z0-9]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z0-9 _\-\.]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -47,7 +47,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if (empty($input)) die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z0-9()+]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z0-9()+\- ]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -56,7 +56,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if (empty($input)) die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z0-9()+@#.-_=$&!`]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z0-9()+@#.\-_=$&!`]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -65,7 +65,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if (empty($input)) die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[0-9]/', $user_input);
+        $validated_input = (bool) preg_match('/^[0-9+\- ]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -74,7 +74,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if ($input == "") die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[0-9]/', $user_input);
+        $validated_input = (bool) preg_match('/^[0-9]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -83,7 +83,7 @@ class ExposeDataController extends DatabaseMethods
     {
         if (empty($input)) die(json_encode(array("success" => false, "message" => "Input required!")));
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z0-9@.\-_\' ]+$/', $user_input);
         if ($validated_input) return $user_input;
         die(json_encode(array("success" => false, "message" => "Invalid input!")));
     }
@@ -118,7 +118,7 @@ class ExposeDataController extends DatabaseMethods
         }
 
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z \'\-]+$/', $user_input);
 
         if ($validated_input) {
             return array("success" => true, "message" => $user_input);
@@ -134,7 +134,7 @@ class ExposeDataController extends DatabaseMethods
         }
 
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[A-Za-z0-9]/', $user_input);
+        $validated_input = (bool) preg_match('/^[A-Za-z0-9 _\-\.]+$/', $user_input);
 
         if ($validated_input) {
             return array("success" => true, "message" => $user_input);
@@ -149,12 +149,12 @@ class ExposeDataController extends DatabaseMethods
             return array("success" => false, "message" => "required");
         }
 
-        if ($input < 1990 || $input > 2022) {
+        if ($input < 1990 || $input > 2099) {
             return array("success" => false, "message" => "invalid");
         }
 
         $user_input = htmlentities(htmlspecialchars($input));
-        $validated_input = (bool) preg_match('/^[0-9]/', $user_input);
+        $validated_input = (bool) preg_match('/^[0-9]+$/', $user_input);
 
         if ($validated_input) {
             return array("success" => true, "message" => $user_input);

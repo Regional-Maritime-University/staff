@@ -1606,7 +1606,7 @@ class SecretaryController
                 ":first_name" => $data["first_name"],
                 ":last_name" => $data["last_name"],
                 ":username" => $data["email"],
-                ":password" => password_hash("123@Lecturer", PASSWORD_DEFAULT), // Default password
+                ":password" => password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT), // Secure random default password
                 ":role" => "lecturer",
                 ":user" => "staff"
             ];
