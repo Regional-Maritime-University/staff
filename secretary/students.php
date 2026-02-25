@@ -1,35 +1,5 @@
 <?php
-session_name("rmu_staff_portal");
-session_start();
-
-if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
-    header("Location: ../index.php");
-}
-
-$isUser = false;
-if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
-
-if (isset($_GET['logout']) || !$isUser) {
-    session_destroy();
-    $_SESSION = array();
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
-    }
-
-    header('Location: ../index.php');
-}
-
-$staffData = $_SESSION["staff"] ?? null;
-$_SESSION["lastAccessed"] = time();
+require_once __DIR__ . '/../inc/auth-guard.php';
 
 require_once('../bootstrap.php');
 
@@ -51,10 +21,11 @@ $pageTitle = "Students";
 $activePage = "students";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
-$semesterId = 2; //$_SESSION["semester"] ?? null;
+$activeSemesters = $secretary->fetchActiveSemesters();
+$currentSemester = $activeSemesters ? $activeSemesters[0] : null;
+$semesterId = $currentSemester ? $currentSemester['id'] : null;
 $archived = false;
 
-$activeSemesters = $secretary->fetchActiveSemesters();
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
 $activePrograms = $secretary->fetchAllActivePrograms(departmentId: $departmentId);
@@ -64,6 +35,17 @@ $activeStudents = $secretary->fetchAllActiveStudents(departmentId: $departmentId
 $totalActiveStudents = $activeStudents && is_array($activeStudents) ? count($activeStudents) : 0;
 $activeStudentsExamAndAssessment = $secretary->fetchAllActiveStudentsExamAndAssessment(students: $activeStudents, semesterId: $semesterId);
 $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsExamAndAssessment) ? $activeStudentsExamAndAssessment : $activeStudents;
+
+$totalFinalYear = 0;
+$totalDeferred = 0;
+$totalInactive = 0;
+if ($activeStudents && is_array($activeStudents)) {
+    foreach ($activeStudents as $s) {
+        if (isset($s['level']) && $s['level'] == '400') $totalFinalYear++;
+        if (isset($s['status']) && strtolower($s['status']) == 'deferred') $totalDeferred++;
+        if (isset($s['status']) && strtolower($s['status']) == 'inactive') $totalInactive++;
+    }
+}
 
 ?>
 
@@ -77,6 +59,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/students.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/toast.css">
 </head>
 
 <body>
@@ -100,22 +83,22 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                     <div class="stat-icon blue">
                         <i class="fas fa-user-graduate"></i>
                     </div>
-                    <div class="stat-value">3</div>
+                    <div class="stat-value"><?= $totalFinalYear ?></div>
                     <div class="stat-label">Final Year</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange">
                         <i class="fas fa-user-clock"></i>
                     </div>
-                    <div class="stat-value">1</div>
+                    <div class="stat-value"><?= $totalDeferred ?></div>
                     <div class="stat-label">Deferred</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon red">
                         <i class="fas fa-user-slash"></i>
                     </div>
-                    <div class="stat-value">20</div>
-                    <div class="stat-label">Final Year</div>
+                    <div class="stat-value"><?= $totalInactive ?></div>
+                    <div class="stat-label">Inactive</div>
                 </div>
             </div>
 
@@ -143,7 +126,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                         <?php
                         if ($activePrograms && is_array($activePrograms)) {
                             foreach ($activePrograms as $program) {
-                                echo "<option value='{$program['id']}'>{$program['name']}</option>";
+                                echo "<option value='" . htmlspecialchars($program['id']) . "'>" . htmlspecialchars($program['name']) . "</option>";
                             }
                         } else {
                             echo "<option value=''>No active programs available</option>";
@@ -183,22 +166,22 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                 } else {
                     foreach ($activeStudents as $student) {
                 ?>
-                        <div class="student-card">
+                        <div class="student-card" data-program="<?= htmlspecialchars($student["program_id"] ?? '') ?>" data-level="<?= htmlspecialchars($student["level"] ?? '') ?>" data-status="<?= htmlspecialchars(strtolower($student["status"] ?? 'active')) ?>">
                             <div class="student-header">
                                 <div class="student-photo">
                                     <img src="../uploads/profiles/me.jpg" alt="Student Photo">
                                 </div>
                                 <div class="student-info">
-                                    <h3 class="student-name"><?= $student["first_name"] . " " . $student["middle_name"] . " " . $student["last_name"] ?></h3>
-                                    <p class="student-id"><?= $student["index_number"] ?></p>
-                                    <span class="student-program"><?= $student["program_name"] ?></span>
+                                    <h3 class="student-name"><?= htmlspecialchars($student["first_name"] . " " . $student["middle_name"] . " " . $student["last_name"]) ?></h3>
+                                    <p class="student-id"><?= htmlspecialchars($student["index_number"]) ?></p>
+                                    <span class="student-program"><?= htmlspecialchars($student["program_name"]) ?></span>
                                 </div>
-                                <span class="student-status active">Active</span> <!-- Change class based on status (active, inactive, on-leave) -->
+                                <span class="student-status active">Active</span>
                                 <div class="student-actions">
                                     <!-- <button class="student-action edit-student" title="Edit Student">
                                         <i class="fas fa-edit"></i>
                                     </button> -->
-                                    <button class="student-action archive-student" title="Archive Student" id="<?= $student["index_number"] ?>">
+                                    <button class="student-action archive-student" title="Archive Student" id="<?= htmlspecialchars($student["index_number"]) ?>">
                                         <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
@@ -207,31 +190,31 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                                 <div class="contact-info">
                                     <div class="contact-item">
                                         <i class="fas fa-envelope"></i>
-                                        <a href="mailto:<?= $student["email"] ?>"><?= $student["email"] ?></a>
+                                        <a href="mailto:<?= htmlspecialchars($student["email"]) ?>"><?= htmlspecialchars($student["email"]) ?></a>
                                     </div>
                                     <div class="contact-item">
                                         <i class="fas fa-phone"></i>
-                                        <a href="tel:<?= $student["phone_number"] ?>"><?= $student["phone_number"] ?></a>
+                                        <a href="tel:<?= htmlspecialchars($student["phone_number"]) ?>"><?= htmlspecialchars($student["phone_number"]) ?></a>
                                     </div>
                                 </div>
                                 <div class="academic-info">
                                     <div class="academic-item">
                                         <div class="academic-label">Level</div>
-                                        <div class="academic-value">300</div>
+                                        <div class="academic-value"><?= htmlspecialchars($student["level"] ?? '') ?></div>
                                     </div>
                                     <div class="academic-item">
                                         <div class="academic-label">Credits</div>
-                                        <div class="academic-value"><?= $student["total_credit_hours"] ?></div>
+                                        <div class="academic-value"><?= htmlspecialchars($student["total_credit_hours"]) ?></div>
                                     </div>
                                     <div class="academic-item">
                                         <div class="academic-label">Courses</div>
-                                        <div class="academic-value"><?= $student["total_courses"] ?></div>
+                                        <div class="academic-value"><?= htmlspecialchars($student["total_courses"]) ?></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="student-footer">
-                                <div class="gpa excellent">CGPA: <?= $student["cgpa"] ?></div> <!-- Change class based on GPA (excellent, good, average, pood) -->
-                                <button class="view-profile-btn view-grades-btn" data-student="Samuel Mensah" id="<?= $student["index_number"] ?>">View Grades</button>
+                                <div class="gpa excellent">CGPA: <?= htmlspecialchars($student["cgpa"]) ?></div>
+                                <button class="view-profile-btn view-grades-btn" data-student="<?= htmlspecialchars($student["first_name"] . " " . $student["last_name"]) ?>" id="<?= htmlspecialchars($student["index_number"]) ?>">View Grades</button>
                             </div>
                         </div>
                 <?php
@@ -363,7 +346,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                             <?php
                             if ($activeSemesters) {
                                 foreach ($activeSemesters as $semester) {
-                                    echo "<option value='{$semester['id']}'>{$semester['academic_year_name']} Semester {$semester['name']} </option>";
+                                    echo "<option value='" . htmlspecialchars($semester['id']) . "'>" . htmlspecialchars($semester['academic_year_name']) . " Semester " . htmlspecialchars($semester['name']) . " </option>";
                                 }
                             } else {
                                 echo "<option value=''>No active semester</option>";
@@ -390,7 +373,7 @@ $activeStudents = $activeStudentsExamAndAssessment && is_array($activeStudentsEx
                         <tfoot></tfoot>
                     </table>
 
-                    <input type="hidden" name="viewGradesStudent" id="viewGradesStudent" value="<?= $student["index_number"] ?>">
+                    <input type="hidden" name="viewGradesStudent" id="viewGradesStudent" value="">
 
                     <div style="display: flex; margin-top: 20px; text-align: right;">
                         <button class="action-btn" id="exportGradesToPDF" style="width: auto; height: auto; padding: 8px 15px; background-color: var(--primary-color); margin-right: 10px;">

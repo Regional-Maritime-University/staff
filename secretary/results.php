@@ -1,35 +1,5 @@
 <?php
-session_name("rmu_staff_portal");
-session_start();
-
-if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
-    header("Location: ../index.php");
-}
-
-$isUser = false;
-if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
-
-if (isset($_GET['logout']) || !$isUser) {
-    session_destroy();
-    $_SESSION = array();
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
-    }
-
-    header('Location: ../index.php');
-}
-
-$staffData = $_SESSION["staff"] ?? null;
-$_SESSION["lastAccessed"] = time();
+require_once __DIR__ . '/../inc/auth-guard.php';
 
 require_once('../bootstrap.php');
 
@@ -49,10 +19,12 @@ $pageTitle = "Results";
 $activePage = "results";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
-$semesterId = 2; //$_SESSION["semester"] ?? null;
+$activeSemesters = $secretary->fetchActiveSemesters();
+$currentSemester = $activeSemesters ? $activeSemesters[0] : null;
+$semesterId = $currentSemester ? $currentSemester['id'] : null;
 $archived = false;
 
-$activeSemesters = $secretary->fetchActiveSemesters();
+$activeCourses = $secretary->fetchActiveCourses($departmentId, null, false);
 
 $activeClasses = $secretary->fetchAllActiveClasses(departmentId: $departmentId);
 
@@ -103,15 +75,16 @@ if ($deadlines && is_array($deadlines)) {
             <div class="results-filters">
                 <div class="filter-group">
                     <select class="filter-select" id="semesterFilter">
-                        <option value="current">First Semester 2023/2024</option>
-                        <option value="previous">Second Semester 2022/2023</option>
                         <option value="all">All Semesters</option>
+                        <?php if ($activeSemesters): foreach ($activeSemesters as $sem): ?>
+                            <option value="<?= htmlspecialchars($sem['id']) ?>"><?= htmlspecialchars($sem['academic_year_name'] . ' Semester ' . $sem['name']) ?></option>
+                        <?php endforeach; endif; ?>
                     </select>
                     <select class="filter-select" id="courseFilter">
                         <option value="all">All Courses</option>
-                        <option value="ME101">ME101 - Introduction to Marine Engineering</option>
-                        <option value="ME302">ME302 - Marine Propulsion Systems</option>
-                        <option value="ME405">ME405 - Ship Design and Construction</option>
+                        <?php if (isset($activeCourses) && $activeCourses): foreach ($activeCourses as $c): ?>
+                            <option value="<?= htmlspecialchars($c['code']) ?>"><?= htmlspecialchars($c['code'] . ' - ' . $c['name']) ?></option>
+                        <?php endforeach; endif; ?>
                     </select>
                     <select class="filter-select" id="statusFilter">
                         <option value="all">All Statuses</option>
@@ -138,33 +111,33 @@ if ($deadlines && is_array($deadlines)) {
                         ?>
                         <div class="result-card">
                             <div class="result-header">
-                                <h3 class="result-title"><?= "[" . $deadline['class_code'] . "] " . $deadline['course_name'] ?></h3>
-                                <span class="result-status <?= $status ?>"><?= ucfirst($status) ?></span>
+                                <h3 class="result-title"><?= htmlspecialchars("[" . $deadline['class_code'] . "] " . $deadline['course_name']) ?></h3>
+                                <span class="result-status <?= htmlspecialchars($status) ?>"><?= htmlspecialchars(ucfirst($status)) ?></span>
                             </div>
                             <div class="result-info">
                                 <div class="info-item">
                                     <div class="info-label">Semester</div>
-                                    <div class="info-value"><?= $deadline['semester_name'] ?></div>
+                                    <div class="info-value"><?= htmlspecialchars($deadline['semester_name']) ?></div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Students</div>
-                                    <div class="info-value"><?= $deadline['total_registered_students'] ?? 0 ?></div>
+                                    <div class="info-value"><?= htmlspecialchars($deadline['total_registered_students'] ?? 0) ?></div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Due Date</div>
-                                    <div class="info-value"><?= date('M d, Y', strtotime($deadline['due_date'])) ?></div>
+                                    <div class="info-value"><?= htmlspecialchars(date('M d, Y', strtotime($deadline['due_date']))) ?></div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Lecturer</div>
-                                    <div class="info-value"><?= $deadline['lecturer_name'] ?></div>
+                                    <div class="info-value"><?= htmlspecialchars($deadline['lecturer_name']) ?></div>
                                 </div>
                             </div>
                             <div class="result-actions">
                                 <!-- <button class="result-btn secondary downloadResultsBtn"
-                                    data-class="<?= $deadline['class_code'] ?>"
-                                    data-course="<?= $deadline['course_code'] ?>"
-                                    data-semester="<?= $deadline['semester_id'] ?>"
-                                    title="Download <?= $deadline['class_code'] ?> results">
+                                    data-class="<?= htmlspecialchars($deadline['class_code']) ?>"
+                                    data-course="<?= htmlspecialchars($deadline['course_code']) ?>"
+                                    data-semester="<?= htmlspecialchars($deadline['semester_id']) ?>"
+                                    title="Download <?= htmlspecialchars($deadline['class_code']) ?> results">
                                     <i class="fas fa-download"></i>
                                 </button> -->
                                 <?php if ($status == "submitted") : ?>

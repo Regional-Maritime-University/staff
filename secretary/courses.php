@@ -1,35 +1,5 @@
 <?php
-session_name("rmu_staff_portal");
-session_start();
-
-if (!isset($_SESSION["staffLoginSuccess"]) || $_SESSION["staffLoginSuccess"] == false || !isset($_SESSION["staff"]["number"]) || empty($_SESSION["staff"]["number"])) {
-    header("Location: ../index.php");
-}
-
-$isUser = false;
-if (strtolower($_SESSION["staff"]["role"]) == "admin" || strtolower($_SESSION["staff"]["role"]) == "developers" || strtolower($_SESSION["staff"]["role"]) == "secretary") $isUser = true;
-
-if (isset($_GET['logout']) || !$isUser) {
-    session_destroy();
-    $_SESSION = array();
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
-    }
-
-    header('Location: ../index.php');
-}
-
-$staffData = $_SESSION["staff"] ?? null;
-$_SESSION["lastAccessed"] = time();
+require_once __DIR__ . '/../inc/auth-guard.php';
 
 require_once('../bootstrap.php');
 
@@ -49,10 +19,10 @@ $pageTitle = "Courses";
 $activePage = "courses";
 
 $departmentId = $_SESSION["staff"]["department_id"] ?? null;
-$semesterId = 2; //$_SESSION["semester"] ?? null;
-$archived = false;
-
 $activeSemesters = $secretary->fetchActiveSemesters();
+$currentSemester = $activeSemesters ? $activeSemesters[0] : null;
+$semesterId = $currentSemester ? $currentSemester['id'] : null;
+$archived = false;
 $lecturers = $secretary->fetchAllLecturers($departmentId, $archived);
 
 $activeCourses = $secretary->fetchActiveCourses($departmentId, null, $archived);
@@ -101,6 +71,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     <link rel="stylesheet" href="./css/courses.css">
     <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/toast.css">
 </head>
 
 <body>
@@ -120,7 +91,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                         <i class="fas fa-clipboard-check"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>24</h3>
+                        <h3><?= $totalActiveCourses ?></h3>
                         <p>Semester Courses</p>
                     </div>
                 </div>
@@ -241,20 +212,20 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                     foreach ($activeCourses as $course) {
                 ?>
                         <div class="course-card"
-                            data-semester="<?= $course["semester"] ?>"
-                            data-level="<?= $course["level"] ?>"
-                            data-lecturer-number="<?= $course["lecturer_number"] ?>"
+                            data-semester="<?= htmlspecialchars($course["semester"]) ?>"
+                            data-level="<?= htmlspecialchars($course["level"]) ?>"
+                            data-lecturer-number="<?= htmlspecialchars($course["lecturer_number"]) ?>"
                             data-has-deadline="<?= $course["deadline_date"] ? 'true' : 'false' ?>">
                             <div class="course-header">
                                 <div>
-                                    <div class="course-title"><?= $course["name"] ?></div>
-                                    <div class="course-code"><?= $course["code"] ?></div>
+                                    <div class="course-title"><?= htmlspecialchars($course["name"]) ?></div>
+                                    <div class="course-code"><?= htmlspecialchars($course["code"]) ?></div>
                                 </div>
                                 <div class="course-actions">
-                                    <button class="action-icon edit-course" title="Edit Course" id="<?= $course["code"] ?>">
+                                    <button class="action-icon edit-course" title="Edit Course" id="<?= htmlspecialchars($course["code"]) ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-icon archive-course" title="Archive Course" id="<?= $course["code"] ?>">
+                                    <button class="action-icon archive-course" title="Archive Course" id="<?= htmlspecialchars($course["code"]) ?>">
                                         <i class="fas fa-archive" style="color: var(--danger-color);"></i>
                                     </button>
                                 </div>
@@ -262,19 +233,19 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                             <div class="course-details">
                                 <div class="detail-item">
                                     <div class="detail-label">Department</div>
-                                    <div class="detail-value"><?= $course["department_name"] ?></div>
+                                    <div class="detail-value"><?= htmlspecialchars($course["department_name"]) ?></div>
                                 </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Credit Hours</div>
-                                    <div class="detail-value"><?= $course["credit_hours"] ?></div>
+                                    <div class="detail-value"><?= htmlspecialchars($course["credit_hours"]) ?></div>
                                 </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Level</div>
-                                    <div class="detail-value"><?= $course["level"] ?></div>
+                                    <div class="detail-value"><?= htmlspecialchars($course["level"]) ?></div>
                                 </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Semester</div>
-                                    <div class="detail-value"><?= $course["semester"] == 1 ? "First Semester" : ($course["semester"] == 2 ? "Second Semester" : $course["semester"]) ?></div>
+                                    <div class="detail-value"><?= $course["semester"] == 1 ? "First Semester" : ($course["semester"] == 2 ? "Second Semester" : htmlspecialchars($course["semester"])) ?></div>
                                 </div>
                             </div>
                             <div class="lecturer-info">
@@ -282,12 +253,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
                                 if ($course["lecturer_number"]) {
                                 ?>
                                     <div class="lecturer-avatar">
-                                        <img src="../uploads/profiles/<?= $course["lecturer_avatar"] ?>" alt="Lecturer Avatar">
+                                        <img src="../uploads/profiles/<?= htmlspecialchars($course["lecturer_avatar"]) ?>" alt="Lecturer Avatar">
                                     </div>
                                     <div class="lecturer-details">
-                                        <div class="lecturer-name"><?= $course["lecturer_prefix"] . " " . $course["lecturer_first_name"] . " " . $course["lecturer_last_name"] ?></div>
-                                        <div class="lecturer-email"><?= $course["lecturer_email"] ?></div>
-                                        <input type="hidden" class="lecturer-number" value="<?= $course["lecturer_number"] ?>">
+                                        <div class="lecturer-name"><?= htmlspecialchars($course["lecturer_prefix"] . " " . $course["lecturer_first_name"] . " " . $course["lecturer_last_name"]) ?></div>
+                                        <div class="lecturer-email"><?= htmlspecialchars($course["lecturer_email"]) ?></div>
+                                        <input type="hidden" class="lecturer-number" value="<?= htmlspecialchars($course["lecturer_number"]) ?>">
                                     </div>
                                 <?php
                                 } else {
@@ -662,6 +633,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         </div>
     </div>
 
+    <script src="../assets/js/toast.js"></script>
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/main.js"></script>
     <script>
@@ -706,9 +678,8 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
 
                     // Check level filter
                     if (levelValue !== 'all') {
-                        // Get level value from the card
-                        const cardSemester = card.dataset.level;
-                        matchesSemester = cardSemester === levelValue;
+                        const cardLevel = card.dataset.level;
+                        matchesLevel = cardLevel === levelValue;
                     }
 
                     // Check lecturer filter
