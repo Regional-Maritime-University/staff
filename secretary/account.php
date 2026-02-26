@@ -431,13 +431,13 @@ $activePage = "account";
     </div>
 
     <!-- Two-Factor Authentication Modal -->
-    <div class="modal" id="twoFactorModal">
+    <div class="modal" id="twoFactorModal" role="dialog" aria-modal="true" aria-labelledby="twoFactorModalTitle">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Setup Two-Factor Authentication</h2>
-                    <button class="close-btn" id="closeTwoFactorModal">
-                        <i class="fas fa-times"></i>
+                    <h2 id="twoFactorModalTitle">Setup Two-Factor Authentication</h2>
+                    <button class="close-btn" id="closeTwoFactorModal" aria-label="Close dialog">
+                        <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="modal-body">

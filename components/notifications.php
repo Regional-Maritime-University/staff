@@ -173,13 +173,13 @@
 </div>
 
 <!-- Notification Settings Modal -->
-<div class="modal" id="notificationSettingsModal">
+<div class="modal" id="notificationSettingsModal" role="dialog" aria-modal="true" aria-labelledby="notificationSettingsModalTitle">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Notification Settings</h2>
-                <button class="close-btn" id="closeNotificationSettingsModal">
-                    <i class="fas fa-times"></i>
+                <h2 id="notificationSettingsModalTitle">Notification Settings</h2>
+                <button class="close-btn" id="closeNotificationSettingsModal" aria-label="Close dialog">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="modal-body">

@@ -191,12 +191,12 @@ if ($deadlines && is_array($deadlines)) {
         </div>
 
         <!-- Upload Results Modal -->
-        <div class="modal" id="uploadResultsModal">
+        <div class="modal" id="uploadResultsModal" role="dialog" aria-modal="true" aria-labelledby="uploadResultsModalTitle">
             <div class="modal-dialog modal-lg modal-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>Upload Exam Results</h2>
-                        <button class="close-btn" data-dismiss="modal">&times;</button>
+                        <h2 id="uploadResultsModalTitle">Upload Exam Results</h2>
+                        <button class="close-btn" data-dismiss="modal" aria-label="Close dialog">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">

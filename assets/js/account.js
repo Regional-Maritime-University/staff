@@ -39,27 +39,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const strengthBar = document.querySelector(".strength-bar");
     const strengthText = document.querySelector(".strength-text");
     
+    // Password requirement checks
+    const requirements = {
+        length:   { regex: /.{8,}/,        el: null },
+        upper:    { regex: /[A-Z]/,        el: null },
+        lower:    { regex: /[a-z]/,        el: null },
+        number:   { regex: /[0-9]/,        el: null },
+        special:  { regex: /[^A-Za-z0-9]/, el: null }
+    };
+
+    // Map requirement list items by their text content
+    const reqItems = document.querySelectorAll(".password-requirements li");
+    reqItems.forEach(function(li) {
+        var text = li.textContent.toLowerCase();
+        if (text.includes("8 characters")) requirements.length.el = li;
+        else if (text.includes("uppercase")) requirements.upper.el = li;
+        else if (text.includes("lowercase")) requirements.lower.el = li;
+        else if (text.includes("number")) requirements.number.el = li;
+        else if (text.includes("special")) requirements.special.el = li;
+    });
+
     newPassword.addEventListener("input", function() {
         const password = this.value;
         let strength = 0;
         let status = "";
-        
+
         if (password.length > 0) {
-            // Check length
-            if (password.length >= 8) strength += 20;
-            
-            // Check for uppercase letters
-            if (/[A-Z]/.test(password)) strength += 20;
-            
-            // Check for lowercase letters
-            if (/[a-z]/.test(password)) strength += 20;
-            
-            // Check for numbers
-            if (/[0-9]/.test(password)) strength += 20;
-            
-            // Check for special characters
-            if (/[^A-Za-z0-9]/.test(password)) strength += 20;
-            
+            // Check each requirement and update UI
+            Object.keys(requirements).forEach(function(key) {
+                var req = requirements[key];
+                var passed = req.regex.test(password);
+                if (passed) strength += 20;
+                if (req.el) {
+                    req.el.classList.toggle("met", passed);
+                }
+            });
+
             // Set status based on strength
             if (strength <= 20) {
                 status = "Very Weak";
@@ -80,11 +95,16 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             status = "Not set";
             strength = 0;
+            // Reset all requirement indicators
+            Object.keys(requirements).forEach(function(key) {
+                if (requirements[key].el) requirements[key].el.classList.remove("met");
+            });
         }
-        
+
         // Update UI
         strengthBar.style.width = `${strength}%`;
         strengthText.textContent = `Password strength: ${status}`;
+        strengthBar.setAttribute("aria-valuenow", strength);
     });
     
     // Password confirmation validation
