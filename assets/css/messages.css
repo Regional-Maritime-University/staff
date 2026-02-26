@@ -1,7 +1,7 @@
 /* Messages Page Specific Styles */
 .messages-container {
 	display: flex;
-	background-color: white;
+	background-color: var(--card-bg);
 	border-radius: 10px;
 	box-shadow: var(--card-shadow);
 	height: calc(100vh - 130px);
@@ -10,7 +10,7 @@
 
 /* Contacts Sidebar */
 .contacts-sidebar {
-	width: 300px;
+	width: 320px;
 	border-right: 1px solid var(--border-color);
 	display: flex;
 	flex-direction: column;
@@ -26,7 +26,12 @@
 
 .contacts-header h2 {
 	font-size: 1.2rem;
-	color: var(--primary-color);
+	color: var(--heading-color);
+}
+
+.contacts-header-actions {
+	display: flex;
+	gap: 8px;
 }
 
 .new-message-btn {
@@ -47,6 +52,27 @@
 	background-color: var(--primary-color);
 }
 
+/* Contact search input */
+.contacts-search {
+	padding: 10px 15px;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.contacts-search input {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	font-size: 0.85rem;
+	background-color: var(--input-bg);
+	color: var(--input-text);
+}
+
+.contacts-search input:focus {
+	outline: none;
+	border-color: var(--accent-color);
+}
+
 .contacts-filter {
 	display: flex;
 	padding: 10px;
@@ -61,7 +87,7 @@
 	padding: 8px 12px;
 	border-radius: 15px;
 	font-size: 0.9rem;
-	color: #666;
+	color: var(--card-text);
 	cursor: pointer;
 	white-space: nowrap;
 	transition: all var(--transition-speed);
@@ -98,9 +124,30 @@
 	background-color: rgba(52, 152, 219, 0.1);
 }
 
+/* Unread message indicator - bold name and accent left border */
+.contact-item.unread {
+	border-left: 3px solid var(--accent-color);
+}
+
+.contact-item.unread .contact-name {
+	font-weight: 700;
+}
+
+.contact-item.unread .contact-preview {
+	font-weight: 500;
+	color: var(--card-text);
+}
+
+/* Read indicator */
+.read-indicator {
+	color: var(--accent-color);
+	font-size: 0.7rem;
+}
+
 .contact-avatar {
 	position: relative;
 	margin-right: 15px;
+	flex-shrink: 0;
 }
 
 .contact-avatar img {
@@ -139,13 +186,24 @@
 
 .contact-name {
 	font-weight: 500;
-	color: var(--primary-color);
-	margin-bottom: 3px;
+	color: var(--heading-color);
+	margin-bottom: 2px;
+}
+
+.contact-subject {
+	font-size: 0.8rem;
+	color: var(--accent-color);
+	font-weight: 500;
+	margin-bottom: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .contact-preview {
-	font-size: 0.85rem;
-	color: #666;
+	font-size: 0.8rem;
+	color: var(--card-text);
+	opacity: 0.6;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -156,6 +214,7 @@
 	flex-direction: column;
 	align-items: flex-end;
 	margin-left: 10px;
+	flex-shrink: 0;
 }
 
 .message-time {
@@ -189,6 +248,8 @@
 	align-items: center;
 	padding: 15px;
 	border-bottom: 1px solid var(--border-color);
+	flex-wrap: wrap;
+	gap: 8px;
 }
 
 .chat-contact {
@@ -201,9 +262,25 @@
 	color: #888;
 }
 
+/* Thread subject indicator */
+.chat-thread-subject {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.85rem;
+	color: var(--accent-color);
+	background-color: var(--light-bg);
+	padding: 4px 12px;
+	border-radius: 15px;
+}
+
+.chat-thread-subject i {
+	font-size: 0.75rem;
+}
+
 .chat-actions {
 	display: flex;
-	gap: 10px;
+	gap: 8px;
 }
 
 .chat-action-btn {
@@ -211,7 +288,7 @@
 	height: 36px;
 	border-radius: 50%;
 	background-color: var(--light-bg);
-	color: var(--primary-color);
+	color: var(--heading-color);
 	border: none;
 	display: flex;
 	align-items: center;
@@ -221,14 +298,15 @@
 }
 
 .chat-action-btn:hover {
-	background-color: rgba(0, 0, 0, 0.05);
+	background-color: var(--accent-color);
+	color: white;
 }
 
 .chat-messages {
 	flex: 1;
 	padding: 15px;
 	overflow-y: auto;
-	background-color: #f8f9fa;
+	background-color: var(--light-bg);
 }
 
 .message-date {
@@ -298,8 +376,8 @@
 }
 
 .message.received .message-bubble {
-	background-color: white;
-	color: #333;
+	background-color: var(--card-bg);
+	color: var(--card-text);
 	border-top-left-radius: 5px;
 }
 
@@ -307,6 +385,48 @@
 	background-color: var(--accent-color);
 	color: white;
 	border-top-right-radius: 5px;
+}
+
+/* Read ticks on messages */
+.message-read-tick {
+	font-size: 0.65rem;
+	color: #aaa;
+	margin-left: 4px;
+}
+
+.message-read-tick.read {
+	color: var(--accent-color);
+}
+
+/* Message attachments */
+.message-attachment {
+	margin-top: 6px;
+}
+
+.attachment-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background-color: rgba(0, 0, 0, 0.05);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	padding: 6px 12px;
+	font-size: 0.8rem;
+	color: var(--card-text);
+	cursor: pointer;
+	transition: background-color var(--transition-speed);
+}
+
+.attachment-item:hover {
+	background-color: rgba(0, 0, 0, 0.08);
+}
+
+.attachment-item i {
+	color: var(--danger-color);
+}
+
+.attachment-item small {
+	color: #888;
 }
 
 .message-time {
@@ -319,11 +439,44 @@
 	text-align: right;
 }
 
+/* Chat input area */
 .chat-input-area {
 	display: flex;
-	align-items: center;
-	padding: 15px;
+	flex-direction: column;
+	padding: 10px 15px 15px;
 	border-top: 1px solid var(--border-color);
+}
+
+.chat-input-row {
+	display: flex;
+	align-items: center;
+}
+
+/* Attachment preview above input */
+.attachment-preview {
+	padding: 8px 0;
+}
+
+.attachment-preview-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background-color: var(--light-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	padding: 4px 10px;
+	font-size: 0.8rem;
+	color: var(--card-text);
+}
+
+.attachment-remove-btn {
+	background: none;
+	border: none;
+	color: var(--danger-color);
+	font-size: 1.1rem;
+	cursor: pointer;
+	padding: 0 2px;
+	line-height: 1;
 }
 
 .attachment-btn,
@@ -334,12 +487,13 @@
 	border-radius: 50%;
 	background: none;
 	border: none;
-	color: var(--primary-color);
+	color: var(--heading-color);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	transition: background-color var(--transition-speed);
+	flex-shrink: 0;
 }
 
 .attachment-btn:hover,
@@ -363,11 +517,41 @@
 	border-radius: 20px;
 	margin: 0 10px;
 	font-size: 0.95rem;
+	background-color: var(--input-bg);
+	color: var(--input-text);
 }
 
 .chat-input:focus {
 	outline: none;
 	border-color: var(--accent-color);
+}
+
+/* Bulk message options */
+.bulk-recipient-options {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.bulk-option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.bulk-option:hover {
+	background-color: var(--light-bg);
+}
+
+.bulk-option input[type="radio"]:checked + span {
+	font-weight: 600;
+	color: var(--accent-color);
 }
 
 /* Responsive Design */
@@ -392,6 +576,10 @@
 
 	.chat-area {
 		height: calc(100vh - 450px);
+	}
+
+	.chat-thread-subject {
+		display: none;
 	}
 }
 

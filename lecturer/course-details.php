@@ -67,6 +67,7 @@ $courseResults = $lecturerCourseDetails["data"]["results"] ?? [];
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/course-details.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -492,6 +493,9 @@ $courseResults = $lecturerCourseDetails["data"]["results"] ?? [];
         </div>
     </div>
 
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
+    <script src="../assets/js/main.js"></script>
     <script>
         // Toggle sidebar
         document.querySelector('.toggle-sidebar').addEventListener('click', function() {

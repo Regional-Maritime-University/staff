@@ -60,6 +60,7 @@ if ($activeStudents && is_array($activeStudents)) {
     <link rel="stylesheet" href="./css/students.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/toast.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -70,6 +71,12 @@ if ($activeStudents && is_array($activeStudents)) {
         <?php require_once '../components/header.php'; ?>
 
         <div class="dashboard-content">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:-10px;">
+                <button class="print-btn" onclick="window.print()" title="Print student list">
+                    <i class="fas fa-print" aria-hidden="true"></i> Print Student List
+                </button>
+            </div>
+
             <!-- Student Stats -->
             <div class="student-stats">
                 <div class="stat-card">
@@ -392,6 +399,7 @@ if ($activeStudents && is_array($activeStudents)) {
     </div>
 
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
     <script src="../assets/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

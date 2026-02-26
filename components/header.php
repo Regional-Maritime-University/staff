@@ -14,6 +14,9 @@
                 <i class="fas fa-search" aria-hidden="true"></i>
             </button>
         </div>
+        <button class="theme-toggle-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
         <div class="header-actions">
             <a href="notifications.php" class="action-btn notifications" aria-label="Notifications - 5 unread">
                 <i class="fas fa-bell" aria-hidden="true"></i>
@@ -32,6 +35,18 @@
 <nav class="breadcrumb" aria-label="Breadcrumb">
     <ol class="breadcrumb-list">
         <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+        <?php
+        // Support multi-level breadcrumbs for deeper pages
+        $breadcrumbParents = [
+            'lecturer-profile'  => ['href' => 'lecturers.php', 'label' => 'Lecturers'],
+            'lecturer-courses'  => ['href' => 'lecturers.php', 'label' => 'Lecturers'],
+            'course-details'    => ['href' => 'courses.php',   'label' => 'My Courses'],
+        ];
+        if (isset($breadcrumbParents[$activePage])):
+            $parent = $breadcrumbParents[$activePage];
+        ?>
+            <li class="breadcrumb-item"><a href="<?= $parent['href'] ?>"><?= $parent['label'] ?></a></li>
+        <?php endif; ?>
         <li class="breadcrumb-item active" aria-current="page"><?= $pageTitle ?></li>
     </ol>
 </nav>

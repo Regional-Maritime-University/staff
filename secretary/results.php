@@ -46,6 +46,7 @@ if ($deadlines && is_array($deadlines)) {
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/results.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -60,6 +61,11 @@ if ($deadlines && is_array($deadlines)) {
         <!-- Main Content -->
 
         <div class="results-content">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                <button class="print-btn" onclick="window.print()" title="Print results">
+                    <i class="fas fa-print" aria-hidden="true"></i> Print Results
+                </button>
+            </div>
 
             <div class="quick-actions">
                 <h2>Quick Actions</h2>
@@ -328,6 +334,9 @@ if ($deadlines && is_array($deadlines)) {
 
     </div>
 
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
+    <script src="../assets/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 

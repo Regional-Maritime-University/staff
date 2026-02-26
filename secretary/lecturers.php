@@ -81,6 +81,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     <link rel="stylesheet" href="./css/lecturers.css">
     <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -92,6 +93,12 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         <?php require_once '../components/header.php'; ?>
 
         <div class="dashboard-content">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:-10px;">
+                <button class="print-btn" onclick="window.print()" title="Print lecturer list">
+                    <i class="fas fa-print" aria-hidden="true"></i> Print Lecturer List
+                </button>
+            </div>
+
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <h2>Quick Actions</h2>
@@ -580,6 +587,9 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
         </div>
     </div>
 
+    <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
+    <script src="../assets/js/main.js"></script>
     <script>
         const staticLecturersData = <?= json_encode($activeLectuers); ?>;
         const totalLecturers = <?= $totalActiveLecturers; ?>;

@@ -106,6 +106,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -588,9 +589,14 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Submitted Exam Results</h2>
-                    <button class="close-btn" id="closeViewResultsModal">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button class="print-btn" onclick="window.print()" title="Print results">
+                            <i class="fas fa-print" aria-hidden="true"></i> Print
+                        </button>
+                        <button class="close-btn" id="closeViewResultsModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <div class="results-filter">
@@ -926,6 +932,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     </div>
 
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
     <script src="../assets/js/main.js"></script>
     <script>
         // Make PHP session data available to JS

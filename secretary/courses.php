@@ -72,6 +72,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
     <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/toast.css">
+    <?php require_once '../components/datatables-head.php'; ?>
 </head>
 
 <body>
@@ -635,6 +636,7 @@ $totalActiveClasses = $activeClasses && is_array($activeClasses) ? count($active
 
     <script src="../assets/js/toast.js"></script>
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <?php require_once '../components/datatables-scripts.php'; ?>
     <script src="../assets/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
