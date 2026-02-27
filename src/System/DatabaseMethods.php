@@ -139,7 +139,7 @@ class DatabaseMethods
         }
     }
 
-    private function logError(PDOException $e)
+    private function logError(Exception $e)
     {
         $logFilePath = dirname(__FILE__) . '/' . $this->logFile;
         if (!file_exists($logFilePath)) {

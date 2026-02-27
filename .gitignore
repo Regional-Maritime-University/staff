@@ -4,3 +4,4 @@ downloads/*
 cacert.pem
 composer.lock
 .env
+node_modules
