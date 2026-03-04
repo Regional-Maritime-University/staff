@@ -38,6 +38,8 @@ require_once('../inc/admin-database-con.php');
 
 $admin = new SecretaryController($db, $user, $pass);
 
+$staffName = $_SESSION["staff"]["prefix"] . " " . $_SESSION["staff"]["first_name"] . " " . $_SESSION["staff"]["last_name"];
+
 $pageTitle = "Account Settings";
 $activePage = "account";
 
@@ -51,7 +53,7 @@ $activePage = "account";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMU Staff Portal - Account</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="./css/account.css">
+    <link rel="stylesheet" href="../assets/css/account.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -90,15 +92,15 @@ $activePage = "account";
                 <div class="account-tab-content active" id="profile">
                     <div class="profile-header">
                         <div class="profile-avatar">
-                            <img src="/placeholder.svg?height=100&width=100" alt="User Avatar">
-                            <button class="change-avatar-btn">
+                            <img src="../uploads/profiles/<?= htmlspecialchars($_SESSION["staff"]["avatar"] ?? '') ?>" alt="<?= htmlspecialchars($staffName) ?>">
+                            <button class="change-avatar-btn" aria-label="Change profile photo">
                                 <i class="fas fa-camera"></i>
                             </button>
                         </div>
                         <div class="profile-info">
-                            <h2>Jane Doe</h2>
-                            <p>Department Secretary</p>
-                            <p>Maritime Studies Department</p>
+                            <h2><?= htmlspecialchars($staffName) ?></h2>
+                            <p><?= htmlspecialchars($_SESSION["staff"]["designation"] ?? 'Secretary') ?></p>
+                            <p><?= htmlspecialchars($_SESSION["staff"]["department_name"] ?? '') ?></p>
                         </div>
                     </div>
 
@@ -108,26 +110,22 @@ $activePage = "account";
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="firstName">First Name</label>
-                                    <input type="text" id="firstName" value="Jane">
+                                    <input type="text" id="firstName" value="<?= htmlspecialchars($_SESSION["staff"]["first_name"] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="lastName">Last Name</label>
-                                    <input type="text" id="lastName" value="Doe">
+                                    <input type="text" id="lastName" value="<?= htmlspecialchars($_SESSION["staff"]["last_name"] ?? '') ?>" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="email">Email Address</label>
-                                    <input type="email" id="email" value="jane.doe@rmu.edu">
+                                    <input type="email" id="email" value="<?= htmlspecialchars($_SESSION["staff"]["email"] ?? '') ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="phone">Phone Number</label>
-                                    <input type="tel" id="phone" value="+233 20 123 4567">
+                                    <input type="tel" id="phone" value="<?= htmlspecialchars($_SESSION["staff"]["phone_number"] ?? '') ?>">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="address">Address</label>
-                                <textarea id="address" rows="3">123 University Avenue, Accra, Ghana</textarea>
                             </div>
                         </div>
 
@@ -136,33 +134,30 @@ $activePage = "account";
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="department">Department</label>
-                                    <select id="department">
-                                        <option value="1" selected>Maritime Studies</option>
-                                        <option value="2">Marine Engineering</option>
-                                        <option value="3">Nautical Science</option>
-                                        <option value="4">Logistics and Transport</option>
-                                    </select>
+                                    <input type="text" id="department" value="<?= htmlspecialchars($_SESSION["staff"]["department_name"] ?? '') ?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="position">Position</label>
-                                    <input type="text" id="position" value="Department Secretary">
+                                    <input type="text" id="position" value="<?= htmlspecialchars($_SESSION["staff"]["designation"] ?? '') ?>" disabled>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="employeeId">Employee ID</label>
-                                    <input type="text" id="employeeId" value="RMU-SEC-2023-001" disabled>
+                                    <input type="text" id="employeeId" value="<?= htmlspecialchars($_SESSION["staff"]["number"] ?? '') ?>" disabled>
                                 </div>
                                 <div class="form-group">
-                                    <label for="joinDate">Join Date</label>
-                                    <input type="date" id="joinDate" value="2023-01-15" disabled>
+                                    <label for="role">Role</label>
+                                    <input type="text" id="role" value="<?= htmlspecialchars(ucfirst($_SESSION["staff"]["role"] ?? '')) ?>" disabled>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button class="cancel-btn">Cancel</button>
-                            <button class="submit-btn" id="saveProfileBtn">Save Changes</button>
+                            <button type="button" class="cancel-btn" id="cancelProfileBtn">Cancel</button>
+                            <button type="button" class="submit-btn" id="saveProfileBtn">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -482,6 +477,9 @@ $activePage = "account";
             </div>
         </div>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/account.js"></script>

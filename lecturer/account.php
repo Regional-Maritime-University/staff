@@ -131,27 +131,27 @@ $activePage = "profile";
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Full Name</div>
-                            <div class="info-value">Dr. John Doe</div>
+                            <div class="info-value"><?= htmlspecialchars($lecturerName) ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Employee ID</div>
-                            <div class="info-value">RMU-FAC-2018-001</div>
+                            <div class="info-value"><?= htmlspecialchars($_SESSION["staff"]["number"] ?? '') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Department</div>
-                            <div class="info-value">Marine Engineering</div>
+                            <div class="info-value"><?= htmlspecialchars($_SESSION["staff"]["department_name"] ?? '') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Position</div>
-                            <div class="info-value">Associate Professor</div>
+                            <div class="info-value"><?= htmlspecialchars($_SESSION["staff"]["designation"] ?? '') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Email</div>
-                            <div class="info-value">john.doe@rmu.edu</div>
+                            <div class="info-value"><?= htmlspecialchars($_SESSION["staff"]["email"] ?? '') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Phone</div>
-                            <div class="info-value">+233 55 123 4567</div>
+                            <div class="info-value"><?= htmlspecialchars($_SESSION["staff"]["phone_number"] ?? '') ?></div>
                         </div>
                         <!-- <div class="info-item">
                             <div class="info-label">Office</div>
@@ -632,85 +632,53 @@ $activePage = "profile";
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <script src="../assets/js/main.js"></script>
     <script>
-        // Toggle sidebar
-        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('collapsed');
-            document.querySelector('.main-content').classList.toggle('expanded');
-        });
+        document.addEventListener("DOMContentLoaded", function() {
+            // Tab functionality
+            document.querySelectorAll(".profile-tab").forEach(function(tab) {
+                tab.addEventListener("click", function() {
+                    document.querySelectorAll(".profile-tab").forEach(function(t) {
+                        t.classList.remove("active");
+                    });
+                    this.classList.add("active");
 
-        // Tab functionality
-        document.querySelectorAll('.profile-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                document.querySelectorAll('.profile-tab').forEach(t => {
-                    t.classList.remove('active');
+                    document.querySelectorAll(".tab-pane").forEach(function(pane) {
+                        pane.classList.remove("active");
+                    });
+
+                    var tabId = this.getAttribute("data-tab");
+                    var pane = document.getElementById(tabId);
+                    if (pane) pane.classList.add("active");
                 });
-
-                // Add active class to clicked tab
-                this.classList.add('active');
-
-                // Hide all tab panes
-                document.querySelectorAll('.tab-pane').forEach(pane => {
-                    pane.classList.remove('active');
-                });
-
-                // Show the corresponding tab pane
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
             });
-        });
 
-        // Performance chart (using a mock implementation since we don't have Chart.js)
-        // In a real implementation, you would use Chart.js or another charting library
-        const mockChart = () => {
-            const canvas = document.getElementById('evaluationChart');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    // Mock chart drawing
-                    ctx.fillStyle = '#f5f6fa';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    ctx.font = '14px Arial';
-                    ctx.fillStyle = '#003262';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Student Evaluation Chart (Mock)', canvas.width / 2, 20);
-
-                    // Note: In a real implementation, you would use Chart.js or another library
-                    ctx.fillText('This is a placeholder for a chart showing student evaluations', canvas.width / 2, canvas.height / 2);
-                    ctx.fillText('In a real implementation, use Chart.js or another charting library', canvas.width / 2, canvas.height / 2 + 30);
-                }
+            // Edit profile button
+            var editBtn = document.querySelector(".profile-btn.secondary");
+            if (editBtn) {
+                editBtn.addEventListener("click", function() {
+                    showToast("Edit profile functionality coming soon.", "info");
+                });
             }
-        };
-
-        // Call mockChart when the performance tab is clicked
-        document.querySelector('[data-tab="performance"]').addEventListener('click', mockChart);
-
-        // Print profile functionality
-        document.querySelector('.profile-btn.secondary:nth-child(3)').addEventListener('click', function() {
-            window.print();
         });
 
-        // Edit profile functionality (mock)
-        document.querySelector('.profile-btn.secondary:nth-child(2)').addEventListener('click', function() {
-            alert('Edit profile functionality would open a form to edit lecturer details.');
-        });
-
-        // Send message functionality (mock)
-        document.querySelector('.profile-btn.primary').addEventListener('click', function() {
-            alert('Message functionality would open a form to send a message to the lecturer.');
-        });
-
-        // Document view/download functionality (mock)
-        document.querySelectorAll('.document-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const action = this.textContent.trim();
-                const documentName = this.closest('.document-item').querySelector('.document-name').textContent;
-                alert(`${action} ${documentName}`);
-            });
-        });
+        // Toast notification helper
+        function showToast(message, type) {
+            var container = document.getElementById("toastContainer");
+            if (!container) return;
+            var toast = document.createElement("div");
+            toast.className = "toast toast-" + (type || "info");
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(function() { toast.classList.add("toast-show"); }, 10);
+            setTimeout(function() {
+                toast.classList.remove("toast-show");
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 
