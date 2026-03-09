@@ -1,0 +1,343 @@
+/* ==========================================================================
+   Modal Selection Styles (Course, Class, Student Selection)
+   ========================================================================== */
+
+/* Selection Containers */
+.course-selection-container,
+.class-selection-container,
+.student-selection-container {
+	margin-top: 15px;
+}
+
+/* Selection Headers */
+.course-selection-header,
+.class-selection-header,
+.student-selection-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.course-selection-header h3,
+.class-selection-header h3,
+.student-selection-header h3 {
+	color: var(--heading-color);
+	margin: 0;
+}
+
+/* Select Buttons */
+#selectCoursesBtn,
+#departmentSelectCoursesBtn,
+#departmentSelectStudentsBtn,
+#classSelectCoursesBtn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	background-color: var(--accent-color);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	transition: background-color var(--transition-speed);
+}
+
+#selectCoursesBtn:hover,
+#departmentSelectCoursesBtn:hover,
+#departmentSelectStudentsBtn:hover,
+#classSelectCoursesBtn:hover {
+	background-color: var(--primary-color);
+}
+
+/* Selected Items Containers */
+.selected-courses-container,
+.department-selected-courses-container,
+.department-selected-students-container,
+.class-selected-courses-container {
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	padding: 15px;
+	margin-bottom: 15px;
+	min-height: 100px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+/* Empty States */
+.selected-courses-empty,
+.department-selected-courses-empty,
+.department-selected-students-empty,
+.class-selected-courses-empty {
+	color: var(--card-text);
+	opacity: 0.5;
+	text-align: center;
+	padding: 20px 0;
+}
+
+/* Selected Items */
+.selected-course,
+.department-selected-course,
+.department-selected-student,
+.class-selected-course {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	background-color: var(--light-bg);
+	border-radius: 6px;
+	margin-bottom: 8px;
+}
+
+/* Remove Buttons */
+.remove-course-btn,
+.department-remove-course-btn,
+.department-remove-student-btn,
+.class-remove-course-btn {
+	background: none;
+	border: none;
+	color: var(--danger-color);
+	cursor: pointer;
+	padding: 5px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.remove-course-btn:hover,
+.department-remove-course-btn:hover,
+.department-remove-student-btn:hover,
+.class-remove-course-btn:hover {
+	background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* Selection Modals z-index */
+#courseSelectionModal,
+#departmentCourseSelectionModal,
+#departmentStudentSelectionModal,
+#classCourseSelectionModal {
+	z-index: 1100;
+}
+
+/* Search Inputs Inside Modals */
+.course-search,
+.department-course-search,
+.class-course-search,
+.department-student-search {
+	position: relative;
+	margin-bottom: 15px;
+}
+
+.course-search input,
+.department-course-search input,
+.department-student-search input,
+.class-course-search input {
+	width: 100%;
+	padding: 12px 40px 12px 12px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	font-size: 1rem;
+	background-color: var(--input-bg);
+	color: var(--input-text);
+}
+
+.course-search i,
+.department-course-search i,
+.department-student-search i,
+.class-course-search i {
+	position: absolute;
+	right: 15px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--card-text);
+	opacity: 0.5;
+}
+
+/* Course/Student List */
+.course-list,
+.department-course-list,
+.department-student-list,
+.class-course-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+}
+
+/* Course/Student List Items */
+.course-item,
+.department-course-item,
+.department-student-item,
+.class-course-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 15px;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.course-item:last-child,
+.department-course-item:last-child,
+.department-student-item:last-child,
+.class-course-item:last-child {
+	border-bottom: none;
+}
+
+.course-item:hover,
+.department-course-item:hover,
+.department-student-item:hover,
+.class-course-item:hover {
+	background-color: var(--light-bg);
+}
+
+/* Selected State */
+.course-item.course-selected,
+.department-course-item.department-course-selected,
+.department-student-item.department-student-selected,
+.class-course-item.class-course-selected {
+	background-color: rgba(46, 204, 113, 0.1);
+}
+
+/* Add Buttons */
+.add-course-btn,
+.department-add-course-btn,
+.department-add-student-btn,
+.class-add-course-btn {
+	background-color: var(--success-color);
+	color: white;
+	border: none;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background-color var(--transition-speed);
+}
+
+.add-course-btn.selected,
+.department-add-course-btn.department-selected,
+.department-add-student-btn.department-selected,
+.class-add-course-btn.class-selected {
+	background-color: var(--success-color);
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+.add-course-btn.selected:hover,
+.department-add-course-btn.department-selected:hover,
+.department-add-student-btn.department-selected:hover,
+.class-add-course-btn.class-selected:hover {
+	background-color: var(--success-color);
+}
+
+.add-course-btn:hover,
+.department-add-course-btn:hover,
+.department-add-student-btn:hover,
+.class-add-course-btn:hover {
+	background-color: #219653;
+}
+
+/* No-Courses/Students Empty State */
+.no-courses-message,
+.department-no-courses-message,
+.department-no-students-message,
+.class-no-courses-message {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 20px;
+	text-align: center;
+	color: var(--card-text);
+	opacity: 0.7;
+	background-color: var(--light-bg);
+	border-radius: 8px;
+	margin: 10px 0;
+	border: 1px dashed var(--border-color);
+}
+
+.no-courses-message i,
+.department-no-courses-message i,
+.department-no-students-message i,
+.class-no-courses-message i {
+	font-size: 2.5rem;
+	margin-bottom: 15px;
+	color: var(--accent-color);
+	opacity: 0.8;
+}
+
+.no-courses-message p,
+.department-no-courses-message p,
+.department-no-students-message p,
+.class-no-courses-message p {
+	margin: 0;
+	font-size: 1.1rem;
+	line-height: 1.5;
+	max-width: 80%;
+}
+
+/* Loading spinner animation (uses Font Awesome's built-in) */
+.no-courses-message .fa-spinner,
+.department-no-courses-message .fa-spinner,
+.department-no-students-message .fa-spinner,
+.class-no-courses-message .fa-spinner {
+	animation: fa-spin 1.5s linear infinite;
+}
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+[data-theme="dark"] .selected-courses-container,
+[data-theme="dark"] .department-selected-courses-container,
+[data-theme="dark"] .department-selected-students-container,
+[data-theme="dark"] .class-selected-courses-container {
+	background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .selected-course,
+[data-theme="dark"] .department-selected-course,
+[data-theme="dark"] .department-selected-student,
+[data-theme="dark"] .class-selected-course {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .course-item:hover,
+[data-theme="dark"] .department-course-item:hover,
+[data-theme="dark"] .department-student-item:hover,
+[data-theme="dark"] .class-course-item:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .course-item.course-selected,
+[data-theme="dark"] .department-course-item.department-course-selected,
+[data-theme="dark"] .department-student-item.department-student-selected,
+[data-theme="dark"] .class-course-item.class-course-selected {
+	background-color: rgba(46, 204, 113, 0.15);
+}
+
+[data-theme="dark"] .no-courses-message,
+[data-theme="dark"] .department-no-courses-message,
+[data-theme="dark"] .department-no-students-message,
+[data-theme="dark"] .class-no-courses-message {
+	background-color: rgba(255, 255, 255, 0.05);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .course-search input,
+[data-theme="dark"] .department-course-search input,
+[data-theme="dark"] .department-student-search input,
+[data-theme="dark"] .class-course-search input {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+}
+
+[data-theme="dark"] .course-list,
+[data-theme="dark"] .department-course-list,
+[data-theme="dark"] .department-student-list,
+[data-theme="dark"] .class-course-list {
+	background-color: var(--card-bg);
+}

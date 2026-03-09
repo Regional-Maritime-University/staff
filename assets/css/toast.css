@@ -97,6 +97,26 @@
     color: #003262;
 }
 
+/* Dark mode support */
+[data-theme="dark"] .toast {
+    background: var(--card-bg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .toast-message {
+    color: var(--card-text);
+}
+
+[data-theme="dark"] .toast-close {
+    color: var(--card-text);
+    opacity: 0.5;
+}
+
+[data-theme="dark"] .toast-close:hover {
+    color: var(--card-text);
+    opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
     #toast-container {

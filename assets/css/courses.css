@@ -1,0 +1,620 @@
+/* =============================================
+   Courses & Classes - Merged Styles
+   (Lecturer + Secretary views)
+   ============================================= */
+
+/* --- Courses Content (Lecturer) --- */
+.courses-content {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+/* --- Semester Selector (Lecturer) --- */
+.semester-selector {
+	background-color: var(--card-bg);
+	border-radius: 10px;
+	box-shadow: var(--card-shadow);
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.semester-selector h3 {
+	font-size: 1.2rem;
+	color: var(--heading-color);
+	margin-bottom: 15px;
+}
+
+.semester-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.semester-option {
+	padding: 10px 15px;
+	background-color: var(--light-bg);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all var(--transition-speed);
+	font-size: 0.95rem;
+	color: var(--secondary-color);
+}
+
+.semester-option:hover {
+	background-color: rgba(52, 152, 219, 0.1);
+}
+
+.semester-option.active {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+/* --- Course Grid (shared) --- */
+.course-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+	gap: 20px;
+}
+
+.class-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+	gap: 20px;
+}
+
+/* --- Course Card (Lecturer - colored header layout) --- */
+.course-card {
+	background-color: var(--card-bg);
+	border-radius: 10px;
+	box-shadow: var(--card-shadow);
+	overflow: hidden;
+	transition: transform var(--transition-speed);
+}
+
+.course-card:hover {
+	transform: translateY(-5px);
+}
+
+.course-header {
+	background-color: var(--primary-color);
+	color: white;
+	padding: 15px 20px;
+	position: relative;
+}
+
+.course-title {
+	font-size: 1.2rem;
+	margin-bottom: 5px;
+}
+
+.course-code {
+	font-size: 0.9rem;
+	opacity: 0.8;
+}
+
+.course-status {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	padding: 5px 10px;
+	border-radius: 15px;
+	font-size: 0.8rem;
+	font-weight: 500;
+}
+
+.course-status.active {
+	background-color: var(--success-color);
+	color: white;
+}
+
+.course-status.marking {
+	background-color: var(--warning-color);
+	color: white;
+}
+
+.course-status.marked {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.course-body {
+	padding: 20px;
+}
+
+.course-details {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+.detail-item {
+	display: flex;
+	flex-direction: column;
+}
+
+.detail-label {
+	font-size: 0.8rem;
+	color: var(--card-text);
+	opacity: 0.7;
+	margin-bottom: 5px;
+}
+
+.detail-value {
+	font-size: 0.95rem;
+	color: var(--heading-color);
+	font-weight: 500;
+}
+
+.course-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 15px;
+}
+
+.course-btn {
+	flex: 1;
+	padding: 10px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	transition: all var(--transition-speed);
+}
+
+.course-btn.primary {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.course-btn.secondary {
+	background-color: var(--light-bg);
+	color: var(--heading-color);
+}
+
+.course-btn.danger {
+	background-color: var(--danger-color);
+	color: white;
+}
+
+.course-btn:hover {
+	transform: translateY(-2px);
+}
+
+.course-btn.primary:hover {
+	background-color: var(--primary-color);
+}
+
+.course-btn.secondary:hover {
+	background-color: var(--border-color);
+}
+
+.course-btn.danger:hover {
+	background-color: #c0392b;
+}
+
+/* --- Course Progress (Lecturer) --- */
+.course-progress {
+	margin-top: 15px;
+}
+
+.progress-label {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 5px;
+	font-size: 0.9rem;
+}
+
+.progress-label span:first-child {
+	color: var(--heading-color);
+	font-weight: 500;
+}
+
+.progress-label span:last-child {
+	color: var(--card-text);
+	opacity: 0.7;
+}
+
+.progress-bar {
+	height: 8px;
+	background-color: var(--light-bg);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background-color: var(--accent-color);
+	border-radius: 4px;
+}
+
+/* --- Empty State (Lecturer) --- */
+.empty-state {
+	text-align: center;
+	padding: 50px 20px;
+	background-color: var(--card-bg);
+	border-radius: 10px;
+	box-shadow: var(--card-shadow);
+}
+
+.empty-icon {
+	font-size: 3rem;
+	color: #ccc;
+	margin-bottom: 20px;
+}
+
+.empty-text {
+	font-size: 1.2rem;
+	color: var(--secondary-color);
+	margin-bottom: 20px;
+}
+
+.empty-btn {
+	padding: 10px 20px;
+	background-color: var(--accent-color);
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background-color var(--transition-speed);
+}
+
+.empty-btn:hover {
+	background-color: var(--primary-color);
+}
+
+/* =============================================
+   Class Card (Secretary - border-bottom header layout)
+   ============================================= */
+
+/* This is sample application-specific CSS for the class page */
+
+.class-card {
+	background-color: var(--card-bg);
+	border-radius: 10px;
+	box-shadow: var(--card-shadow);
+	padding: 20px;
+	margin-bottom: 20px;
+	transition: transform var(--transition-speed);
+}
+
+.class-card:hover {
+	transform: translateY(-5px);
+}
+
+.class-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.class-title {
+	font-size: 1.2rem;
+	color: var(--heading-color);
+	font-weight: 600;
+}
+
+.class-code {
+	font-size: 0.9rem;
+	color: var(--accent-color);
+	font-weight: 500;
+}
+
+.class-actions {
+	display: flex;
+	gap: 10px;
+}
+
+.class-details {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 15px;
+	margin-bottom: 15px;
+}
+
+/* --- Class Info (Secretary) --- */
+.class-info {
+	display: flex;
+	flex-direction: column;
+	background: var(--light-bg);
+	padding: 10px 12px;
+	border-radius: 6px;
+}
+
+.info-label {
+	font-size: 0.8rem;
+	color: var(--card-text);
+	opacity: 0.5;
+	margin-bottom: 2px;
+	font-weight: 500;
+}
+
+.info-value {
+	font-size: 0.95rem;
+	color: var(--heading-color);
+	font-weight: 600;
+}
+
+/* --- Class Footer (Secretary) --- */
+.class-footer {
+	display: flex;
+	gap: 10px;
+	margin-top: 10px;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.action-icon {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 6px 10px;
+	border-radius: 6px;
+	transition: background-color var(--transition-speed);
+	font-size: 1rem;
+	color: var(--heading-color);
+}
+
+.action-icon:hover {
+	background: var(--light-bg);
+}
+
+.action-icon.edit-class i {
+	color: var(--accent-color);
+}
+
+.action-icon.archive-class i {
+	color: var(--danger-color);
+}
+
+/* --- Lecturer Info (Secretary) --- */
+.lecturer-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px;
+	background-color: var(--light-bg);
+	border-radius: 8px;
+}
+
+.lecturer-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	overflow: hidden;
+	border: 2px solid var(--accent-color);
+}
+
+.lecturer-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.lecturer-details {
+	flex: 1;
+}
+
+.lecturer-name {
+	font-size: 0.95rem;
+	color: var(--heading-color);
+	font-weight: 500;
+	margin-bottom: 3px;
+}
+
+.lecturer-email {
+	font-size: 0.8rem;
+	color: var(--card-text);
+	opacity: 0.7;
+}
+
+/* --- Deadline Info (Secretary) --- */
+.deadline-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 15px;
+	padding: 10px;
+	background-color: rgba(243, 156, 18, 0.12);
+	border-radius: 8px;
+	color: var(--warning-color);
+}
+
+.deadline-info i {
+	font-size: 1.2rem;
+}
+
+.deadline-text {
+	font-size: 0.9rem;
+	font-weight: 500;
+}
+
+/* --- Filter Bar (Secretary) --- */
+.filter-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin-bottom: 20px;
+	background-color: var(--card-bg);
+	padding: 15px;
+	border-radius: 10px;
+	box-shadow: var(--card-shadow);
+}
+
+.filter-group {
+	flex: 1;
+	min-width: 200px;
+}
+
+.filter-group label {
+	display: block;
+	margin-bottom: 8px;
+	color: var(--heading-color);
+	font-weight: 500;
+	font-size: 0.9rem;
+}
+
+.filter-group select,
+.filter-group input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	font-size: 0.9rem;
+	background-color: var(--input-bg);
+	color: var(--input-text);
+}
+
+.filter-actions {
+	display: flex;
+	align-items: flex-end;
+	gap: 10px;
+}
+
+.filter-btn {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	font-weight: 500;
+	transition: background-color var(--transition-speed);
+}
+
+.filter-btn.apply,
+.filter-btn.assign {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.filter-btn.reset {
+	background-color: #f8f9fa;
+	color: var(--heading-color);
+}
+
+.filter-btn.apply:hover,
+.filter-btn.assign:hover {
+	background-color: var(--primary-color);
+}
+
+.filter-btn.reset:hover {
+	background-color: var(--border-color);
+}
+
+/* --- Pagination (Secretary) --- */
+.pagination {
+	display: flex;
+	justify-content: center;
+	gap: 5px;
+	margin-top: 30px;
+}
+
+.page-item {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background-color: var(--card-bg);
+	color: var(--heading-color);
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--transition-speed);
+	box-shadow: var(--card-shadow);
+}
+
+.page-item:hover {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.page-item.active {
+	background-color: var(--accent-color);
+	color: white;
+}
+
+.page-item.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* =============================================
+   Responsive Design
+   ============================================= */
+@media (max-width: 1200px) {
+	.course-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 992px) {
+	.course-grid,
+	.class-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 768px) {
+	.semester-options {
+		flex-direction: column;
+	}
+}
+
+@media (max-width: 576px) {
+	.course-details,
+	.class-details {
+		grid-template-columns: 1fr;
+	}
+
+	.course-actions,
+	.class-actions {
+		flex-direction: column;
+	}
+}
+
+/* =============================================
+   Dark Mode Overrides
+   ============================================= */
+[data-theme="dark"] .course-card,
+[data-theme="dark"] .class-card {
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .semester-selector,
+[data-theme="dark"] .filter-bar,
+[data-theme="dark"] .empty-state {
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .page-item {
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn.reset {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .empty-icon {
+	color: #555;
+}
+
+[data-theme="dark"] .course-btn.danger:hover {
+	background-color: #e74c3c;
+}
+
+[data-theme="dark"] .deadline-info {
+	background-color: rgba(243, 156, 18, 0.15);
+}
