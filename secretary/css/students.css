@@ -508,3 +508,167 @@
 .filter-btn.reset:hover {
 	background-color: #e9ecef;
 }
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+[data-theme="dark"] .student-card {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .student-header {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .student-name {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .student-id {
+	color: #aaa;
+}
+
+[data-theme="dark"] .student-program {
+	background-color: var(--light-bg);
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .student-status.active {
+	background-color: rgba(46, 204, 113, 0.15);
+}
+
+[data-theme="dark"] .student-status.inactive {
+	background-color: rgba(231, 76, 60, 0.15);
+}
+
+[data-theme="dark"] .student-status.on-leave {
+	background-color: rgba(243, 156, 18, 0.15);
+}
+
+[data-theme="dark"] .student-action {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .student-action:hover {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .contact-info {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .academic-info {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .academic-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .academic-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .gpa {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .stat-card {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .stat-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .stat-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .course-checkbox {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .course-checkbox:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .course-code {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .course-name {
+	color: #aaa;
+}
+
+[data-theme="dark"] .grades-table th {
+	background-color: var(--light-bg);
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .grades-table td {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .grades-table tr:hover {
+	background-color: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .import-option {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .import-option:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .import-option.active {
+	background-color: rgba(52, 152, 219, 0.15);
+}
+
+[data-theme="dark"] .import-title {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .import-desc {
+	color: #aaa;
+}
+
+[data-theme="dark"] .page-btn {
+	background-color: var(--card-bg);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .page-btn:hover {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .filter-bar {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .filter-group label {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .filter-group select,
+[data-theme="dark"] .filter-group input {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn.reset {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .filter-btn.reset:hover {
+	background-color: var(--border-color);
+}

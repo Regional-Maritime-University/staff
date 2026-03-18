@@ -296,3 +296,100 @@ This is sample application-specific CSS for the class page
 	opacity: 0.5;
 	cursor: not-allowed;
 }
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+[data-theme="dark"] .course-card,
+[data-theme="dark"] .class-card {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .course-header,
+[data-theme="dark"] .class-header {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .course-title,
+[data-theme="dark"] .class-title {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .class-info {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .info-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .info-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .detail-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .detail-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .lecturer-info {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .lecturer-name {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .lecturer-email {
+	color: #aaa;
+}
+
+[data-theme="dark"] .deadline-info {
+	background-color: rgba(243, 156, 18, 0.15);
+}
+
+[data-theme="dark"] .action-icon {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .action-icon:hover {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .filter-bar {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .filter-group label {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .filter-group select,
+[data-theme="dark"] .filter-group input {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn.reset {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .filter-btn.reset:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .page-item {
+	background-color: var(--card-bg);
+	color: var(--heading-color);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}

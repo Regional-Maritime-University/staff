@@ -413,3 +413,120 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+[data-theme="dark"] .lecturer-card {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .lecturer-info-text h3 {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .lecturer-title {
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .lecturer-details {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .detail-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .detail-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .specialization-tag {
+	background-color: var(--border-color);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .course-tag {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .course-list h4 {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .filter-bar {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .filter-group label {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .filter-group select,
+[data-theme="dark"] .filter-group input {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn.reset {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .filter-btn.reset:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .page-btn {
+	background-color: var(--card-bg);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .page-btn:hover {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .tags-input-container {
+	background-color: var(--input-bg);
+	border-color: var(--border-color);
+	color: var(--input-text);
+}
+
+[data-theme="dark"] .tag {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .tag span {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .tags-input {
+	background-color: transparent;
+	color: var(--input-text);
+}
+
+[data-theme="dark"] .file-preview {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .preview-filename {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .preview-filesize {
+	color: #aaa;
+}
+
+[data-theme="dark"] .import-courses {
+	background-color: var(--border-color);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .import-title {
+	color: var(--heading-color);
+}

@@ -988,3 +988,210 @@ body {
 		justify-content: flex-end;
 	}
 }
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+[data-theme="dark"] body {
+	background-color: var(--body-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .sidebar {
+	background-color: var(--sidebar-bg);
+}
+
+[data-theme="dark"] .header {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .header-left h1 {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .toggle-sidebar {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .search-bar {
+	background-color: var(--input-bg);
+}
+
+[data-theme="dark"] .search-bar input {
+	color: var(--input-text);
+}
+
+[data-theme="dark"] .action-btn {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .programs-filters {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .filter-select {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn.secondary {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .filter-btn.secondary:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .program-card {
+	background-color: var(--card-bg);
+	box-shadow: none;
+	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .program-title {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .program-code {
+	color: #aaa;
+}
+
+[data-theme="dark"] .program-description {
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .program-level.degree {
+	background-color: rgba(46, 204, 113, 0.15);
+}
+
+[data-theme="dark"] .program-level.masters {
+	background-color: rgba(52, 152, 219, 0.15);
+}
+
+[data-theme="dark"] .program-level.diploma {
+	background-color: rgba(243, 156, 18, 0.15);
+}
+
+[data-theme="dark"] .stat-item {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .stat-value {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .stat-label {
+	color: #aaa;
+}
+
+[data-theme="dark"] .info-item {
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .program-btn.secondary {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .program-btn.secondary:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-content {
+	background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .modal-filters {
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-search {
+	background-color: var(--input-bg);
+}
+
+[data-theme="dark"] .modal-search input {
+	color: var(--input-text);
+}
+
+[data-theme="dark"] .modal-filter-select {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-body {
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .list-item {
+	background-color: var(--light-bg);
+}
+
+[data-theme="dark"] .list-item:hover {
+	background-color: var(--border-color);
+	border-color: var(--accent-color);
+}
+
+[data-theme="dark"] .list-item-title {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .list-item-subtitle {
+	color: #aaa;
+}
+
+[data-theme="dark"] .list-item-meta {
+	color: #aaa;
+}
+
+[data-theme="dark"] .empty-state {
+	color: #aaa;
+}
+
+[data-theme="dark"] .empty-state i {
+	color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .empty-state h3 {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .form-group label {
+	color: var(--heading-color);
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea {
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .cancel-btn {
+	background-color: var(--light-bg);
+	color: var(--card-text);
+}
+
+[data-theme="dark"] .cancel-btn:hover {
+	background-color: var(--border-color);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+	background: var(--light-bg);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+	background: var(--accent-color);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+	background: var(--primary-color);
+}

@@ -74,6 +74,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMU Staff Portal - Programs</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="./css/program.css">
     <link rel="stylesheet" href="./css/course-selection-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -408,6 +409,7 @@ $totalActiveCourses = $activeCoursesData && is_array($activeCoursesData) ? count
     </div>
 
     <script src="../assets/js/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/main.js"></script>
     <script>
         // Modal Functions
         function openModal(modalId) {
